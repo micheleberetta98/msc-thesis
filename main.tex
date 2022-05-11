@@ -1,5 +1,11 @@
 \documentclass[a4paper,12pt,twoside,openright]{report}
 
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[backend=biber]{biblatex}
+
+\newcommand{\emptypage}{\clearpage\pagenumbering{gobble}\mbox{}}
+
 \title{
   Lorem Ipsum
 }
@@ -8,5 +14,20 @@
 
 \begin{document}
   \maketitle
-  Lorem Ipsum
+
+  \emptypage
+
+  \clearpage
+  \pagenumbering{Roman}
+  \tableofcontents
+
+  \emptypage
+
+  % ------------ Document
+  \clearpage
+  \pagenumbering{arabic}
+  \chapter{Introduction}
+  \chapter{Applying landlock}
+  \chapter{Testing and performance}
+  \chapter{Conclusions}
 \end{document}
