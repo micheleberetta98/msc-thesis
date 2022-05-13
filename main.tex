@@ -5,6 +5,7 @@
 \usepackage[backend=biber]{biblatex}
 
 \newcommand{\emptypage}{\clearpage\pagenumbering{gobble}\mbox{}}
+\newcommand{\toc}{\clearpage\pagenumbering{Roman}\tableofcontents}
 
 \title{
   Lorem Ipsum
@@ -14,13 +15,8 @@
 
 \begin{document}
   \maketitle
-
   \emptypage
-
-  \clearpage
-  \pagenumbering{Roman}
-  \tableofcontents
-
+  \toc
   \emptypage
 
   % ------------ Document
