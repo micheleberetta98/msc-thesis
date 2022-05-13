@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage{import}
 
+% ------------------------ Custom commands
 \newcommand{\emptypage}{
   \clearpage
   \thispagestyle{empty}
@@ -15,13 +16,18 @@
 }
 \newcommand{\toc}{\clearpage\pagenumbering{Roman}\tableofcontents}
 
+% ------------------------ Main title
 \title{
   Lorem Ipsum
 }
 \author{Michele Beretta}
 \date{A.A. 2021/2022}
 
+% ------------------------ Graphics
 \graphicspath{{./images/}}
+
+% ------------------------ Bibliography
+\addbibresource{bibliography.bib}
 
 \begin{document}
   \maketitle
@@ -29,7 +35,6 @@
   \toc
   \emptypage
 
-  % ------------ Document
   \clearpage
   \pagenumbering{arabic}
   
@@ -37,4 +42,7 @@
   \import{chapters/}{02-applying-landlock.tex}
   \import{chapters/}{03-performance.tex}
   \import{chapters/}{04-conclusions.tex}
+
+  \nocite{*}
+  \printbibliography[heading=bibintoc]
 \end{document}
