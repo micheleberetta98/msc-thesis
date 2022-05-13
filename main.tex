@@ -2,9 +2,17 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage[hidelinks]{hyperref}
 \usepackage[backend=biber]{biblatex}
+\usepackage{graphicx}
+\usepackage{import}
 
-\newcommand{\emptypage}{\clearpage\pagenumbering{gobble}\mbox{}}
+\newcommand{\emptypage}{
+  \clearpage
+  \thispagestyle{empty}
+  \pagenumbering{gobble}
+  \mbox{}
+}
 \newcommand{\toc}{\clearpage\pagenumbering{Roman}\tableofcontents}
 
 \title{
@@ -12,6 +20,8 @@
 }
 \author{Michele Beretta}
 \date{A.A. 2021/2022}
+
+\graphicspath{{./images/}}
 
 \begin{document}
   \maketitle
@@ -22,8 +32,9 @@
   % ------------ Document
   \clearpage
   \pagenumbering{arabic}
-  \chapter{Introduction}
-  \chapter{Applying landlock}
-  \chapter{Testing and performance}
-  \chapter{Conclusions}
+  
+  \import{chapters/}{01-introduction.tex}
+  \import{chapters/}{02-applying-landlock.tex}
+  \import{chapters/}{03-performance.tex}
+  \import{chapters/}{04-conclusions.tex}
 \end{document}
