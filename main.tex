@@ -16,13 +16,6 @@
 }
 \newcommand{\toc}{\clearpage\pagenumbering{Roman}\tableofcontents}
 
-% ------------------------ Main title
-\title{
-  Lorem Ipsum
-}
-\author{Michele Beretta}
-\date{A.A. 2021/2022}
-
 % ------------------------ Graphics
 \graphicspath{{./images/}}
 
@@ -30,7 +23,7 @@
 \addbibresource{bibliography.bib}
 
 \begin{document}
-  \maketitle
+  \import{pages/}{title.tex}
   \emptypage
   \toc
   \emptypage
