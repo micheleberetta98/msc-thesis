@@ -65,4 +65,14 @@ of all rulesets - if a process first restricts itself allowing all read and writ
 and then restricts itself again with only reading permissions, the result is equivalent
 to a single restriction made with a ruleset that permits only reading operations.
 
-\subsection{BPF}
+\subsection{eBPF}
+\textit{eBPF} \cite{ebpf} is a virtual machine in the Linux Kernel that can run sandboxed programs
+in a privileged context. It can be used to safely extend the capabilities of the kernel
+without requiring to change kernel source code or load kernel modules.
+
+Application developers can run eBPF programs in order to add additional capabilities at runtime,
+and then the operating system guarantees safety and efficiency as if natively compiled
+by using a Just-In-Time compiler.
+These eBPF programs are event-driven and run when a certain hook point is passed. Some
+pre-defined hooks include system calls, network events, and so on. If a hook does not exist,
+it's possible to create custom kernel or user probes.
