@@ -35,6 +35,50 @@ run on browsers or on \textit{Node.js}\footnote{ Emscripten also supports WebAss
 
 \subsection{Overview}
 
+Although WebAssembly is a binary code format, it can also be written with \textit{S-expressions}
+in order to be more readable.
+Each binary takes the form of a \textit{module}, which contains \textit{functions}, \textit{global} variables,
+\textit{tables} and \textit{memories}. Each of these can be exported to be used in the embedder.
+A module can also import functionalities.
+While a module is a static representation of a program, an \textit{instance} is the dynamic one.
+A module can be instatiated by the embedder (e.g.\ a JavaScript virtual machine).
+
+\begin{lstlisting}[language=wasm, caption={Factorial written in WebAssembly S-expressions}, label=lst:wasm-fact]
+  (module
+    (func $fact (param $x i64) (result i64)
+      (if (result i64) (i64.eqz (local.get $x))
+        (then (i64.const 1))
+        (else
+          (i64.mul
+            (local.get $x)
+            (call $fact
+              (i64.sub (local.get $x) (i64.const 1)))))))
+    (export "fact" (func $fact)))
+\end{lstlisting}
+
+WebAssembly is a typed language, but there are only four basic \textit{value types} - integers and IEEE 754 floating
+point numbers, each in 32 and 64 bit variants. There are no distinction between signed and unsigned integers,
+but instructions that depends on signedness are marked with an explicit suffix.
+
+\textit{Functions} are typed, take a sequence of values as a parameter and returns another sequence of values.
+They cannot be nested inside each other. The content of the call stack for execution are separate from the data
+portion of the memory, and cannot be accessed directly by WebAssembly.
+The code inside a function consists of a series of \textit{instructions} that modify an implicit operand stack,
+either by declaring local variables or applying operations to the value already on the stack.
+Functions can be called either \textit{directly} by using an index that identifies a function, or \textit{indirectly},
+i.e.\ dinamically through a global \textit{table}.
+
+WebAssembly has also support for \textit{traps} - in a similar manner to an exception, a trap aborts the current
+computation, and control is given back to the embedder. For example, when embedded in JavaScript, a trap will
+throw a JavaScript exception.
+
+The main storage that WebAssembly uses is a \textit{linear memory} (or simply \textit{memory}), that is represented
+by an array of bytes. Each module can defined no more than one memory, which can grow when needed with a unit size
+of 64 KiB, a \textit{page}.
+
+Another main difference from other stack machines is that WebAssembly doesn't provide arbitrary jumps but
+\textit{structured control flow}, so that the code can be validated in a single pass.
+
 \subsection{Problems with WebAssembly}
 \subsection{WebAssembly as a fault isolation tool}
 \subsection{WASI - WebAssembly System Interface}
