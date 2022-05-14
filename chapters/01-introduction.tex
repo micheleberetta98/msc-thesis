@@ -7,6 +7,34 @@
 
 \section{WebAssembly}
 \subsection{Description and motivations}
+
+\textit{WebAssembly} \cite{wasm-website} is a binary instruction format for a stack-based virtual machine.
+It is designed to be a portable compilation target, so that different languages can be deployed on the web.
+
+Nowadays, web application's need are more sophisticated and demanding, such as 3D visualization, audio and video,
+games and so on. Efficiency and security are then important points that must be addressed, however JavaScript,
+as the de-facto standard language on the web, is not able to meet these requirements.
+
+WebAssembly main goals are \cite{bringing-the-web-up-to-speed-2017} to be:
+\begin{itemize}
+  \item \textit{Safe}, in particular to provide the same memory safety as a managed language;
+  \item \textit{Fast}, by using ahead-of-time optimizations in a similar manner as native machine code;
+  \item \textit{Portable}, since the web spans many device, architectures, operating systems and browsers;
+  \item And finally \textit{compact}, because code is transmitted over the network and must reduce load times as much as possible.
+\end{itemize}
+
+There were previous attempt at solving the problem of having safe, fast and portable low-level code on the Web,
+such as \textit{ActiveX}, \textit{Native Client} and \textit{asm.js}.
+
+\textit{ActiveX} \cite{activex} was a Microsoft's technology for code-signing x86 binaries to run on the web, and relied only
+on this signing. Hence, it achieved safety through a trust model, not through technical construction.
+\textit{Native Client} \cite{native-client} introduced the first sandboxing technique for x86, ARM or MIPS machine code,
+which was statically validated. Lastly, \textit{asm.js} \cite{asmjs} is a specialized subset of JavaScript, which is on of the target
+languages of \textit{Emscripten} \cite{emscripten}, a compiler toolchain able to compile C/C++ applications in order to have them
+run on browsers or on \textit{Node.js}\footnote{ Emscripten also supports WebAssembly output.}.
+
+\subsection{Overview}
+
 \subsection{Problems with WebAssembly}
 \subsection{WebAssembly as a fault isolation tool}
 \subsection{WASI - WebAssembly System Interface}
