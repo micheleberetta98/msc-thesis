@@ -82,3 +82,12 @@ by using a Just-In-Time compiler.
 These eBPF programs are event-driven and run when a certain hook point is passed. Some
 pre-defined hooks include system calls, network events, and so on. If a hook does not exist,
 it's possible to create custom kernel or user probes.
+
+Unlike Landlock, eBPF makes it possible to define specific exception, e.g.\ denying
+certain access rights on specific files while allowing them on the containing directory.
+It also allows to specify wether a program has access to devices such as \texttt{terminal}
+and \texttt{dev}.
+
+Thanks to \texttt{BPFContain}\footnote{\url{https://github.com/willfindlay/bpfcontain-rs}}
+it's also possible to run a container security daemon by leveraging eBPF.  In this case,
+specific policies must be written for desired commands.
