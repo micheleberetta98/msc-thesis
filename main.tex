@@ -8,11 +8,16 @@
 \usepackage{import}
 \usepackage{csquotes}
 \usepackage{geometry}
-\RequirePackage[UKenglish]{babel}
+\usepackage{listings}
 
 % ------------------------ Styling
 \geometry{margin=3cm}
 \renewcommand{\baselinestretch}{1.15}
+
+\lstdefinelanguage{wasm}{
+  morekeywords={func,module,export,param,result,if,then,else,eqz,local,get,const,mul,call,sub},
+  morestring=[b]",
+}
 
 % ------------------------ Custom commands
 \newcommand{\emptypage}{
