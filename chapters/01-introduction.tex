@@ -65,6 +65,12 @@ of all rulesets - if a process first restricts itself allowing all read and writ
 and then restricts itself again with only reading permissions, the result is equivalent
 to a single restriction made with a ruleset that permits only reading operations.
 
+Landlock can be used directly when writing C/C++ code in Linux thanks to the
+\texttt{<linux/landlock.h>}\footnote{Examples of code available at \cite{landlock-user-space}}
+header, or by using libraries that provide these binding to other languages,
+such as \texttt{go-landlock}\footnote{\url{https://github.com/landlock-lsm/go-landlock}}
+for Go and \texttt{rust-landlock}\footnote{\url{https://github.com/landlock-lsm/rust-landlock}} for Rust.
+
 \subsection{eBPF}
 \textit{eBPF} \cite{ebpf} is a virtual machine in the Linux Kernel that can run sandboxed programs
 in a privileged context. It can be used to safely extend the capabilities of the kernel
