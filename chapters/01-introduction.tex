@@ -41,7 +41,7 @@ Each binary takes the form of a \textit{module}, which contains \textit{function
 \textit{tables} and \textit{memories}. Each of these can be exported to be used in the embedder.
 A module can also import functionalities.
 While a module is a static representation of a program, an \textit{instance} is the dynamic one.
-A module can be instatiated by the embedder (e.g.\ a JavaScript virtual machine).
+A module can be instantiated by the embedder (e.g.\ a JavaScript virtual machine).
 
 \begin{lstlisting}[language=wasm, caption={Factorial written in WebAssembly S-expressions}, label=lst:wasm-fact]
   (module
@@ -66,7 +66,7 @@ portion of the memory, and cannot be accessed directly by WebAssembly.
 The code inside a function consists of a series of \textit{instructions} that modify an implicit operand stack,
 either by declaring local variables or applying operations to the value already on the stack.
 Functions can be called either \textit{directly} by using an index that identifies a function, or \textit{indirectly},
-i.e.\ dinamically through a global \textit{table}.
+i.e.\ dynamically through a global \textit{table}.
 
 WebAssembly has also support for \textit{traps} - in a similar manner to an exception, a trap aborts the current
 computation, and control is given back to the embedder. For example, when embedded in JavaScript, a trap will
@@ -88,7 +88,7 @@ Another main difference from other stack machines is that WebAssembly doesn't pr
 The \textit{Linux Security Module} (LSM) \cite{lsm-2002} \cite{kernel-lsm}
 is a lightweight, general purpose, access control framework for the Linux Kernel.
 It provides a mechanism for various security checks to be hooked by kernel extensions.
-These extensions are not loadable kernel modules, but they can either be choosen at
+These extensions are not loadable kernel modules, but they can either be chosen at
 compile-time via specific flags, such as \texttt{CONFIG\_DEFAULT\_SECURITY}, or overridden at boot-time.
 
 The LSM is used primarily by \textit{Mandatory Access Control} (MAC) extensions to
@@ -113,10 +113,10 @@ Some projects that use LSM include:
 \textit{Landlock} \cite{landlock-kernel} \cite{landlock-user-space} is a security feature available since Linux 5.13
 that uses the LSM framework in order to provide scoped access control,
 so that any process, even when unprivileged, can securely restrict itself.
-This can help mitigate the security impact of bugs or unexpected/malicious behaviour
+This can help mitigate the security impact of bugs or unexpected/malicious behavior
 in user space applications.
 
-Landlock employes the concept of \textit{rule}, which describes an action
+Landlock employs the concept of \textit{rule}, which describes an action
 on an object. An object is (currently) a file hierarchy, and actions are
 defined with access rights, such as executing, reading or writing files, making
 symbolic links and so on.
@@ -124,7 +124,7 @@ A set of rules is called a \textit{ruleset}, and it can restrict both the thread
 using it and its future children, created either by spawning a new thread, as well
 as using the \textit{fork} system call.
 
-Notably, Landlock does not permits the definition of exeptions.
+Notably, Landlock does not permits the definition of exceptions.
 For example, suppose we have a directory \texttt{dir1}, which contains two files
 \texttt{file1} and \texttt{file2}. We can define a ruleset that allows
 reading and writing files for \texttt{dir1}.
@@ -152,12 +152,12 @@ Application developers can run eBPF programs in order to add additional capabili
 and then the operating system guarantees safety and efficiency as if natively compiled
 by using a Just-In-Time compiler.
 These eBPF programs are event-driven and run when a certain hook point is passed. Some
-pre-defined hooks include system calls, network events, and so on. If a hook does not exist,
+predefined hooks include system calls, network events, and so on. If a hook does not exist,
 it's possible to create custom kernel or user probes.
 
 Unlike Landlock, eBPF makes it possible to define specific exception, e.g.\ denying
 certain access rights on specific files while allowing them on the containing directory.
-It also allows to specify wether a program has access to devices such as \texttt{terminal}
+It also allows to specify whether a program has access to devices such as \texttt{terminal}
 and \texttt{dev}.
 
 Thanks to \texttt{BPFContain}\footnote{\url{https://github.com/willfindlay/bpfcontain-rs}}
