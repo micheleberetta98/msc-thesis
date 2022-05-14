@@ -30,6 +30,13 @@ Some projects that use LSM include:
   \item \textit{AppArmor} \cite{apparmor}, a MAC style security extension that implements a task centered policy.
 \end{itemize}
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.5\linewidth]{lsm-hook-architecture.png}
+  \caption{LSM Hook Architecture, from \cite{kernel-lsm}}
+  \label{fig:lsm-hook-architecture}
+\end{figure}
+
 \subsection{Landlock}
 \textit{Landlock} \cite{landlock-kernel} \cite{landlock-user-space} is a security feature available since Linux 5.13
 that uses the LSM framework in order to provide scoped access control,
