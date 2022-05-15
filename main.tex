@@ -12,7 +12,7 @@
 
 % ------------------------ Styling
 \geometry{margin=3cm}
-\renewcommand{\baselinestretch}{1.15}
+\renewcommand{\baselinestretch}{1.2}
 
 \lstdefinelanguage{wasm}{
   morekeywords={func,module,export,param,result,if,then,else,eqz,local,get,const,mul,call,sub},
@@ -31,6 +31,17 @@
   \pagenumbering{Roman}
   \tableofcontents
 }
+\lstnewenvironment{code}[1][]%
+{
+   \noindent
+   \minipage{\linewidth} 
+   \vspace{0.5\baselineskip}
+   \lstset{
+     basicstyle=\ttfamily\footnotesize,
+     frame=single,
+     #1
+  }
+}{\endminipage}
 
 % ------------------------ Graphics
 \graphicspath{{./images/}}
