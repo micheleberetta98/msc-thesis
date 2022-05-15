@@ -31,7 +31,12 @@ on this signing. Hence, it achieved safety through a trust model, not through te
 \textit{Native Client} \cite{native-client} introduced the first sandboxing technique for x86, ARM or MIPS machine code,
 which was statically validated. Lastly, \textit{asm.js} \cite{asmjs} is a specialized subset of JavaScript, which is on of the target
 languages of \textit{Emscripten} \cite{emscripten}, a compiler toolchain able to compile C/C++ applications in order to have them
-run on browsers or on \textit{Node.js}\footnote{ Emscripten also supports WebAssembly output.}.
+run on browsers or on \textit{Node.js}.
+
+WebAssembly is available as a target for various languages, such as C/C++ with the aid of Emscripten, Rust,
+AssemblyScript\footnote{A language with a syntax similar to TypeScript.}, Go, Kotlin, Swift and Zig.
+The compiled binary can be then used from JavaScript on the web, or with Node.js or Deno, or even as a CLI application
+with the aid of the \textit{WebAssebly System Interface} (see Section \ref*{sec:introduction-wasi}).
 
 \subsection{Overview}
 
@@ -82,6 +87,7 @@ Another main difference from other stack machines is that WebAssembly doesn't pr
 \subsection{Problems with WebAssembly}
 \subsection{WebAssembly as a fault isolation tool}
 \subsection{WASI - WebAssembly System Interface}
+\label{sec:introduction-wasi}
 
 \section{Linux Security Modules}
 
