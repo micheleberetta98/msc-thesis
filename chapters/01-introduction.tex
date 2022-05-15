@@ -8,12 +8,38 @@ WebAssembly is a new language that is ``designed for efficient execution and com
 on modern processors including in a web browser'' \cite{wasm-w3c-announcement}, and strives to improve
 both performance and power consumption.
 
-\section{The web}
+\section{The Web}
 \subsection{Basic structure}
 \subsection{The web browser}
 \subsection{JavaScript}
 
+\textit{JavaScript}, or \textit{JS} when abbreviated, is a high-level, dynamic, weakly typed programming language
+that together with HTML and CSS is at the core of the World Wide Web. It conforms to the ECMAScript standard \cite{ecma-262}
+and it can be interpreted, but it is usually \textit{just-in-time compiled}.
+
+It was created in 1995 at Netscape and originally JavaScript engines were only run in web browsers, but there
+are now runtime systems that allows the use of JavaScript directly on machines, such as \textit{Node.js} or \textit{Deno}.
+
+Since web browsers run JavaScript files received via the Web, there is the potential for authors to deliver
+malicious scripts. Browsers mitigate these risks using both a \textit{sandbox}, disallowing JS to perform general-purpose
+programming tasks like working directly with files\footnote{Although, there are APIs that can grant access to a ``virtual drive''
+only when explicitly allowed by the user \cite{filesystem-mdn}, so access to the user's file system is not possible.},
+and \textit{same-origin policy} constraints, in which scripts from one website have access to data from the same website but not others.
+
+A common security vulnerability in the JavaScript world is \textit{cross-site scripting} (XSS), which is a violation of the
+same-origin policy. These vulnerabilities occurs when an attacker is able to inject a malicious script in a target website
+in order to, for example, access private information about the user.
+Another vulnerability is \textit{cross-site request forgery} (CSRF), in which code on an attacker's website tricks the user's
+browser into taking actions that the victim did not want to happen.
+
+Sometimes hardware vulnerabilities can also be found - in 2019, the Spectre paper included a JavaScript implementation
+alongside eBPF \cite{spectre}.
+
+JavaScript is ill-equipped when it comes to performance-critical modern web pages - from this needs were born technologies
+such as \textit{asm.js}, and eventually \textit{WebAssembly}.
+
 \section{WebAssembly}
+
 \subsection{Description and motivations}
 
 \textit{WebAssembly} \cite{wasm-website} is a binary instruction format for a stack-based virtual machine.
