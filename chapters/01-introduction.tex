@@ -1,5 +1,13 @@
 \section{The context}
 
+Nowadays, web application's need are more sophisticated and demanding, such as 3D visualisation, audio and video,
+games and so on. Efficiency and security are then important points that must be addressed, however JavaScript,
+as the de facto standard language on the web, is not able to meet these requirements.
+
+WebAssembly is a new language that is ``designed for efficient execution and compact representation of code
+on modern processors including in a web browser'' \cite{wasm-w3c-announcement}, and strives to improve
+both performance and power consumption.
+
 \section{The web}
 \subsection{Basic structure}
 \subsection{The web browser}
@@ -12,11 +20,7 @@
 It is designed to be a portable compilation target, so that different languages can be deployed on the web.
 It was announced in 2015 and implemented by major browsers by 2017, and as of May 2022 is supported
 by 93\% of all browsers\footnote{\url{https://caniuse.com/?search=WebAssembly}}.
-
-Nowadays, web application's need are more sophisticated and demanding, such as 3D visualisation, audio and video,
-games and so on. Efficiency and security are then important points that must be addressed, however JavaScript,
-as the de facto standard language on the web, is not able to meet these requirements.
-WebAssembly main goals are hence to be \cite{bringing-the-web-up-to-speed-2017}:
+WebAssembly main goals are to be \cite{bringing-the-web-up-to-speed-2017}:
 \begin{itemize}
   \item \textit{Safe}, in particular to provide the same memory safety as a managed language;
   \item \textit{Fast}, by using ahead-of-time optimisations in a similar manner as native machine code;
@@ -193,7 +197,7 @@ Some projects that use LSM include:
   \item \textit{AppArmor} \cite{apparmor}, a MAC style security extension that implements a task centred policy.
 \end{itemize}
 
-\begin{figure}[h]
+\begin{figure}[ht]
   \centering
   \includegraphics[width=0.5\linewidth]{lsm-hook-architecture.png}
   \caption{LSM Hook Architecture, from \cite{kernel-lsm}}
