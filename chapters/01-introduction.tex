@@ -85,7 +85,7 @@ Another main difference from other stack machines is that WebAssembly doesn't pr
 
 \section{Linux Security Modules}
 
-The \textit{Linux Security Module} (LSM) \cite{lsm-2002} \cite{kernel-lsm}
+The \textit{Linux Security Modules} (LSM) \cite{lsm-2002, kernel-lsm}
 is a lightweight, general purpose, access control framework for the Linux Kernel.
 It provides a mechanism for various security checks to be hooked by kernel extensions.
 These extensions are not loadable kernel modules, but they can either be chosen at
@@ -110,7 +110,7 @@ Some projects that use LSM include:
 \end{figure}
 
 \subsection{Landlock}
-\textit{Landlock} \cite{landlock-kernel} \cite{landlock-user-space} is a security feature available since Linux 5.13
+\textit{Landlock} \cite{landlock-kernel, landlock-user-space} is a security feature available since Linux 5.13
 that uses the LSM framework in order to provide scoped access control,
 so that any process, even when unprivileged, can securely restrict itself.
 This can help mitigate the security impact of bugs or unexpected/malicious behavior
