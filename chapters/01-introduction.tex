@@ -9,23 +9,32 @@ on modern processors including in a web browser'' \cite{wasm-w3c-announcement}, 
 both performance and power consumption.
 
 \section{The Web}
+
 \subsection{Basic structure}
-\subsection{The web browser}
+
+The \textit{World Wide Web}, or more commonly \textit{Web}, is a collection of documents and other resources
+that can be shared among various computers via the \textit{Internet}.
+
+The resources shared are usually in the form of \textit{web pages}, documents whose structure is defined with HTML
+(\textit{Hypertext Markup Language}) and whose styles are declared with CSS (\textit{Cascade Style Sheet}).
+Other kind of resources include anything ranging from images, videos, audio, software and source code.
+
+However, web pages are \textit{static} per se, and cannot do much aside from showing content. A programming
+language is hence needed to make the web \textit{dynamic}. Among all technologies and languages, nowadays
+only JavaScript survives as the de facto standard language, used for both simple scripts and complex applications.
+
 \subsection{JavaScript}
+\label{sec:introduction-javascript}
 
 \textit{JavaScript}, or \textit{JS} when abbreviated, is a high-level, dynamic, weakly typed programming language
 that together with HTML and CSS is at the core of the World Wide Web. It conforms to the ECMAScript standard \cite{ecma-262}
-and it can be interpreted, but it is usually \textit{just-in-time compiled}.
+and it can be both interpreted and \textit{just-in-time compiled}.
 
 It was created in 1995 at Netscape and originally JavaScript engines were only run in web browsers, but there
 are now runtime systems that allows the use of JavaScript directly on machines, such as \textit{Node.js} or \textit{Deno}.
 
-Since web browsers run JavaScript files received via the Web, there is the potential for authors to deliver
-malicious scripts. Browsers mitigate these risks using both a \textit{sandbox}, disallowing JS to perform general-purpose
-programming tasks like working directly with files\footnote{Although, there are APIs that can grant access to a ``virtual drive''
-only when explicitly allowed by the user \cite{filesystem-mdn}, so access to the user's file system is not possible.},
-and \textit{same-origin policy} constraints, in which scripts from one website have access to data from the same website but not others.
-
+Since JavaScript files are shared via the Web, there is the potential for authors to deliver
+malicious scripts.
 A common security vulnerability in the JavaScript world is \textit{cross-site scripting} (XSS), which is a violation of the
 same-origin policy. These vulnerabilities occurs when an attacker is able to inject a malicious script in a target website
 in order to, for example, access private information about the user.
@@ -36,7 +45,19 @@ Sometimes hardware vulnerabilities can also be found - in 2019, the Spectre pape
 alongside eBPF \cite{spectre}.
 
 JavaScript is ill-equipped when it comes to performance-critical modern web pages - from this needs were born technologies
-such as \textit{asm.js}, and eventually \textit{WebAssembly}.
+such as \textit{asm.js}, \textit{Native Client}, and eventually \textit{WebAssembly}.
+
+\subsection{Web browsers}
+
+A \textit{web browser} is a piece of software that enables users to access web pages shared on the World Wide Web, or a
+local website. Browsers natively support the rendering of HTML and CSS, and feature an engine able to run JavaScript or, more commonly,
+to just-in-time compile it in order to obtain more performance.
+
+Browsers can also mitigate the risk provided by the common JavaScript vulnerabilities mentioned in Section \ref{sec:introduction-javascript}
+by using two main methods - \textit{sandboxing}, so that JS isn't allowed to perform general-purpose
+programming tasks like working directly with files\footnote{Although, there are APIs that can grant access to a ``virtual drive''
+only when explicitly allowed by the user \cite{filesystem-mdn}, so access to the user's file system is not possible.},
+and \textit{same-origin policy} constraints, in which scripts from one website have access to data from the same website but not others.
 
 \section{WebAssembly}
 
