@@ -48,7 +48,7 @@ A module can also import functionalities.
 While a module is a static representation of a program, an \textit{instance} is the dynamic one.
 A module can be instantiated by the embedder (e.g.\ a JavaScript virtual machine).
 
-\begin{lstlisting}[language=wasm, caption={Factorial written in WebAssembly S-expressions}, label=lst:wasm-fact]
+\begin{lstlisting}[language=wasm, caption={Recursive factorial written in WebAssembly S-expressions}, label=lst:wasm-fact]
   (module
     (func $fact (param $x i64) (result i64)
       (if (result i64) (i64.eqz (local.get $x))
