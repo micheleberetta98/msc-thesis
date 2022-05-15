@@ -14,8 +14,11 @@
 \geometry{margin=3cm}
 \renewcommand{\baselinestretch}{1.2}
 
+\renewcommand{\ttdefault}{pcr}
 \lstdefinelanguage{wasm}{
   morekeywords={func,module,export,param,result,if,then,else,eqz,local,get,const,mul,call,sub},
+  emph={i64},
+  emphstyle=\itshape,
   morestring=[b]",
 }
 
@@ -37,7 +40,8 @@
    \minipage{\linewidth} 
    \vspace{0.5\baselineskip}
    \lstset{
-     basicstyle=\ttfamily\footnotesize,
+     basicstyle=\ttfamily,
+     keywordstyle=\bfseries,
      frame=single,
      #1
   }
