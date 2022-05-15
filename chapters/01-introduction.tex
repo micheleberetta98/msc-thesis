@@ -117,6 +117,49 @@ This enables the indirect diversion described in the previous paragraph if the t
 \subsection{WASI - WebAssembly System Interface}
 \label{sec:introduction-wasi}
 
+The \textit{WebAssembly System Interface} (WASI) \cite{wasi} is a modular system interface for WebAssembly.
+It focuses on security and portability so that WebAssembly binaries can be targeted by different languages
+and then ben safely run on different platforms.
+Its API provieds access to several OS-like features, such as filesystems and Berkeley sockets.
+The two languages that have good interoperability at the moment are Rust, where the compiler directly supports targeting WASM and WASI,
+and C/C++, either through Emscripten or a custom prebuilt \textit{Clang} toolchain\footnote{\url{https://github.com/WebAssembly/wasi-sdk}}.
+
+A binary that uses WASI can be run using a CLI runtime, such as \textit{Wasmtime} \cite{wasmtime} or \textit{Wasmer} \cite{wasmer},
+or using a browser polyfill.
+The approach taken for the sandboxing by these runtimes is based on a \textit{capability-based security model} \cite{wasmtime-security-sandboxing},
+so that access to the filesystem must be explicitely given.
+Moreover, writes to output streams are filtered when connected to a terminal in order to prevent control sequences
+that may have side effects and confuse or mislead users.
+
+The CLI runtimes have some particular features and properties:
+\begin{itemize}
+  \item It is possible to \textit{sandbox} entire directories by \textit{preopening} them, and eventually mapping them to custom paths
+        , in order to have the files' descriptors available; it is not possible to escape this sandbox using the parent directory \texttt{..}
+        or soft symlinks, but it is possible to escape using hard symlinks;
+  \item The directory is the finest granularity available - once access is given to a specific directory, all files and subdirectories are
+        visible, and there are no restrictions on permitted actions (reading, writing, deleting and creating files)\footnote{In C the binary can create files with specific user permissions on Linux, e.g.\ executable files.};
+  \item When listing files in a directory, the only files that are visible are the ones that were already present at the preopening of the directory,
+        but files added after the preopen can be read/written;
+  \item Any change made to a file by any process is reflected in what the compiled WebAssembly binary is able to read;
+  \item Environment variables are not accessible by default, but they must be explicitely declared;
+  \item The WebAssembly memory is effectively sandboxed - the compiled cannot access memory outside its sandbox, otherwise a trap is raised;
+  \item Not all ``classic'' funcitonality is available - when compiling C with the custom prebuilt toolchain,
+        functions such as \texttt{system}, \texttt{execv} and \texttt{fexecve} are not available,
+        so it is not possible to execute arbitrary commands or files;
+  \item Fileless execution isn't feasable, since \texttt{memfd\_create} is not available due to the missing
+        \texttt{sys/mman.h}\footnote{This library can be emulated, but \texttt{memfd\_create} is still not available}.
+\end{itemize}
+
+By using the \textit{wasm2c} tool available in the \textit{WebAssembly Binary Toolkit}\footnote{\url{https://github.com/WebAssembly/wabt}},
+C code can be compiled into WebAssembly and then converted back to C.
+This way, a traditional C program to use directly the functions made available from the original C library with an added sandbox
+that allows code isolation. The sandboxed library cannot access locations outside its allocated memory without causing a trap,
+halting the execution and giving back control to the embedder.
+Similarly, the user C code cannot access the sandboxed memory directly, and if attempted it would result in a segmentation fault.
+
+Lastly, as highlighted in \cite{wasmtime-security-sandboxing}, Spectre mitigations are not yet implemented, but are a topic of
+ongoing research.
+
 \subsection{WebAssembly as a fault isolation tool}
 
 Since WebAssembly is \textit{sandboxed}, it is possible to isolate libraries that could be a frequent source of
