@@ -37,15 +37,14 @@ run on browsers or on \textit{Node.js}.
 WebAssembly is available as a target for various languages, such as C/C++ with the aid of Emscripten, Rust,
 AssemblyScript\footnote{A language with a syntax similar to TypeScript.}, Go, Kotlin, Swift and Zig.
 The compiled binary can be then used from JavaScript on the web, or with Node.js or Deno, or even as a CLI application
-with the aid of the \textit{WebAssebly System Interface} (see Section \ref*{sec:introduction-wasi}).
+with the aid of the \textit{WebAssembly System Interface} (see Section \ref*{sec:introduction-wasi}).
 
 \subsection{Overview of the language}
 
 Although WebAssembly is a binary code format, it can also be written with \textit{S-expressions}
 in order to be more readable.
 Each binary takes the form of a \textit{module}, which contains \textit{functions}, \textit{global} variables,
-\textit{tables} and \textit{memories}. Each of these can be exported to be used in the embedder.
-A module can also import functionalities.
+\textit{tables} and \textit{memories}. Each of these can be exported to be used in the embedder, and a module can also import functionalities.
 While a module is a static representation of a program, an \textit{instance} is the dynamic one.
 A module can be instantiated by the embedder (e.g.\ a JavaScript virtual machine).
 
@@ -72,7 +71,7 @@ portion of the memory, and cannot be accessed directly by WebAssembly.
 The code inside a function consists of a series of \textit{instructions} that modify an implicit operand stack,
 either by declaring local variables or applying operations to the value already on the stack.
 Functions can be called either \textit{directly} by using an index that identifies a function, or \textit{indirectly},
-i.e.\ dynamically through a global \textit{table}.
+i.e.\ dynamically through a global \textit{table}. In this second case, only the function's type signature is validated.
 
 WebAssembly has also support for \textit{traps} - in a similar manner to an exception, a trap aborts the current
 computation, and control is given back to the embedder. For example, when embedded in JavaScript, a trap will
@@ -80,12 +79,41 @@ throw a JavaScript exception.
 
 The main storage that WebAssembly uses is a \textit{linear memory} (or simply \textit{memory}), that is represented
 by an array of bytes. Each module can defined no more than one memory, which can grow when needed with a unit size
-of 64 KiB, a \textit{page}.
+of 64 KiB, a \textit{page}. This memory is separated by the call stack and by the memory dedicated to code.
+Moreover, all pointers, when present, are translated into offsets in the linear memory, and all memory accesses are bound-checked.
 
 Another main difference from other stack machines is that WebAssembly doesn't provide arbitrary jumps but
-\textit{structured control flow}, so that the code can be validated in a single pass.
+\textit{structured control flow}, so that the code can be validated in a single pass and prevent common control flow attacks.
 
 \subsection{Problems with WebAssembly}
+
+Since languages with manual memory management, such as C/C++, can be compiled into WebAssembly,
+it is natural to ponder how memory vulnerabilities affect WebAssembly binaries.
+In the original paper it is said that ``a buggy or exploited WebAssembly program can make a mess of the data in its own memory''
+\cite{bringing-the-web-up-to-speed-2017}, in light of the fact that the call stack is not accessible by the program.
+
+However, as shown in \cite{binary-security-wasm-2020}, even though WebAssembly strives for safety,
+binaries can be still exploited with both traditional attacks,
+such as buffer overflows, and attacks that aren't applicable in traditional native binaries, e.g.\ overwriting
+string literals in memory.
+
+The paper shows that it is possible to obtain a write primitive given a WebAssembly binary compiled from vulnerable C/C++ code,
+by means of stack-based buffer overflows and heap metadata corruption, and it is possible to overwrite stack, heap and ``constant''
+data, since the linear memory does not have a read-only section. It would be possible then, for example, to overwrite the name
+of a file that was encoded as a string literal in the original program.
+
+Another problem shown in the same paper is the redirection of indirect calls. Since WebAssembly allows indirect calls
+to functions through a function table, an attacker could divert the execution by overwriting an integer in linear memory
+that serves as an index into the table section. WebAssembly limits this ability with two mechanisms - not all functions
+may appear in the table, but only those that can be indirectly called, and all functions call are type checked.
+So, redirecting indirect calls is possible only within the class of functions with the same type.
+
+Lastly, it is possible to enable remote code execution when including vulnerable WebAssembly in an application.
+This is because functions that have different types in one language can be mapped onto functions with the same type
+in WebAssembly. For example, a log functions that in C has the signature \texttt{void log(int)}, and a function such as
+\texttt{void exec(const char* cmd)} both become functions with only one \texttt{i32} param in WebAssembly.
+This enables the indirect divertion described in the previous paragraph if the two functions can be indirectly called.
+
 \subsection{WebAssembly as a fault isolation tool}
 \subsection{WASI - WebAssembly System Interface}
 \label{sec:introduction-wasi}
