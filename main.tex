@@ -26,7 +26,11 @@
   \pagenumbering{gobble}
   \mbox{}
 }
-\newcommand{\toc}{\clearpage\pagenumbering{Roman}\tableofcontents}
+\newcommand{\toc}{
+  \clearpage
+  \pagenumbering{Roman}
+  \tableofcontents
+}
 
 % ------------------------ Graphics
 \graphicspath{{./images/}}
@@ -36,6 +40,8 @@
 
 \begin{document}
   \input{pages/title.tex}
+  \emptypage
+  \input{pages/abstract.tex}
   \emptypage
   \toc
   \emptypage
