@@ -47,7 +47,7 @@ alongside eBPF \cite{spectre}.
 JavaScript is ill-equipped when it comes to performance-critical modern web pages - from this needs were born technologies
 such as \textit{asm.js}, \textit{Native Client}, and eventually \textit{WebAssembly}.
 
-\subsection{Web browsers}
+\subsection{Web browsers and JavaScript runtimes}
 
 A \textit{web browser} is a piece of software that enables users to access web pages shared on the World Wide Web, or a
 local website. Browsers natively support the rendering of HTML and CSS, and feature an engine able to run JavaScript or, more commonly,
@@ -58,6 +58,17 @@ by using two main methods - \textit{sandboxing}, so that JS isn't allowed to per
 programming tasks like working directly with files\footnote{Although, there are APIs that can grant access to a ``virtual drive''
 only when explicitly allowed by the user \cite{filesystem-mdn}, so access to the user's file system is not possible.},
 and \textit{same-origin policy} constraints, in which scripts from one website have access to data from the same website but not others.
+
+JavaScript can not only be executed on a browser, but also on so called ``back-end''
+runtimes\footnote{Opposed to ``front-end'', which usually pertains to the browser}.
+These runtimes offer custom libraries that enable JavaScript to access the file system, to make network requests,
+spawn child processes and build complex applicatives, e.g.\ web servers.
+Two notable runtimes are \textit{Node.js}\footnote{\url{https://nodejs.org/}} and \textit{Deno}\footnote{\url{https://deno.land}},
+both open-source.
+The first is built on top of Google's V8 engine, was initially released in 2009 and has a package manager called \textit{npm}
+in order to manage its vast ecosystem of JS packages.
+Deno, on the other hand, is a more modern runtime written in Rust, that includes support for TypeScript out of the box
+and is \textit{secure by default}, since it blocks all file, network and environment access unless explicitely enabled.
 
 \section{WebAssembly}
 
@@ -83,7 +94,7 @@ on this signing. Hence, it achieved safety through a trust model, not through te
 \textit{Native Client} \cite{native-client} introduced the first sandboxing technique for x86, ARM or MIPS machine code,
 which was statically validated. Lastly, \textit{asm.js} \cite{asmjs} is a specialised subset of JavaScript, which is on of the target
 languages of \textit{Emscripten} \cite{emscripten}, a compiler toolchain able to compile C/C++ applications in order to have them
-run on browsers or on \textit{Node.js}.
+run on browsers or on other JavaScript runtimes.
 
 WebAssembly is available as a target for various languages, such as C/C++ with the aid of Emscripten, Rust,
 AssemblyScript\footnote{A language with a syntax similar to TypeScript.}, Go, Kotlin, Swift and Zig.
