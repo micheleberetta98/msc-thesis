@@ -115,6 +115,19 @@ in WebAssembly. For example, a log functions that in C has the signature \texttt
 This enables the indirect diversion described in the previous paragraph if the two functions can be indirectly called.
 
 \subsection{WebAssembly as a fault isolation tool}
+
+Since WebAssembly is \textit{sandboxed}, it is possible to isolate libraries that could be a frequent source of
+vulnerabilities by compiling them to WebAssembly before their use.
+
+An example is shown with the \textit{RLBox} project \cite{wasm-firefox-isolation-2020},
+a framework that supports efficient sandboxing with modest performance overhead.
+This project has been integrated into Firefox in order to sandbox the \texttt{libGraphite} font shaping library.
+
+Even with the WASI interface it is possible to isolate a WebAssembly binary, since it is effectively \textit{sandboxed}
+- all interactions with the embedding environment must be done through explicit exports and imports, and the memory is
+bound checked at runtime, so that the WebAssembly program cannot access data outside its assigned memory, and the
+embedder cannot access memory assigned to the WebAssembly code directly.
+
 \subsection{WASI - WebAssembly System Interface}
 \label{sec:introduction-wasi}
 
