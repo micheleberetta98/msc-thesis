@@ -191,7 +191,9 @@ and C/C++, either through Emscripten or a custom prebuilt \textit{Clang} toolcha
 A binary that uses WASI can be run using a CLI runtime, such as \textit{Wasmtime} \cite{wasmtime} or \textit{Wasmer} \cite{wasmer},
 or using a browser polyfill.
 The approach taken for the sandboxing by these runtimes is based on a \textit{capability-based security model} \cite{wasmtime-security-sandboxing},
-so that access to the file system must be explicitly given.
+so that access to the file system and other resources must be explicitly given. Capabilities can be either \textit{static}, which
+are represented by the list of imports of the WebAssembly module to run, or \textit{dynamic}, i.e.\ specific flags
+specified with custom command-line arguments at execution time.
 Moreover, writes to output streams are filtered when connected to a terminal in order to prevent control sequences
 that may have side effects and confuse or mislead users.
 
