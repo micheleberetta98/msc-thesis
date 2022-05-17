@@ -229,9 +229,14 @@ ongoing research.
 Since WebAssembly is \textit{sandboxed}, it is possible to isolate libraries that could be a frequent source of
 vulnerabilities by compiling them to WebAssembly before their use.
 
-An example is shown with the \textit{RLBox} project \cite{wasm-firefox-isolation-2020},
-a framework that supports efficient sandboxing with modest performance overhead.
-This project has been integrated into Firefox in order to sandbox the \texttt{libGraphite} font shaping library.
+An example is shown with the \textit{RLBox} project \cite{wasm-firefox-isolation-2020, rlbox-docs},
+a framework that supports efficient sandboxing with modest performance overhead,
+that has been integrated into Firefox in order to sandbox the \texttt{libGraphite} font shaping library.
+RLBox ensures that whatever library is sandboxed is also memory isolated from the rest of the application,
+and all this boundary crossings are explicit. The isolation is enforced by sandboxing mechansims, such as
+WebAssembly \cite{wasm-sandboxing-firefox}, and to ensure that application code doesn't use unsafe values
+originated in the sandbox, RLBox differentiates between \textit{tainted} and \textit{untainted} values
+thanks to the C++ type system.
 
 Even with the WASI interface it is possible to isolate a WebAssembly binary, since it is effectively \textit{sandboxed}
 - all interactions with the embedding environment must be done through explicit exports and imports, and the memory is
