@@ -1,10 +1,11 @@
 \section{The context}
 
-Nowadays, web application's need are more sophisticated and demanding, such as 3D visualisation, audio and video,
-games and so on. Efficiency and security are then important points that must be addressed, however JavaScript,
+Nowadays, web applications' needs are more sophisticated and demanding, such as 3D visualisation, audio and video,
+games, and so on. Efficiency and security are then important points that must be addressed. However JavaScript,
 as the de facto standard language on the web, is not able to meet these requirements.
 
-WebAssembly is a new language that is ``designed for efficient execution and compact representation of code
+In order to compensate for JavaScript's lack of performance, WebAssembly was introduced -
+it is a new language that is ``designed for efficient execution and compact representation of code
 on modern processors including in a web browser'' \cite{wasm-w3c-announcement}, and strives to improve
 both performance and power consumption.
 
@@ -13,11 +14,11 @@ both performance and power consumption.
 \subsection{Basic structure}
 
 The \textit{World Wide Web}, or more commonly \textit{Web}, is a collection of documents and other resources
-that can be shared among various computers via the \textit{Internet}.
+that can be shared among various devices via the \textit{Internet}.
 
 The resources shared are usually in the form of \textit{web pages}, documents whose structure is defined with HTML
 (\textit{Hypertext Markup Language}) and whose styles are declared with CSS (\textit{Cascade Style Sheet}).
-Other kind of resources include anything ranging from images, videos, audio, software and source code.
+Other kind of resources include anything ranging from images, videos, audio, software, and source code.
 
 However, web pages are \textit{static} if they only use HTML and CSS, and cannot do much aside from showing content. A programming
 language is hence needed to make the web \textit{dynamic}. Among all technologies and languages, nowadays
@@ -40,8 +41,8 @@ malicious scripts.
 A common security vulnerability in the JavaScript world is \textit{cross-site scripting} (XSS), which is a violation of the
 same-origin policy. These vulnerabilities occurs when an attacker is able to inject a malicious script in a target website
 in order to, for example, access private information about the user.
-Another vulnerability is \textit{cross-site request forgery} (CSRF), in which code on an attacker's website tricks the user's
-browser into taking actions that the victim did not want to happen.
+Another vulnerability is \textit{cross-site request forgery} (CSRF), in which malicious code on an attacker's website
+tricks the user's browser, so that it takes actions not desired by the user.
 
 Sometimes hardware vulnerabilities have also been found - in 2019, the Spectre paper included a JavaScript implementation
 alongside eBPF \cite{spectre}.
@@ -51,26 +52,25 @@ such as \textit{asm.js}, \textit{Native Client}, and eventually \textit{WebAssem
 
 \subsection{Web browsers and JavaScript runtimes}
 
-A \textit{web browser} is a piece of software that enables users to access web pages shared on the World Wide Web, or a
+A \textit{web browser} is a piece of software for accessing web pages shared on the World Wide Web, or a
 local website. Browsers natively support the rendering of HTML and CSS, and feature an engine able to run JavaScript or, more commonly,
-to just-in-time compile it in order to obtain more performance.
+to just-in-time compile it in order to improve performance.
 
 Browsers can also mitigate the risk provided by the common JavaScript vulnerabilities mentioned in Section \ref{sec:introduction-javascript}
 by using two main methods - \textit{sandboxing}, so that JS isn't allowed to perform general-purpose
 programming tasks like working directly with files\footnote{Although, there are APIs that can grant access to a ``virtual drive''
 only when explicitly allowed by the user \cite{filesystem-mdn}, so access to the user's file system is not possible.},
-and \textit{same-origin policy} constraints, in which scripts from one website have access to data from the same website but not others.
+and \textit{same-origin policy} constraints, in which scripts from one website have access to data from the same website but not from others.
 
 JavaScript can not only be executed on a browser, but also on so called ``back-end''
 runtimes\footnote{Opposed to ``front-end'', which usually pertains to the browser}.
-These runtimes offer custom libraries that enable JavaScript to access the file system, to make network requests,
-spawn child processes and build complex applications, e.g.\ web servers.
-Two notable runtimes are \textit{Node.js}\footnote{\url{https://nodejs.org/}} and \textit{Deno}\footnote{\url{https://deno.land}},
-both open-source.
-The first is built on top of Google's V8 engine, was initially released in 2009 and has a package manager called \textit{npm}
+These runtimes offer custom libraries that permit JavaScript to access the file system, to make network requests,
+spawn child processes and build complex applications, for example web servers.
+Two notable open-source runtimes are \textit{Node.js}\footnote{\url{https://nodejs.org/}} and \textit{Deno}\footnote{\url{https://deno.land}}.
+The first, initially released in 2009, is built on top of Google's V8 engine and has a package manager called \textit{npm}
 in order to manage its vast ecosystem of JS packages.
-Deno, on the other hand, is a more modern runtime written in Rust, that includes support for TypeScript out of the box
-and is \textit{secure by default}, since it blocks all file, network and environment access unless explicitly enabled.
+Deno, on the other hand, is a more modern runtime written in Rust, includes support for TypeScript out of the box
+and is \textit{secure by default} since it blocks all file, network, and environment access unless explicitly enabled.
 
 \section{WebAssembly}
 
@@ -80,26 +80,26 @@ and is \textit{secure by default}, since it blocks all file, network and environ
 It is designed to be a portable compilation target, so that different languages can be deployed on the web.
 It was announced in 2015 and implemented by major browsers by 2017, and as of May 2022 is supported
 by 93\% of all browsers\footnote{\url{https://caniuse.com/?search=WebAssembly}}.
-WebAssembly main goals are to be \cite{bringing-the-web-up-to-speed-2017}:
+WebAssembly main goals are the following \cite{bringing-the-web-up-to-speed-2017}:
 \begin{itemize}
-  \item \textit{Safe}, in particular to provide the same memory safety as a managed language;
-  \item \textit{Fast}, by using ahead-of-time optimisations in a similar manner as native machine code;
-  \item \textit{Portable}, since the web spans many device, architectures, operating systems and browsers;
-  \item And finally \textit{compact}, because code is transmitted over the network and must reduce load times as much as possible.
+  \item \textit{safety}, in particular to provide the same memory safety as a managed language;
+  \item \textit{speed}, by using ahead-of-time optimisations in a similar manner as native machine code;
+  \item \textit{portability}, since the web spans many devices, architectures, operating systems, and browsers;
+  \item and finally \textit{compactness}, because code is transmitted over the network and must reduce load times as much as possible.
 \end{itemize}
 
-There were previous attempt at solving the problem of having safe, fast and portable low-level code on the Web,
-such as \textit{ActiveX}, \textit{Native Client} and \textit{asm.js}.
+There were previous attempt at solving the problem of having safe, fast, and portable low-level code on the Web,
+such as \textit{ActiveX}, \textit{Native Client}, and \textit{asm.js}.
 
 \textit{ActiveX} \cite{activex} was a Microsoft's technology for code-signing x86 binaries to run on the web, and relied only
-on this signing. Hence, it achieved safety through a trust model, not through technical construction.
+on this signing. Hence, it achieved safety through a trust model instead of technical construction.
 \textit{Native Client} \cite{native-client} introduced the first sandboxing technique for x86, ARM or MIPS machine code,
-which was statically validated. Lastly, \textit{asm.js} \cite{asmjs} is a specialised subset of JavaScript, which is on of the target
+which was statically validated. Lastly, \textit{asm.js} \cite{asmjs} is a specialised subset of JavaScript, which is one of the target
 languages of \textit{Emscripten} \cite{emscripten}, a compiler toolchain able to compile C/C++ applications in order to have them
 run on browsers or on other JavaScript runtimes.
 
 WebAssembly is available as a target for various languages, such as C/C++ with the aid of Emscripten, Rust,
-AssemblyScript\footnote{A language with a syntax similar to TypeScript.}, Go, Kotlin, Swift and Zig.
+AssemblyScript\footnote{A language with a syntax similar to TypeScript.}, Go, Kotlin, Swift, and Zig.
 The compiled binary can be then used from JavaScript on the web, or with Node.js or Deno, or even as a CLI application
 with the aid of the \textit{WebAssembly System Interface} (see Section \ref*{sec:introduction-wasi}).
 
@@ -108,7 +108,7 @@ with the aid of the \textit{WebAssembly System Interface} (see Section \ref*{sec
 Although WebAssembly is a binary code format, it can also be written with \textit{S-expressions}
 in order to be more readable.
 Each binary takes the form of a \textit{module}, which contains \textit{functions}, \textit{global} variables,
-\textit{tables} and \textit{memories}. Each of these can be exported to be used in the embedder, and a module can also import functionalities.
+\textit{tables}, and \textit{memories}. Each of these can be exported to be used in the embedder, and a module can also import functionalities.
 While a module is a static representation of a program, an \textit{instance} is the dynamic one.
 A module can be instantiated by the embedder (e.g.\ a JavaScript virtual machine).
 
@@ -129,7 +129,7 @@ WebAssembly is a typed language, but there are only four basic \textit{value typ
 point numbers, each in 32 and 64 bit variants. There are no distinction between signed and unsigned integers,
 but instructions that depends on signedness are marked with an explicit suffix.
 
-\textit{Functions} are typed, take a sequence of values as a parameter and returns another sequence of values.
+\textit{Functions} are typed, take a sequence of values as a parameter, and returns another sequence of values.
 They cannot be nested inside each other. The content of the call stack for execution are separate from the data
 portion of the memory, and cannot be accessed directly by WebAssembly.
 The code inside a function consists of a series of \textit{instructions} that modify an implicit operand stack,
@@ -162,7 +162,7 @@ such as buffer overflows, and attacks that aren't applicable in traditional nati
 string literals in memory.
 
 The paper shows that it is possible to obtain a write primitive given a WebAssembly binary compiled from vulnerable C/C++ code,
-by means of stack-based buffer overflows and heap metadata corruption, and it is possible to overwrite stack, heap and ``constant''
+by means of stack-based buffer overflows and heap metadata corruption, and it is possible to overwrite stack, heap, and ``constant''
 data, since the linear memory does not have a read-only section. It would be possible then, for example, to overwrite the name
 of a file that was encoded as a string literal in the original program.
 
@@ -185,7 +185,7 @@ The \textit{WebAssembly System Interface} (WASI) \cite{wasi} is a modular system
 It focuses on security and portability so that WebAssembly binaries can be targeted by different languages
 and then been safely run on different platforms.
 Its API provides access to several OS-like features, such as file systems and Berkeley sockets.
-The two languages that have good interoperability at the moment are Rust, where the compiler directly supports targeting WASM and WASI,
+The two languages that have good interoperability at the moment are Rust, where the compiler directly supports targeting both WASM and WASI,
 and C/C++, either through Emscripten or a custom prebuilt \textit{Clang} toolchain\footnote{\url{https://github.com/WebAssembly/wasi-sdk}}.
 
 A binary that uses WASI can be run using a CLI runtime, such as \textit{Wasmtime} \cite{wasmtime} or \textit{Wasmer} \cite{wasmer},
@@ -203,14 +203,14 @@ The CLI runtimes have some particular features and properties:
         , in order to have the files' descriptors available; it is not possible to escape this sandbox using the parent directory \texttt{..}
         or soft symlinks, but it is possible to escape using hard symlinks;
   \item The directory is the finest granularity available - once access is given to a specific directory, all files and subdirectories are
-        visible, and there are no restrictions on permitted actions (reading, writing, deleting and creating files)\footnote{In C the binary can create files with specific user permissions on Linux, e.g.\ executable files.};
+        visible, and there are no restrictions on permitted actions (reading, writing, deleting, and creating files)\footnote{In C the binary can create files with specific user permissions on Linux, e.g.\ executable files.};
   \item When listing files in a directory, the only files that are visible are the ones that were already present at the preopening of the directory,
         but files added after the preopen can be read/written;
   \item Any change made to a file by any process is reflected in what the compiled WebAssembly binary is able to read;
   \item Environment variables are not accessible by default, but they must be explicitly declared;
   \item The WebAssembly memory is effectively sandboxed - the compiled cannot access memory outside its sandbox, otherwise a trap is raised;
   \item Not all ``classic'' functionality is available - when compiling C with the custom prebuilt toolchain,
-        functions such as \texttt{system}, \texttt{execv} and \texttt{fexecve} are not available,
+        functions such as \texttt{system}, \texttt{execv}, and \texttt{fexecve} are not available,
         so it is not possible to execute arbitrary commands or files;
   \item Fileless execution isn't feasible, since \texttt{memfd\_create} is not available due to the missing
         \texttt{sys/mman.h}\footnote{This library can be emulated, but \texttt{memfd\_create} is still not available}.
@@ -220,7 +220,7 @@ By using the \textit{wasm2c} tool available in the \textit{WebAssembly Binary To
 C code can be compiled into WebAssembly and then converted back to C.
 This way, a traditional C program to use directly the functions made available from the original C library with an added sandbox
 that allows code isolation. The sandboxed library cannot access locations outside its allocated memory without causing a trap,
-halting the execution and giving back control to the embedder.
+halting the execution, and giving back control to the embedder.
 Similarly, the user C code cannot access the sandboxed memory directly, and if attempted it would result in a segmentation fault.
 
 Lastly, as highlighted in \cite{wasmtime-security-sandboxing}, Spectre mitigations are not yet implemented, but are a topic of
