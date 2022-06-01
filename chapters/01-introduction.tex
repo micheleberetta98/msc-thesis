@@ -1,7 +1,7 @@
 \section{The context}
 
 Nowadays, web applications' needs are more sophisticated and demanding, such as 3D visualisation, audio and video,
-games, and so on. Efficiency and security are then important points that must be addressed. However JavaScript,
+real-time features, and so on. Efficiency and security are then important points that must be addressed. However JavaScript,
 as the de facto standard language on the web, is not able to meet these requirements.
 
 In order to compensate for JavaScript's lack of performance, WebAssembly was introduced -
@@ -44,11 +44,11 @@ in order to, for example, access private information about the user.
 Another vulnerability is \textit{cross-site request forgery} (CSRF), in which malicious code on an attacker's website
 tricks the user's browser, so that it takes actions not desired by the user.
 
-Sometimes hardware vulnerabilities have also been found - in 2019, the Spectre paper included a JavaScript implementation
-alongside eBPF \cite{spectre}.
+Software vulnerabilities are the most common, but hardware vulnerabilities have also been found.
+For example, in 2019 the Spectre paper included a JavaScript implementation alongside eBPF \cite{spectre}.
 
-JavaScript is ill-equipped when it comes to performance-critical modern web pages - from this needs were born technologies
-such as \textit{asm.js}, \textit{Native Client}, and eventually \textit{WebAssembly}.
+All things considered, JavaScript is ill-equipped when it comes to performance-critical modern web
+pages - from this needs were born technologies such as \textit{asm.js}, \textit{Native Client}, and eventually \textit{WebAssembly}.
 
 \subsection{Web browsers and JavaScript runtimes}
 
@@ -142,9 +142,10 @@ computation, and control is given back to the embedder. For example, when embedd
 throw a JavaScript exception.
 
 The main storage that WebAssembly uses is a \textit{linear memory} (or simply \textit{memory}), that is represented
-by an array of bytes. Each module can defined no more than one memory, which can grow when needed with a unit size
-of 64 KiB, a \textit{page}. This memory is separated by the call stack and by the memory dedicated to code.
-Moreover, all pointers, when present, are translated into offsets in the linear memory, and all memory accesses are bound-checked.
+by an array of bytes. Each module can define no more than one memory, which can grow by one or more
+\textit{pages}\footnote{A page is 64 KiB large.} if the need arises.
+This memory is separated by the call stack and by the memory dedicated to code.
+Moreover, when present, all pointers are translated into offsets in the linear memory, and all memory accesses are bound-checked.
 
 Another main difference from other stack machines is that WebAssembly doesn't provide arbitrary jumps but
 \textit{structured control flow}, so that the code can be validated in a single pass and prevent common control flow attacks.
@@ -153,13 +154,12 @@ Another main difference from other stack machines is that WebAssembly doesn't pr
 
 Since languages with manual memory management, such as C/C++, can be compiled into WebAssembly,
 it is natural to ponder how memory vulnerabilities affect WebAssembly binaries.
-In the original paper it is said that ``a buggy or exploited WebAssembly program can make a mess of the data in its own memory''
+In the original paper it is mentioned that ``a buggy or exploited WebAssembly program can make a mess of the data in its own memory''
 \cite{bringing-the-web-up-to-speed-2017}, in light of the fact that the call stack is not accessible by the program.
 
-However, as shown in \cite{binary-security-wasm-2020}, even though WebAssembly strives for safety,
-binaries can be still exploited with both traditional attacks,
+However, even though WebAssembly strives for safety, binaries can be still exploited with both traditional attacks,
 such as buffer overflows, and attacks that aren't applicable in traditional native binaries, e.g.\ overwriting
-string literals in memory.
+string literals in memory \cite{binary-security-wasm-2020}.
 
 The paper shows that it is possible to obtain a write primitive given a WebAssembly binary compiled from vulnerable C/C++ code,
 by means of stack-based buffer overflows and heap metadata corruption, and it is possible to overwrite stack, heap, and ``constant''
@@ -174,7 +174,7 @@ So, redirecting indirect calls is possible only within the class of functions wi
 
 Lastly, it is possible to enable remote code execution when including vulnerable WebAssembly in an application.
 This is because functions that have different types in one language can be mapped onto functions with the same type
-in WebAssembly. For example, a log functions that in C has the signature \texttt{void log(int)}, and a function such as
+in WebAssembly. For example, a log function that in C has the signature \texttt{void log(int)}, and a function such as
 \texttt{void exec(const char* cmd)} both become functions with only one \texttt{i32} param in WebAssembly.
 This enables the indirect diversion described in the previous paragraph if the two functions can be indirectly called.
 
@@ -199,29 +199,30 @@ that may have side effects and confuse or mislead users.
 
 The CLI runtimes have some particular features and properties:
 \begin{itemize}
-  \item It is possible to \textit{sandbox} entire directories by \textit{preopening} them, and eventually mapping them to custom paths
+  \item it is possible to \textit{sandbox} entire directories by \textit{preopening} them, and eventually mapping them to custom paths
         , in order to have the files' descriptors available; it is not possible to escape this sandbox using the parent directory \texttt{..}
         or soft symlinks, but it is possible to escape using hard symlinks;
-  \item The directory is the finest granularity available - once access is given to a specific directory, all files and subdirectories are
+  \item the directory is the finest granularity available - once access is given to a specific directory, all files and subdirectories are
         visible, and there are no restrictions on permitted actions (reading, writing, deleting, and creating files)\footnote{In C the binary can create files with specific user permissions on Linux, e.g.\ executable files.};
-  \item When listing files in a directory, the only files that are visible are the ones that were already present at the preopening of the directory,
+  \item when listing files in a directory, the only files that are visible are the ones that were already present at the preopening of the directory,
         but files added after the preopen can be read/written;
-  \item Any change made to a file by any process is reflected in what the compiled WebAssembly binary is able to read;
-  \item Environment variables are not accessible by default, but they must be explicitly declared;
-  \item The WebAssembly memory is effectively sandboxed - the compiled cannot access memory outside its sandbox, otherwise a trap is raised;
-  \item Not all ``classic'' functionality is available - when compiling C with the custom prebuilt toolchain,
+  \item any change made to a file by any process is reflected in what the compiled WebAssembly binary is able to read;
+  \item environment variables are not accessible by default, but they must be explicitly declared;
+  \item the WebAssembly memory is effectively sandboxed - the compiled cannot access memory outside its sandbox, otherwise a trap is raised;
+  \item not all ``classic'' functionality is available - when compiling C with the custom prebuilt toolchain,
         functions such as \texttt{system}, \texttt{execv}, and \texttt{fexecve} are not available,
         so it is not possible to execute arbitrary commands or files;
-  \item Fileless execution isn't feasible, since \texttt{memfd\_create} is not available due to the missing
+  \item fileless execution isn't feasible, since \texttt{memfd\_create} is not available due to the missing
         \texttt{sys/mman.h}\footnote{This library can be emulated, but \texttt{memfd\_create} is still not available}.
 \end{itemize}
 
 By using the \textit{wasm2c} tool available in the \textit{WebAssembly Binary Toolkit}\footnote{\url{https://github.com/WebAssembly/wabt}},
 C code can be compiled into WebAssembly and then converted back to C.
-This way, a traditional C program to use directly the functions made available from the original C library with an added sandbox
+This way, a traditional C program can use directly the functions made available from the original C library with an added sandbox
 that allows code isolation. The sandboxed library cannot access locations outside its allocated memory without causing a trap,
 halting the execution, and giving back control to the embedder.
-Similarly, the user C code cannot access the sandboxed memory directly, and if attempted it would result in a segmentation fault.
+Similarly, the user C code cannot access the sandboxed memory directly, and, if the code were to attempt to do so,
+it would result in a segmentation fault.
 
 Lastly, as highlighted in \cite{wasmtime-security-sandboxing}, Spectre mitigations are not yet implemented, but are a topic of
 ongoing research.
@@ -235,14 +236,14 @@ An example is shown with the \textit{RLBox} project \cite{wasm-firefox-isolation
 a framework that supports efficient sandboxing with modest performance overhead,
 that has been integrated into Firefox in order to sandbox the \texttt{libGraphite} font shaping library.
 RLBox ensures that whatever library is sandboxed is also memory isolated from the rest of the application,
-and all this boundary crossings are explicit. The isolation is enforced by sandboxing mechansims, such as
+and all these boundary crossings are explicit. The isolation is enforced by sandboxing mechanisms, such as
 WebAssembly \cite{wasm-sandboxing-firefox}, and to ensure that application code doesn't use unsafe values
 originated in the sandbox, RLBox differentiates between \textit{tainted} and \textit{untainted} values
-thanks to the C++ type system.
+through the use of the C++ type system.
 
-Even with the WASI interface it is possible to isolate a WebAssembly binary, since it is effectively \textit{sandboxed}
+Even the WASI interface is able to segregate a WebAssembly binary, since it is effectively \textit{sandboxed}
 - all interactions with the embedding environment must be done through explicit exports and imports, and the memory is
-bound checked at runtime, so that the WebAssembly program cannot access data outside its assigned memory, and the
+bound checked at runtime. Hence, the WebAssembly program cannot access data outside its assigned memory, and the
 embedder cannot access memory assigned to the WebAssembly code directly.
 
 \section{Linux Security Modules}
@@ -287,7 +288,7 @@ using it and its future children, created either by spawning a new thread, as we
 as using the \textit{fork} system call.
 
 Notably, Landlock does not permits the definition of exceptions.
-For example, suppose we have a directory \texttt{dir1}, which contains two files
+For example, let us suppose we have a directory \texttt{dir1}, which contains two files
 \texttt{file1} and \texttt{file2}. We can define a ruleset that allows
 reading and writing files for \texttt{dir1}.
 However, if we then define another ruleset comprising only of read operations
@@ -299,9 +300,9 @@ of all rulesets - if a process first restricts itself allowing all read and writ
 and then restricts itself again with only reading permissions, the result is equivalent
 to a single restriction made with a ruleset that permits only reading operations.
 
-Landlock can be used directly when writing C/C++ code in Linux thanks to the
+Landlock can be used directly when writing C/C++ code in Linux with the
 \texttt{<linux/landlock.h>}\footnote{Examples of code available at \cite{landlock-user-space}}
-header, or by using libraries that provide these binding to other languages,
+header, or by using libraries that provide these bindings to other languages,
 such as \texttt{go-landlock}\footnote{\url{https://github.com/landlock-lsm/go-landlock}}
 for Go and \texttt{rust-landlock}\footnote{\url{https://github.com/landlock-lsm/rust-landlock}} for Rust.
 
@@ -315,7 +316,7 @@ and then the operating system guarantees safety and efficiency as if natively co
 by using a Just-In-Time compiler.
 These eBPF programs are event-driven and run when a certain hook point is passed. Some
 predefined hooks include system calls, network events, and so on. If a hook does not exist,
-it's possible to create custom kernel or user probes.
+it is possible to create custom kernel or user probes.
 
 Unlike Landlock, eBPF makes it possible to define specific exception, e.g.\ denying
 certain access rights on specific files while allowing them on the containing directory.
@@ -323,5 +324,5 @@ It also allows to specify whether a program has access to devices such as \textt
 and \texttt{dev}.
 
 Thanks to \texttt{BPFContain}\footnote{\url{https://github.com/willfindlay/bpfcontain-rs}}
-it's also possible to run a container security daemon by leveraging eBPF.  In this case,
+it is also possible to run a container security daemon by leveraging eBPF.  In this case,
 specific policies must be written for desired commands.
