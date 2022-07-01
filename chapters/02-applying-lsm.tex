@@ -1,8 +1,125 @@
 \section{Goals}
 
+The main goal of using \textit{Linux Security Modules} in combination with WebAssembly
+is to provide a finer grain customisation when choosing how to limit the permissions given
+to the executable.
+
+More specifically, the desired features are
+\begin{enumerate}
+  \item to give the possibility to differentiate between directories and files when giving permissions;
+  \item to clearly separate read, write, execution and deletion capabilities;
+  \item eventually, to prevent the creation of new files, directories and other objects (such as symbolic links).
+\end{enumerate}
+
+Additional desirable features include the possibility to apply exceptions to a certain rule, as well
+as limiting the access to other resources in the operating systems, such as network, devices, and
+inter-process communications.
+
+Finally, usability is also taken into consideration, especially from the point of view of a user.
+
 \section{Landlock}
 
 \subsection{Code architecture}
+
+In order to use Landlock, it must be enabled when compiling Linux.
+
+The code itself is written in \textit{Rust}, and makes use of the
+\textit{rust-landlock}\footnote{\url{https://github.com/landlock-lsm/rust-landlock}} crate
+to communicate with Landlock and the \textit{wasmtime} and \textit{wasmtime-wasi} official
+crates in order to have a runtime environment to execute a WebAssembly binary.
+
+The project is divided into five modules, which are:
+\begin{enumerate}
+  \item \texttt{args}, used to define and parse the command line arguments that specify the WebAssembly binary,
+        the directories to preopen, and the allowed privileges on individual folders and/or files;
+  \item \texttt{landlock}, which handles the creation and update of the permissions' ruleset;
+  \item \texttt{main}, the module that interfaces with the user;
+  \item \texttt{path\_access}, containing a helper structure to track permission for a single path;
+  \item and finally \texttt{wasm}, that communicates with the \textit{wasmtime} and the \textit{wasmtime-wasi} crates
+        in order to run the provided binaries, as well as preopening directories.
+\end{enumerate}
+
+\subsubsection{The \texttt{args} module}
+
+The main definition of this module is the \texttt{Args} struct.
+
+\begin{code}[language=rust]
+  pub struct Args {
+    pub wasm_module: String,
+
+    pub dirs: Vec<String>,
+
+    pub mapdirs: Vec<(String, String)>,
+
+    pub fs_allows: Vec<(String, BitFlags<AccessFs>)>,
+
+    pub no_landlock: bool,
+  }
+\end{code}
+
+Every single field is mapped to one command line argument, which can appear multiple (or no) times
+if it is a \texttt{Vec}. Their usage and meaning is described in Table \ref{table:landlock-cli-args}.
+
+Note that here preopening a directories does not mean it and its contents will be accessible by the
+provided binary at runtime - they can still be restricted by the landlock policies. Preopening is
+necessary though in order to give the possibility to access its contents.
+
+Directories can also me \textit{mapped} - in a way similar to the one provided by \textit{wasmtime} command line tool,
+it is possible to remap path, so that it's possible to have the binary access any arbitrary path in the system
+without manually copying and/or executing it in a specific directory.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|l|l|l|l|}
+    \hline
+    \textit{Argument} & \textit{Required} & \textit{Description} \\
+    \hline\hline
+    \texttt{wasm\_module} & Yes & The path to the WASM binary to run \\ \hline
+    \texttt{dir} & No & All the directories to preopen \\ \hline
+    \texttt{mapdir} & No & Eventual mappings between the directories \\ \hline
+    \texttt{fs\_allow} & No & All the permitted actions on a single path \\ \hline
+    \texttt{no\_landlock} & No & Used to disable the self restriction done by landlock \\
+    \hline
+  \end{tabular}
+  \caption{All the available command line arguments}
+  \label{table:landlock-cli-args}
+\end{table}
+
+The arguments \texttt{dir}, \texttt{mapdir} and \texttt{fs\_allow} can appear multiple time, and all the values
+are then collected into a single \texttt{Vec}. In this way, it is possible to apply different restrictions on different
+paths - for example, one could set some files as read-only, while another subset of files in a specific directory
+could also be writable.
+
+The \texttt{fs\_allow} is made up of two parts - a path to restrict, and a series of enabled permissions on that specific path.
+Each permission is mapped one-to-one to the flags provided by Landlock in a manner listed in Table \ref*{table:landlock-flags}.
+The specific ABI used is the first version, so at the moment it is not possible to specify a \texttt{LANDLOCK\_ACCESS\_FS\_REFERER}
+in order to reparent a file hierarchy.
+
+Lastly, the \texttt{no\_landlock} argument is only for testing purposes - it is off by default, so that
+landlock is enabled and self restriction is applied if not explicitly disabled.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|l|l|}
+    \hline
+    \textit{Flag} & \textit{Enabled permission} \\ \hline\hline
+    \texttt{X} & Execute a file \\ \hline
+    \texttt{W} & Write to a file \\ \hline
+    \texttt{R} & Read a file \\ \hline
+    \texttt{RDir} & Open a directory or list its content \\ \hline
+    \texttt{DDir} & Delete an empty directory or rename one \\ \hline
+    \texttt{D} & Unlink or rename a file \\ \hline
+    \texttt{MChar} & Create, rename or link a character device \\ \hline
+    \texttt{MDir} & Create or rename a directory \\ \hline
+    \texttt{MReg} & Create, rename or link a regular file \\ \hline
+    \texttt{MSock} & Create, rename or link a socket \\ \hline
+    \texttt{MFifo} & Create, rename or link a named pipe \\ \hline
+    \texttt{MBlock} & Create, rename or link a block device \\ \hline
+    \texttt{MSym} & Create, rename or link a symbolic link \\ \hline
+  \end{tabular}
+  \caption{Provided landlock flags}
+  \label{table:landlock-flags}
+\end{table}
 
 \subsection{Available permission settings}
 
