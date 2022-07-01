@@ -204,7 +204,7 @@ The CLI runtimes have some particular features and properties:
         or soft symlinks, but it is possible to escape using hard symlinks;
   \item the \textit{directory} is the finest granularity available to the preopen action - once access is given to a specific directory, all files and subdirectories are
         visible, and it is not possible to restrict permissions (all files are readable and
-        writeable) when using the command line runtime wrapper\footnote{It is possible to specify a basic set of permissions when using the WASI runtime library in another language, e.g. in Rust,
+        writable) when using the command line runtime wrapper\footnote{It is possible to specify a basic set of permissions when using the WASI runtime library in another language, e.g. in Rust,
         see example at \url{https://docs.rs/wasmer-wasi/latest/wasmer_wasi/struct.WasiState.html}.};
   \item when using C, the WebAssembly binary can create files with specific user permissions on Linux, e.g.\ executable files;
   \item when listing files in a directory, the only files that are visible are the ones that were already present at the preopening of the directory,
@@ -308,6 +308,36 @@ Landlock can be used directly when writing C/C++ code in Linux with the
 header, or by using libraries that provide these bindings to other languages,
 such as \texttt{go-landlock}\footnote{\url{https://github.com/landlock-lsm/go-landlock}}
 for Go and \texttt{rust-landlock}\footnote{\url{https://github.com/landlock-lsm/rust-landlock}} for Rust.
+
+Landlock employs a series of flags to restrict a sandboxed process to a set of actions on files and
+directories opened after the sandboxing operation (those opened before are not affected).
+As highlighted in \cite{landlock-user-space}, the file system flags for files are:
+\begin{itemize}
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_EXECUTE}, to execute a file;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_WRITE\_FILE}, to open a file with write access;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_READ\_FILE}, to open a file with read access.
+\end{itemize}
+
+Directories can receive a wider range of access rights, including the previous ones and the following ones.
+All of them, except the first, are applied to the content of a directory and not the directory itself.
+\begin{itemize}
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_READ\_DIR}, to open a directory or list its content\footnote{Applies to subdirectories as well.};
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_REMOVE\_DIR}, to remove an empty directory or rename one;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_REMOVE\_FILE}, to unlink or rename a file;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_CHAR}, to create, rename or link a character device;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_DIR}, to create or rename a directory;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_REG}, to create, rename or link a regular file;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_SOCK}, to create, rename or link a socket;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_FIFO}, to create, rename or link a named pipe;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_BLOCK}, to create, rename or link a block device;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_SYM}, to create, rename or link a symbolic link;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_REFER}, to re-parent a file hierarchy\footnote{Available since the second version of the Landlock ABI}.
+\end{itemize}
+
+This last one is treated differently from the others - in order to prevent privilege escalation, it is not enough
+to create a rule with that access right, but it is necessary that, when linking or renaming a file, the destination
+directory hierarchy must always have the same (or a superset of) restrictions of the source hierarchy.
+If that is not the case, this actions is denied with an error from the operating system.
 
 \subsection{eBPF}
 \textit{eBPF} \cite{ebpf} is a virtual machine in the Linux Kernel that can run sandboxed programs
