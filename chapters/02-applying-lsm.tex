@@ -17,11 +17,10 @@ inter-process communications.
 
 Finally, usability is also taken into consideration, especially from the point of view of a user.
 
+\newpage
 \section{Landlock}
 
-\subsection{Code architecture}
-
-In order to use Landlock, it must be enabled when compiling Linux.
+\subsection{Code architecture and description}\label{sec:landlock-code-architecture}
 
 The code itself is written in \textit{Rust}, and makes use of the
 \textit{rust-landlock}\footnote{\url{https://github.com/landlock-lsm/rust-landlock}} crate
@@ -41,64 +40,169 @@ The project is divided into five modules, which are:
 
 \subsubsection{The \texttt{args} module}
 
-The main definition of this module is the \texttt{Args} struct.
+The main definition of this module is the \texttt{Args} struct, visible in Listing \ref{lst:arg-struct}.
 
-\begin{code}[language=rust]
+Every single field is mapped to one command line argument thanks to the \textit{clap} crates which handles the
+creation and parsing of the CLI arguments structure.
+Their usage and meaning is described in Table \ref{table:landlock-cli-args}.
+
+Note that here preopening a directories does not mean it and its contents will be accessible by the
+provided binary at runtime - they can still be restricted by the landlock policies. Preopening is
+necessary though in order to give the possibility to access its contents.
+
+Directories can also be \textit{mapped} - in a way similar to the one provided by the \textit{Wasmtime} command line tool,
+it is possible to remap path, so that it's possible to have the binary access any arbitrary path in the system
+without manually copying and/or executing it in a specific directory.
+
+\begin{code}[language=rust, caption=The \texttt{Args} struct, label=lst:arg-struct]
+  #[derive(Parser, Debug)]
+  #[clap(author, version, about, long_about = None)]
   pub struct Args {
+    // The module to execute
     pub wasm_module: String,
 
+    // The preopepend dir(s) to pass to wasmtime
     pub dirs: Vec<String>,
 
+    // The preopened mapped dir(s) to pass to wasmtime
     pub mapdirs: Vec<(String, String)>,
 
+    // A list of the allowed privileges on a particular folder/file
     pub fs_allows: Vec<(String, BitFlags<AccessFs>)>,
 
     pub no_landlock: bool,
   }
 \end{code}
 
-Every single field is mapped to one command line argument, which can appear multiple (or no) times
-if it is a \texttt{Vec}. Their usage and meaning is described in Table \ref{table:landlock-cli-args}.
-
-Note that here preopening a directories does not mean it and its contents will be accessible by the
-provided binary at runtime - they can still be restricted by the landlock policies. Preopening is
-necessary though in order to give the possibility to access its contents.
-
-Directories can also me \textit{mapped} - in a way similar to the one provided by \textit{wasmtime} command line tool,
-it is possible to remap path, so that it's possible to have the binary access any arbitrary path in the system
-without manually copying and/or executing it in a specific directory.
-
-\begin{table}[h]
+\begin{table}
   \centering
   \begin{tabular}{|l|l|l|l|}
     \hline
     \textit{Argument} & \textit{Required} & \textit{Description} \\
     \hline\hline
-    \texttt{wasm\_module} & Yes & The path to the WASM binary to run \\ \hline
+    \textit{WASM module path} & Yes & The path to the WASM binary to run \\ \hline
     \texttt{dir} & No & All the directories to preopen \\ \hline
     \texttt{mapdir} & No & Eventual mappings between the directories \\ \hline
-    \texttt{fs\_allow} & No & All the permitted actions on a single path \\ \hline
-    \texttt{no\_landlock} & No & Used to disable the self restriction done by landlock \\
+    \texttt{fs-allow} & No & All the permitted actions on a single path \\ \hline
+    \texttt{no-landlock} & No & Used to disable the self restriction done by landlock \\
     \hline
   \end{tabular}
   \caption{All the available command line arguments}
   \label{table:landlock-cli-args}
 \end{table}
 
-The arguments \texttt{dir}, \texttt{mapdir} and \texttt{fs\_allow} can appear multiple time, and all the values
+The arguments \texttt{dir}, \texttt{mapdir} and \texttt{fs\_allow} can appear multiple times (or no times at all), and all the values
 are then collected into a single \texttt{Vec}. In this way, it is possible to apply different restrictions on different
 paths - for example, one could set some files as read-only, while another subset of files in a specific directory
 could also be writable.
 
-The \texttt{fs\_allow} is made up of two parts - a path to restrict, and a series of enabled permissions on that specific path.
-Each permission is mapped one-to-one to the flags provided by Landlock in a manner listed in Table \ref*{table:landlock-flags}.
-The specific ABI used is the first version, so at the moment it is not possible to specify a \texttt{LANDLOCK\_ACCESS\_FS\_REFERER}
-in order to reparent a file hierarchy.
+The \texttt{fs\_allow} is made up of two parts, separated by a colon - a path to apply the restrictions to,
+and a series of enabled permissions on that specific path, separated by a comma.
+Each permission is mapped one-to-one to the flags provided by Landlock in a manner listed in Table \ref{table:landlock-flags}.
+Moreover, there are three useful ``shortcuts'' used to represent common situations - \texttt{~read}, \texttt{~write} and \texttt{*}.
 
 Lastly, the \texttt{no\_landlock} argument is only for testing purposes - it is off by default, so that
 landlock is enabled and self restriction is applied if not explicitly disabled.
 
-\begin{table}[h]
+\subsubsection{The \texttt{wasm} module}
+
+This module manages a single WebAssembly binary module, represented by a vector of bytes, and handles the creation
+and construction of a \textit{WASI Context}, a structure defined by the \textit{wasmtime-wasi} crate used to store
+all preopened directories, eventual imports and more that will be useful to run the WebAssembly module.
+
+\begin{code}[language=Rust, caption=The outline of the \texttt{wasm} module]
+pub struct WasmModule {
+  bytes: Vec<u8>, ctx_builder: WasiCtxBuilder,
+}
+
+impl WasmModule {
+  // Reads the WASM module and initializes the WasiCtxBuilder
+  pub fn new(path: &str) -> Result<Self> { ... }
+
+  // Make inherit stdio to the WASM module
+  pub fn use_stdio(mut self) -> Self { ... }
+
+  // Preopen all given directories
+  pub fn preopen_all(
+    mut self,
+    dirs: &Vec<String>) -> Result<Self> {...}
+
+  // Preopen and map all given directories
+  pub fn preopen_all_map(
+    mut self,
+    mapdirs: &Vec<(String, String)>) -> Result<Self> {...}
+
+  // Preopen (and map) a single directory
+  pub fn preopen(
+    mut self,
+    dir: &str, guest_path: &str) -> Result<Self> {...}
+
+  // Run the module
+  pub fn run(self) -> Result<()> {...}
+}  
+\end{code}
+
+Here are defined various helpers to preopen directories, both unmapped and mapped.
+Most importantly, in this module it's defined how to run a WebAssembly binary - it must defined both an \textit{engine} and a \textit{linker},
+as well as a \textit{store} which represents the memory of a WebAssembly module described in the previous chapter.
+
+Note that the WebAssembly module has to have a \textit{default exported function} to run - when compiling with a WASI target,
+this is usually represented by the \texttt{\_start} function, which corresponds to the \texttt{main} function in languages
+such as C and Rust.
+
+\subsubsection{The \texttt{landlock} and \texttt{path\_access} modules}
+
+The \texttt{landlock} module is a thin wrapper around the API made available by the \textit{rust-landlock} crate.
+It handles mostly ruleset creation, rule insertion, and enforces the policies before the desired WASM module is run.
+The main outline of the code is visible in Listing \ref{lst:rust-landlock}.
+
+It makes use of another thin wrapper, the \texttt{PathAccess} struct defined in the \texttt{path\_access} module.
+In this module, the main entity is the \texttt{PathAccess} struct, that tracks which flags as defined in Table \ref{table:landlock-flags}
+are applied to a single path. The flags list starts empty, and multiple flags can be added at any times.
+Moreover, this module also takes care of conversions between types required by the Landlock ABI in order
+to make the code compile.
+
+\begin{code}[language=Rust, caption=The outline of the \texttt{landlock} module, label=lst:rust-landlock]
+pub struct Landlock {
+  ruleset: RulesetCreated,
+}
+
+impl Landlock {
+  // Creates a new ruleset with flags from Landlock ABI version 1
+  pub fn new() -> Result<Self, RulesetError> { ... }
+
+  // Add a set of rules to the ruleset
+  pub fn add_rules(
+    mut self,
+    rules: impl Iterator<Item = PathAccess>) -> Result<Self>
+  { ... }
+
+  // Add a single rule to the ruleset
+  pub fn add_rule(
+    mut self,
+    path_access: PathAccess) -> Result<Self>
+  { ... }
+
+  // Self restrict the process and checks wether Landlock
+  // is supported or not by the running kernel
+  pub fn enforce(self) -> Result<RestrictionStatus> { ... }
+}
+\end{code}
+
+\subsection{Available permission settings}
+
+The program allows to specify all access right flags from the first versione of the Landlock
+ABI\footnote{At the moment it is not possible to specify the \texttt{LANDLOCK\_ACCESS\_FS\_REFERER} in order to reparent a file hierarchy.}.
+These flags are used in the command line arguments and the following examples illustrate how to combine them:
+\begin{itemize}
+  \item \texttt{-{}-dir ``.'' -{}-fs-allow ``input:R''} runs \texttt{bin.wasm} with only a read permission on the file \texttt{input};
+  \item \texttt{-{}-dir ``.'' -{}-fs-allow ``input:X''} only allows the execution of \texttt{input};
+  \item \texttt{-{}-dir ``.'' -{}-fs-allow ``.:MReg''} only allows the creation, rename or linking of regular files in the current directory;
+  \item \texttt{-{}-dir ``.'' -{}-dir ``./inner'' -{}-fs-allow ``.:R'' -{}-fs-allow ``./inner:*''} combines multiple access rights so that
+        files in the current directory can only be read, while there are no restrictions only in a specific subdirectory (in this case, \texttt{inner}).
+\end{itemize}
+
+\begin{table}
   \centering
   \begin{tabular}{|l|l|}
     \hline
@@ -116,12 +220,17 @@ landlock is enabled and self restriction is applied if not explicitly disabled.
     \texttt{MFifo} & Create, rename or link a named pipe \\ \hline
     \texttt{MBlock} & Create, rename or link a block device \\ \hline
     \texttt{MSym} & Create, rename or link a symbolic link \\ \hline
+    \texttt{$\sim$read} & Combination of \texttt{X}, \texttt{R} and \texttt{RDir} \\ \hline
+    \texttt{$\sim$write} & Combination of all but \texttt{X}, \texttt{R} and \texttt{RDir} \\ \hline
+    \texttt{*} & Enable all flags \\ \hline
   \end{tabular}
-  \caption{Provided landlock flags}
+  \caption{Provided Landlock flags}
   \label{table:landlock-flags}
 \end{table}
 
-\subsection{Available permission settings}
+The Landlock self-restriction is applied after the necessary preopening of the directories,
+otherwise the running process would have to always have the permissions for listing directories even if
+not needed by the WASM binary.
 
 \subsection{Advantages and disadvantages}
 
