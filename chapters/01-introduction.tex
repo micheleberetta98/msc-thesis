@@ -202,18 +202,21 @@ The CLI runtimes have some particular features and properties:
   \item it is possible to \textit{sandbox} entire directories by \textit{preopening} them, and eventually mapping them to custom paths
         , in order to have the files' descriptors available; it is not possible to escape this sandbox using the parent directory \texttt{..}
         or soft symlinks, but it is possible to escape using hard symlinks;
-  \item the directory is the finest granularity available - once access is given to a specific directory, all files and subdirectories are
-        visible, and there are no restrictions on permitted actions (reading, writing, deleting, and creating files)\footnote{In C the binary can create files with specific user permissions on Linux, e.g.\ executable files.};
+  \item the \textit{directory} is the finest granularity available to the preopen action - once access is given to a specific directory, all files and subdirectories are
+        visible, and it is not possible to restrict permissions (all files are readable and
+        writeable) when using the command line runtime wrapper\footnote{It is possible to specify a basic set of permissions when using the WASI runtime library in another language, e.g. in Rust,
+        see example at \url{https://docs.rs/wasmer-wasi/latest/wasmer_wasi/struct.WasiState.html}.};
+  \item when using C, the WebAssembly binary can create files with specific user permissions on Linux, e.g.\ executable files;
   \item when listing files in a directory, the only files that are visible are the ones that were already present at the preopening of the directory,
         but files added after the preopen can be read/written;
   \item any change made to a file by any process is reflected in what the compiled WebAssembly binary is able to read;
-  \item environment variables are not accessible by default, but they must be explicitly declared;
+  \item environment variables are not accessible by default, but they must be explicitly declared and given access to;
   \item the WebAssembly memory is effectively sandboxed - the compiled cannot access memory outside its sandbox, otherwise a trap is raised;
   \item not all ``classic'' functionality is available - when compiling C with the custom prebuilt toolchain,
         functions such as \texttt{system}, \texttt{execv}, and \texttt{fexecve} are not available,
         so it is not possible to execute arbitrary commands or files;
   \item fileless execution isn't feasible, since \texttt{memfd\_create} is not available due to the missing
-        \texttt{sys/mman.h}\footnote{This library can be emulated, but \texttt{memfd\_create} is still not available}.
+        \texttt{sys/mman.h}\footnote{This library can be emulated, but \texttt{memfd\_create} is still not available.}.
 \end{itemize}
 
 By using the \textit{wasm2c} tool available in the \textit{WebAssembly Binary Toolkit}\footnote{\url{https://github.com/WebAssembly/wabt}},
