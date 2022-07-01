@@ -38,6 +38,17 @@ The project is divided into five modules, which are:
         in order to run the provided binaries, as well as preopening directories.
 \end{enumerate}
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\linewidth]{rust-landlock-code-diagram.png}
+  \caption{The code's architecture}
+  \label{fig:rust-landlock-code-architecture}
+\end{figure}
+
+The architecture outline is visible in Figure \ref{fig:rust-landlock-code-architecture}, where
+are outlined the most important external crates and all dependencies between the modules, represented
+by directed arrows.
+
 \subsubsection{The \texttt{args} module}
 
 The main definition of this module is the \texttt{Args} struct, visible in Listing \ref{lst:arg-struct}.
@@ -80,7 +91,7 @@ without manually copying and/or executing it in a specific directory.
     \hline
     \textit{Argument} & \textit{Required} & \textit{Description} \\
     \hline\hline
-    \textit{WASM module path} & Yes & The path to the WASM binary to run \\ \hline
+    \textit{WASM module} & Yes & The path to the WASM binary to run \\ \hline
     \texttt{dir} & No & All the directories to preopen \\ \hline
     \texttt{mapdir} & No & Eventual mappings between the directories \\ \hline
     \texttt{fs-allow} & No & All the permitted actions on a single path \\ \hline
@@ -91,24 +102,38 @@ without manually copying and/or executing it in a specific directory.
   \label{table:landlock-cli-args}
 \end{table}
 
-The arguments \texttt{dir}, \texttt{mapdir} and \texttt{fs\_allow} can appear multiple times (or no times at all), and all the values
+The first argument is positional, and is the path where the WebAssembly module is located.
+
+The arguments \texttt{dir}, \texttt{mapdir} and \texttt{fs-allow} can appear multiple times (or no times at all), and all the values
 are then collected into a single \texttt{Vec}. In this way, it is possible to apply different restrictions on different
 paths - for example, one could set some files as read-only, while another subset of files in a specific directory
 could also be writable.
 
-The \texttt{fs\_allow} is made up of two parts, separated by a colon - a path to apply the restrictions to,
+The \texttt{fs-allow} is made up of two parts, separated by a colon - a path to apply the restrictions to,
 and a series of enabled permissions on that specific path, separated by a comma.
 Each permission is mapped one-to-one to the flags provided by Landlock in a manner listed in Table \ref{table:landlock-flags}.
-Moreover, there are three useful ``shortcuts'' used to represent common situations - \texttt{~read}, \texttt{~write} and \texttt{*}.
+Moreover, there are three useful ``shortcuts'' used to represent common situations - \texttt{$\sim$read}, \texttt{$\sim$write} and \texttt{*}.
 
-Lastly, the \texttt{no\_landlock} argument is only for testing purposes - it is off by default, so that
+Lastly, the \texttt{no-landlock} argument is only for testing purposes - it is off by default, so that
 landlock is enabled and self restriction is applied if not explicitly disabled.
 
 \subsubsection{The \texttt{wasm} module}
 
-This module manages a single WebAssembly binary module, represented by a vector of bytes, and handles the creation
+This module manages a single WebAssembly binary module and forms a bridge to the \textit{wasmtime} and the \textit{wasmtime-wasi}
+crates. In this project, \textit{Wasmtime} bindings were used instead of the \textit{Wasmer} ones, but both provide the
+same level of functionality, albeit with different names and structure.
+
+Here a WASM binary is represented by a vector of bytes, and it is also handled the creation
 and construction of a \textit{WASI Context}, a structure defined by the \textit{wasmtime-wasi} crate used to store
 all preopened directories, eventual imports and more that will be useful to run the WebAssembly module.
+
+Here are defined various helpers to preopen directories, both unmapped and mapped.
+Most importantly, in this module it's defined how to run a WebAssembly binary - it must defined both an \textit{engine} and a \textit{linker},
+as well as a \textit{store} which represents the memory of a WebAssembly module described in the previous chapter.
+
+Note that the WebAssembly module has to have a \textit{default exported function} to run - when compiling with a WASI target,
+this is usually represented by the \texttt{\_start} function, which corresponds to the \texttt{main} function in languages
+such as C and Rust.
 
 \begin{code}[language=Rust, caption=The outline of the \texttt{wasm} module]
 pub struct WasmModule {
@@ -141,14 +166,6 @@ impl WasmModule {
   pub fn run(self) -> Result<()> {...}
 }  
 \end{code}
-
-Here are defined various helpers to preopen directories, both unmapped and mapped.
-Most importantly, in this module it's defined how to run a WebAssembly binary - it must defined both an \textit{engine} and a \textit{linker},
-as well as a \textit{store} which represents the memory of a WebAssembly module described in the previous chapter.
-
-Note that the WebAssembly module has to have a \textit{default exported function} to run - when compiling with a WASI target,
-this is usually represented by the \texttt{\_start} function, which corresponds to the \texttt{main} function in languages
-such as C and Rust.
 
 \subsubsection{The \texttt{landlock} and \texttt{path\_access} modules}
 
