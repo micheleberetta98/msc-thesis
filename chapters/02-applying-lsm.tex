@@ -72,7 +72,7 @@ without manually copying and/or executing it in a specific directory.
     // The module to execute
     pub wasm_module: String,
 
-    // The preopepend dir(s) to pass to wasmtime
+    // The preopened dir(s) to pass to wasmtime
     pub dirs: Vec<String>,
 
     // The preopened mapped dir(s) to pass to wasmtime
@@ -141,7 +141,7 @@ pub struct WasmModule {
 }
 
 impl WasmModule {
-  // Reads the WASM module and initializes the WasiCtxBuilder
+  // Reads the WASM module and initialises the WasiCtxBuilder
   pub fn new(path: &str) -> Result<Self> { ... }
 
   // Make inherit stdio to the WASM module
@@ -200,7 +200,7 @@ impl Landlock {
     path_access: PathAccess) -> Result<Self>
   { ... }
 
-  // Self restrict the process and checks wether Landlock
+  // Self restrict the process and checks whether Landlock
   // is supported or not by the running kernel
   pub fn enforce(self) -> Result<RestrictionStatus> { ... }
 }
@@ -208,7 +208,7 @@ impl Landlock {
 
 \subsection{Available permission settings}
 
-The program allows to specify all access right flags from the first versione of the Landlock
+The program allows to specify all access right flags from the first version of the Landlock
 ABI\footnote{At the moment it is not possible to specify the \texttt{LANDLOCK\_ACCESS\_FS\_REFERER} in order to reparent a file hierarchy.}.
 These flags are used in the command line arguments and the following examples illustrate how to combine them:
 \begin{itemize}
