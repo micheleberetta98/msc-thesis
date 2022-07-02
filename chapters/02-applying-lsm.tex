@@ -226,18 +226,6 @@ to make the code compile.
 The program allows to specify all access right flags from the first version of the Landlock
 ABI\footnote{At the moment it is not possible to specify the \texttt{LANDLOCK\_ACCESS\_FS\_REFERER} in order to reparent a file hierarchy.}.
 
-All flags are listed in Table \ref{table:landlock-flags}, and some the following examples illustrate how to combine them:
-\begin{itemize}
-  \item \texttt{file:R} allows only to read from \textit{file};
-  \item \texttt{file:X} the combination of \texttt{.:RDir} allows the execution of \textit{file} and the listing of the current directory;
-  \item \texttt{.:MReg} only allows the creation, rename or linking of regular files in the current directory;
-  \item \texttt{.:R,W} and \texttt{./subdir:*} allows only reads and writes on files in the current directory, while no restrictions are
-        made for \textit{subdir}.
-\end{itemize}
-
-Note that, as highlighted in Section \ref{sec:landlock-args-module}, the directories containing the files of insterest
-must always be preopened, even if their content is then restricted by landlock.
-
 \begin{table}
   \centering
   \begin{tabular}{|l|l|}
@@ -260,9 +248,21 @@ must always be preopened, even if their content is then restricted by landlock.
     \texttt{$\sim$write} & Combination of all but \texttt{X}, \texttt{R} and \texttt{RDir} \\ \hline
     \texttt{*} & Enable all flags \\ \hline
   \end{tabular}
-  \caption{Provided Landlock flags}
+  \caption{Provided flags and corresponding Landlock permissions}
   \label{table:landlock-flags}
 \end{table}
+
+All flags are listed in Table \ref{table:landlock-flags}, and some the following examples illustrate how to combine them:
+\begin{itemize}
+  \item \texttt{file:R} allows only to read from \textit{file};
+  \item \texttt{file:X} the combination of \texttt{.:RDir} allows the execution of \textit{file} and the listing of the current directory;
+  \item \texttt{.:MReg} only allows the creation, rename or linking of regular files in the current directory;
+  \item \texttt{.:R,W} and \texttt{./subdir:*} allows only reads and writes on files in the current directory, while no restrictions are
+        made for \textit{subdir}.
+\end{itemize}
+
+Note that, as highlighted in Section \ref{sec:landlock-args-module}, the directories containing the files of interest
+must always be preopened, even if their content is then restricted by landlock.
 
 The Landlock self-restriction is applied after the necessary preopening of the directories,
 otherwise the running process would have to always have the permissions for listing directories even if
@@ -270,7 +270,26 @@ not needed by the WASM binary.
 
 \subsection{Advantages and disadvantages}
 
-\section{eBPF}
+The main advantage that Landlock brings is simplicity. For the developer, the API is simple enough to use
+to use, and it can be used in a variety of languages - the main two languages are C (used directly with the kernel libraries),
+Rust as in this project, and Go\footnote{\url{https://github.com/landlock-lsm/go-landlock}}.
+From the user's point of view, the provided permission flags are clear enough that it is not required to have
+anything beside a basic understanding of Linux's file system permissions.
+Hence, it can be used to provide a clear interface that is not so different from the one already given by
+the existing runtimes.
+Moreover, Landlock allows \textit{unprivileged} access control - it is not necessary to gain particular privileges
+when running a binary, so the user can run a WebAssembly module in a protected environment even if they are not
+in the \textit{sudoers} group.
+
+The biggest drawback with this approach is simplicity itself. As highlighted in Section \ref{sec:intro-lsm-landlock},
+there is no way to define exception - this restricts the possibilities given to the user, and makes some situations
+impossible to specify. For example, if a \texttt{LANDLOCK\_ACCESS\_FS\_REMOVE\_FILE} right is given to a directory,
+all files in that directory can be renamed and there is no way to prevent renaming for a specific file.
+Or similarly, if a \texttt{LANDLOCK\_ACCESS\_FS\_READ\_DIR} right is given to a directory, all subdirectories
+will be subjected to the same access right, so it is not possible to discriminate between subdirectories.
+In addition to this, the set of capabilities is somewat limited, and mostly related to the file system.
+
+\section{eBPF with \textit{bpfcontain}}
 
 \subsection{Architecture}
 
