@@ -308,8 +308,8 @@ to a single restriction made with a ruleset that permits only reading operations
 Landlock can be used directly when writing C/C++ code in Linux with the
 \texttt{<linux/landlock.h>}\footnote{Examples of code available at \cite{landlock-user-space}}
 header, or by using libraries that provide these bindings to other languages,
-such as \texttt{go-landlock}\footnote{\url{https://github.com/landlock-lsm/go-landlock}}
-for Go and \texttt{rust-landlock}\footnote{\url{https://github.com/landlock-lsm/rust-landlock}} for Rust.
+such as \texttt{go-landlock} \cite{go-landlock}
+for Go and \texttt{rust-landlock} \cite{rust-landlock} for Rust.
 
 Landlock employs a series of flags to restrict a sandboxed process to a set of actions on files and
 directories opened after the sandboxing operation (those opened before are not affected).
@@ -358,6 +358,6 @@ certain access rights on specific files while allowing them on the containing di
 It also allows to specify whether a program has access to devices such as \texttt{terminal}
 and \texttt{dev}.
 
-Thanks to \texttt{BPFContain}\footnote{\url{https://github.com/willfindlay/bpfcontain-rs}}
+Thanks to \texttt{BPFContain} \cite{bpfcontain}
 it is also possible to run a container security daemon by leveraging eBPF.  In this case,
 specific policies must be written for desired commands.
