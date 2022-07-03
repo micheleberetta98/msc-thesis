@@ -30,11 +30,12 @@ a custom command line interface that allowed the user to specify with more preci
 the WebAssembly binary is permitted to do on certain folders and files.
 
 The project is open source and the code is available at \url{https://github.com/micheleberetta98/rust-wasm-landlock}.
+Note that, for the project to compile, the Landlock LSM must be enabled in the Linux kernel.
 
 \subsection{Code architecture and description}\label{sec:landlock-code-architecture}
 
 The code itself is written in \textit{Rust}, and makes use of the
-\textit{rust-landlock}\footnote{\url{https://github.com/landlock-lsm/rust-landlock}} crate
+\textit{rust-landlock} \cite{rust-landlock} crate
 to communicate with Landlock and the \textit{wasmtime} and \textit{wasmtime-wasi} official
 crates in order to have a runtime environment to execute a WebAssembly binary.
 
@@ -287,12 +288,176 @@ impossible to specify. For example, if a \texttt{LANDLOCK\_ACCESS\_FS\_REMOVE\_F
 all files in that directory can be renamed and there is no way to prevent renaming for a specific file.
 Or similarly, if a \texttt{LANDLOCK\_ACCESS\_FS\_READ\_DIR} right is given to a directory, all subdirectories
 will be subjected to the same access right, so it is not possible to discriminate between subdirectories.
-In addition to this, the set of capabilities is somewat limited, and mostly related to the file system.
+In addition to this, the set of capabilities is somewhat limited, and mostly related to the file system.
 
-\section{eBPF with \textit{bpfcontain}}
+\section{eBPF with \textit{BPFContain}}
 
-\subsection{Architecture}
+\textit{BPFContain} \cite{bpfcontain} is a container security daemon for Linux written in Rust that offers
+interoperability with \textit{eBPF} \cite{ebpf}.
+Since \textit{BPFContain} is an external tool and not a library such as \textit{rust-landlock}, there was no need
+to develop a project from scratch, since it is enough to combine it with the WebAssembly runtime of choice, which
+in our case is \textit{Wasmtime}.
+
+It should be noted that \textit{BPFContain} is still in active development and not yet feature-complete.
+Finally, for this tool to work, BPF should be enabled when compiling the Linux kernel.
+
+\subsection{Usage}
+
+The usage is pretty straightforward:
+\begin{enumerate}
+  \item run the daemon once in the foreground in order to create the necessary files and directories;
+  \item create a policy in \texttt{/var/lib/bpfcontain/policy};
+  \item start the daemon in the background;
+  \item run confined program by referring the policy name.
+\end{enumerate}
+
+The daemon must be run with super user privileges and the policy itself can be written in YAML.
 
 \subsection{Available permission settings}
 
+The number of permission options that is possible to specify is way greater than the one offered by Landlock.
+A policy is hence separated into multiple parts:
+\begin{itemize}
+  \item a \textit{name} for the policy file and a \textit{command} to run, both required;
+  \item an optional set of \textit{rights} to grant;
+  \item an optional set of \textit{restrictions} to explicitly revoke;
+  \item and an optional set of \textit{taint rules} (if no taint rules are specified, the policy
+        will start tainted by default).
+\end{itemize}
+
+If the policy does not taint by default, it is strongly recommended to specify read/execute access to
+the executable and red/exec-mmap access to any required external libraries.
+
+More specifically, the rights and restrictions allows for a bigger expressive power, since it is
+possible to differentiate between devices, files, folders, capabilities, network access and
+inter-process communications. For example, a process might be restricted altogether from accessing
+the network, and only allow communication with another specific process or policy.
+
+An example of a policy is visible in Listing \ref{lst:yaml-policy-bash}, which defines how to
+run \textit{bash} in a confined environment.
+In this policy, \textit{bash} is allowed to access the terminal and \texttt{/dev/null}, as well
+as reading and executing everything in \texttt{/} and reading everything in \texttt{/proc}.
+An important point is the \texttt{deny} section - here \textit{bash} is prevented to writing and
+appending anything in all of the file system, and is also tainted if it attempts to
+do any of these actions.
+
+\begin{code}[caption=A policy for running bash, label=lst:yaml-policy-bash]
+  # Name and command of the policy
+  name: bash
+  cmd: /bin/bash
+  defaultTaint: false
+  
+  allow:
+    # Allow access to terminal and /dev/null
+    - device: terminal
+    - device: null
+    # Allow read and execute access on the file system
+    - fs: {pathname: /, access: rxm}
+    - fs: {pathname: /proc, access: r}
+  
+  deny:
+    # Prevent writes
+    - fs: {path: /, access: wa}
+  
+  taint:
+    - fs: {path: /, access: wa}
+  \end{code}
+
+A more complex example is visible in Listing \ref{lst:yaml-policy-httpd}, which shows a policy
+used to run \textit{httpd}, allowing reading the files to serve, reading and appending to log files,
+and allowing inter-process communication only with running \textit{mysqld} processes.
+
+In the specific case of WebAssembly, it is enough to simply set the \texttt{cmd} option as
+a call to the WASI runtime with the desired binary, \textit{Wasmtime} or \textit{Wasmer}, making sure that
+necessary directories are preopened and eventual environment variables are imported.
+An example policy is visible in Listing \ref{lst:yaml-policy-wasm}, where \textit{copy-file.wasm} simply copies
+the content of \texttt{input.txt} to \texttt{output.txt}.
+
+\begin{code}[caption=A policy for HTTPD, label=lst:yaml-policy-httpd]
+# Name and command of the policy
+name: httpd
+cmd: httpd
+
+allow:
+  # Allow access to terminal and /dev/null
+  - dev: random
+  - dev: null
+
+  # Access to log files
+  - file: {pathname: /var/log/httpd, access: rw}
+  - file: {pathname: /var/log/httpd/*log, access: ra}
+
+  # Read configuration
+  - file: {pathname: /etc/httpd, access: r}
+
+  # Serve files
+  - file: {pathname: /srv, access: r}
+
+  # Read hostname information
+  - file: {pathname: /etc/host*, access: r}
+
+  # Shared libraries loaded at runtime
+  - file: {pathname: /usr/lib/httpd/modules/*.so,
+           access: mr}
+  - file: {pathname: /usr/lib/libnss*.so.*, access: mr}
+  - file: {pathname: /usr/lib/libgcc_s.so.*, access: mr}
+
+  # Allow ipc with MySQL
+  - ipc: mysqld
+
+  # Allow sending signals to existing httpd instances
+  - signal: {to: httpd, signals: [check, superFatal]}
+
+  # Use networking
+  - net: [server, send, recv]
+\end{code}
+
+\begin{code}[caption=Running WASM with BPFContain, label=lst:yaml-policy-wasm]
+# Name and command of the policy
+name: copy-file
+cmd: wasmtime --dir=. copy-file.wasm
+
+allow:
+  # Allow access to the current folder
+  - fs: {pathname: ., access: rwxm}
+\end{code}
+
 \subsection{Advantages and disadvantages}
+
+The main advantage of using \textit{eBPF} is the extreme customisation in defining all the
+permissions and capabilities that a process can have. Most notably, when comparing with Landlock,
+there is support for exceptions and restrictions, so that more cases can be covered.
+
+A point of note is the ability to restrict communication with other processes, be it by allowing
+or disallowing IPC, or specifying what signals can be send and to whom.
+Moreover, the restrictions and permissions applied to files and directories more specific and do not
+necessarily transfer to subdirectories. As seen in the example in the previous sections,
+one can also use \textit{wildcards} when describing paths, such as the \texttt{/var/log/httpd/*log}
+in Listing \ref{lst:yaml-policy-httpd}.
+There is also a notion of tainting, and there can be rules that define when to taint a process.
+
+Finally, other desirable permissions are covered, such as network and devices. Network was also present
+in Landlock, but only regarding the creation and management of sockets. Similarly, Landlock offered
+creating, renaming and linking devices, but eBPF allows to specify which particular devices can be accessed
+and which not.
+
+However, eBPF brings also some disadvantages that Landlock does not have.
+The biggest downside is regarding usability - with Landlock it was enough to be able to use
+the terminal and understand the basics of passing parameters, but BPFContain requires the writing
+of a policy in a specific language, albeit a simple one like YAML, and this policy must be in a very
+specific location\footnote{To be fair, this is a limitation of \textit{BPFContain} and not of \textit{eBPF} itself}.
+This brings down obviously the level of simplicity and usability for a user that wants to contain and restrict
+some binaries.
+
+Another point regarding the specific usage with \textit{Wasmtime} and WebAssembly is the necessity of
+having executable privileges - since \textit{Wasmtime} offers a command line binary, then in order to run
+a WebAssembly module the confined process must be able to execute commands. This however transfers this
+permission to the WebAssembly module itself. This permission can be restricted only to a specific file system
+location, but it is still something that has to be taken into consideration.
+
+Lastly, with this method it is necessary to run a \textit{separate} daemon that does the actual
+confinement, and this daemon must be run as a super user.
+Hence, a user that is not able to use the \texttt{sudo} command is not able to make leverage of eBPF
+expressive power.
+This is in stark contrast with Landlock, which sets out to offer \textit{unprivileged} access control,
+so that super user privileges are not required to restrict oneself.
