@@ -332,6 +332,11 @@ However, if we then define another ruleset comprising only of read operations
 for \texttt{file1}, the permissions specified for \texttt{dir1} are still
 valid, so when a process restricts itself it is still able to write to \texttt{file1}.
 
+Other limitations of Landlock include the impossibility for a thread to modify its own topology
+(e.g., via \textit{mount}), a limit of 16 layers of stacked rulesets and the impossibility to
+restrict special file systems\footnote{In particular, all those that do not come from a user-visible file system
+but are visible through \texttt{/proc/<pid>/fd/*}, or special kernel file systems like nsfs.}
+
 In case of multiple consecutive self-restrictions, the result is the intersection
 of all rulesets - if a process first restricts itself allowing all read and writing operations,
 and then restricts itself again with only reading permissions, the result is equivalent
@@ -372,6 +377,11 @@ This last one is treated differently from the others - in order to prevent privi
 it is necessary that the destination directory hierarchy has the same (or a superset of) restrictions
 as the source hierarchy, since only create a rule with such access right is not enough to protect oneself.
 If that is not the case, this actions is denied directly by the operating system.
+
+Lastly, every new thread resulting from a \textit{clone} call inherits all Landlock restrictions from its parents.
+These restrictions are also kept after a \textit{fork}.
+More sepecifically, when a thread restricts itself, these rules are not applied to other sibling threads
+but will be enforced on all of the thread's descendants.
 
 \subsection{eBPF}
 \textit{eBPF} \cite{ebpf} is a virtual machine in the Linux Kernel that can run sandboxed programs
