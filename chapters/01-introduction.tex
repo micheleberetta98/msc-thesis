@@ -229,9 +229,11 @@ Hence, all writes to output streams are filtered in order to prevent this type o
 
 CLI runtimes have some particular features and properties:
 \begin{itemize}
-  \item it is possible to \textit{sandbox} entire directories by \textit{preopening} them, and eventually mapping them to custom paths
-        , in order to have the file descriptors available; it is not possible to escape this sandbox using the parent directory \texttt{..}
-        or soft symlinks, but it is possible to escape using hard symlinks;
+  \item it is possible to \textit{sandbox} entire directories by \textit{preopening} them, and eventually mapping them to custom paths,
+        in order to have the file descriptors available; it is not possible to escape this sandbox using the parent directory \texttt{..}
+        or soft links, but it is possible to escape using hard links;
+        this is because hard links point directly to the \textit{data} on disk, and behave as a full fledged copy of the linked file, while soft links
+        only point to an existing \textit{file} - this is why using hard links is possible to ``escape'' sandbox;
   \item the \textit{directory} is the finest granularity available to the preopen action - once access is given to a specific directory, all files and subdirectories are
         visible, and it is not possible to restrict permissions (all files are readable and
         writable) when using the command line runtime wrapper\footnote{It is possible to specify a basic set of permissions when using the WASI runtime library in another language, such as in Rust,
