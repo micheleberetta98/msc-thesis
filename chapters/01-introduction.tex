@@ -19,25 +19,50 @@ only JavaScript survives as the de facto standard language, used for both simple
 \textit{JavaScript}, or \textit{JS} when abbreviated, is a high-level, dynamic, weakly typed programming language
 that together with HTML and CSS is at the core of the World Wide Web. It conforms to the ECMAScript standard \cite{ecma-262}
 and it can be both interpreted and \textit{just-in-time compiled}.
-
-It was created in 1995 at Netscape and originally JavaScript engines were only run in web browsers, but there
-are now runtime systems that allows the use of JavaScript directly on machines, such as \textit{Node.js} or \textit{Deno}.
 A notable language which is a superset of JavaScript is \textit{TypeScript}, developed by Microsoft, that
 introduces static typing and can be transpiled to JavaScript.
 
-Since JavaScript files are shared via the Web, there is the potential for authors to deliver
-malicious scripts.
-A common security vulnerability in the JavaScript world is \textit{cross-site scripting} (XSS), which is a violation of the
-same-origin policy. These vulnerabilities occurs when an attacker is able to inject a malicious script in a target website
-in order to, for example, access private information about the user.
-Another vulnerability is \textit{cross-site request forgery} (CSRF), in which malicious code on an attacker's website
-tricks the user's browser, so that it takes actions not desired by the user.
+\begin{code}[language=javascript, caption=A simple example of JavaScript]
+function fact(n) {
+  if (n == 0) return 1;
+  return n * fact(n - 1);
+}
 
-Software vulnerabilities are the most common, but hardware vulnerabilities have also been found.
-For example, in 2019 the Spectre paper included a JavaScript implementation alongside eBPF \cite{spectre}.
+function showFactorial() {
+  let div = document.getElementById('output');
+  let input = document.getElementById('number');
+  let n = parseInt(input.text);
 
-All things considered, JavaScript is ill-equipped when it comes to performance-critical modern web
+  if (n < 0) {
+    div.innerHTML = 'Not defined';
+  } else {
+    div.innerHTML = fact(n);
+  }
+}
+
+document
+  .getElementById('get-factorial')
+  .addEventListener('click', showFactorial)
+\end{code}
+
+However, JavaScript is ill-equipped when it comes to performance-critical modern web
 pages - from this needs were born technologies such as \textit{asm.js}, \textit{Native Client}, and eventually \textit{WebAssembly}.
+The main downsides of JavaScript that brought the need for WebAssembly are:
+\begin{itemize}
+  \item JavaScript is a text format, while WebAssembly is a binary format, and this means that parsing WebAssembly
+        is faster than parsing JavaScript;
+  \item JavaScript is dynamically typed and WebAssembly is statically typed, hence code optimization for JS has to occur
+        in the browser, when all JS files have been received, while optimizations for WebAssembly can occur much earlier
+        in the compilation process; for example, JS has only two numeric type (a double-precision IEEE 754 value and a \textit{BigInt}
+        for numbers bigger than $2^53$) but WASM can differentiate between integers and floating point numbers,
+        so that when compiled the most efficient instructions can be chosen when operating on numbers;
+  \item JavaScript has a number of security vulnerabilities that WebAssembly strives to eliminate by design;
+        a common security vulnerability\footnote{Software vulnerabilities are the most common, but hardware vulnerabilities have also been found \cite{spectre}.}
+        in the JavaScript world is \textit{cross-site scripting} (XSS), which is a violation of the
+        same-origin policy and occurs when an attacker is able to inject a malicious script in a target website;
+        another vulnerability is \textit{cross-site request forgery} (CSRF), in which malicious code on an attacker's website
+        tricks the user's browser, so that it takes actions not desired by the user.
+\end{itemize}
 
 \subsection{Web browsers and JavaScript runtimes}
 
@@ -52,7 +77,7 @@ only when explicitly allowed by the user \cite{filesystem-mdn}, so access to the
 and \textit{same-origin policy} constraints, in which scripts from one website have access to data from the same website but not from others.
 
 JavaScript can not only be executed on a browser, but also on so called ``back-end''
-runtimes\footnote{Opposed to ``front-end'', which usually pertains to the browser}.
+runtimes\footnote{Opposed to ``front-end'', which usually pertains to the browser.}.
 These runtimes offer custom libraries that permit JavaScript to access the file system, to make network requests,
 spawn child processes and build complex applications, for example web servers.
 Two notable open-source runtimes are \textit{Node.js}\footnote{\url{https://nodejs.org/}} and \textit{Deno}\footnote{\url{https://deno.land}},

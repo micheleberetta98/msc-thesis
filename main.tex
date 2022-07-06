@@ -16,12 +16,24 @@
 \geometry{margin=3cm}
 \renewcommand{\baselinestretch}{1.2}
 
+\renewcommand{\ttdefault}{pcr}
+
 \lstdefinelanguage{wasm}{
   morekeywords={func,module,export,param,result,if,then,else,eqz,local,get,const,mul,call,sub},
   emph={i64},
   emphstyle=\itshape,
   morestring=[b]",
 }
+
+\lstdefinelanguage{javascript}{
+  morekeywords=[1]{function,for,if,return,this,var,let},
+  morekeywords=[2]{false,null,true,boolean,number,undefined,NaN},
+  sensitive,
+  morecomment=[l]{//},
+  morestring=[b]',
+  morestring=[b]",
+}
+
 \lstdefinelanguage{rust}{%
   sensitive%
 , morecomment=[l]{//}%
@@ -81,6 +93,8 @@
    \vspace{0.2\baselineskip}
    \lstset{
      basicstyle=\ttfamily,
+     showstringspaces=false,
+     upquote=true,
      frame=single,
      #1
   }
