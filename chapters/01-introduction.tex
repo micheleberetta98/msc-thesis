@@ -334,8 +334,7 @@ valid, so when a process restricts itself it is still able to write to \texttt{f
 
 Other limitations of Landlock include the impossibility for a thread to modify its own topology
 (e.g., via \textit{mount}), a limit of 16 layers of stacked rulesets and the impossibility to
-restrict special file systems\footnote{In particular, all those that do not come from a user-visible file system
-but are visible through \texttt{/proc/<pid>/fd/*}, or special kernel file systems like nsfs.}
+restrict special file systems, such as kernel file systems (e.g., nsfs).
 
 In case of multiple consecutive self-restrictions, the result is the intersection
 of all rulesets - if a process first restricts itself allowing all read and writing operations,
@@ -358,7 +357,9 @@ As highlighted in \cite{landlock-user-space}, the file system flags for files ar
 \end{itemize}
 
 Directories can receive a wider range of access rights, including the previous ones and the following ones.
-All of them, except the first, are applied to the content of a directory and not to the directory itself.
+All of them, except the first, are applied to the content of a directory and not to the directory
+itself\footnote{This means that, for example, if \texttt{LANDLOCK\_ACCESS\_FS\_REMOVE\_DIR} is given to a directory $d$, it
+allows the removal of empty directories \textit{inside} of $d$, and not of $d$ itself.}.
 \begin{itemize}
   \item \texttt{LANDLOCK\_ACCESS\_FS\_READ\_DIR}, to open a directory or list its content\footnote{Applies to subdirectories as well.};
   \item \texttt{LANDLOCK\_ACCESS\_FS\_REMOVE\_DIR}, to remove an empty directory or rename one;
