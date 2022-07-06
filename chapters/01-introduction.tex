@@ -66,8 +66,9 @@ JavaScript can not only be executed on a browser, but also on so called ``back-e
 runtimes\footnote{Opposed to ``front-end'', which usually pertains to the browser}.
 These runtimes offer custom libraries that permit JavaScript to access the file system, to make network requests,
 spawn child processes and build complex applications, for example web servers.
-Two notable open-source runtimes are \textit{Node.js}\footnote{\url{https://nodejs.org/}} and \textit{Deno}\footnote{\url{https://deno.land}}.
-The first, initially released in 2009, is built on top of Google's V8 engine and has a package manager called \textit{npm}
+Two notable open-source runtimes are \textit{Node.js}\footnote{\url{https://nodejs.org/}} and \textit{Deno}\footnote{\url{https://deno.land}},
+both built on top of Google's V8 engine.
+The first is older, initially released in 2009, and has a package manager called \textit{npm}
 in order to manage its vast ecosystem of JS packages.
 Deno, on the other hand, is a more modern runtime written in Rust, includes support for TypeScript out of the box
 and is \textit{secure by default} since it blocks all file, network, and environment access unless explicitly enabled.
@@ -82,7 +83,7 @@ It was announced in 2015 and implemented by major browsers by 2017, and as of Ma
 by 93\% of all browsers \cite{caniuse, webassembly-mdn}.
 WebAssembly main goals are the following \cite{bringing-the-web-up-to-speed-2017}:
 \begin{itemize}
-  \item \textit{safety}, in particular to provide the same memory safety as a managed language;
+  \item \textit{security}, since code on the Web originates from untrusted sources;
   \item \textit{speed}, by using ahead-of-time optimisations in a similar manner as native machine code;
   \item \textit{portability}, since the web spans many devices, architectures, operating systems, and browsers;
   \item and finally \textit{compactness}, because code is transmitted over the network and must reduce load times as much as possible.
@@ -92,7 +93,7 @@ There were previous attempt at solving the problem of having safe, fast, and por
 such as \textit{ActiveX}, \textit{Native Client}, and \textit{asm.js}.
 
 \textit{ActiveX} \cite{activex} was a Microsoft's technology for code-signing x86 binaries to run on the web, and relied only
-on this signing. Hence, it achieved safety through a trust model instead of technical construction.
+on this signing. Hence, it achieved security through a trust model instead of technical construction.
 \textit{Native Client} \cite{native-client} introduced the first sandboxing technique for x86, ARM or MIPS machine code,
 which was statically validated. Lastly, \textit{asm.js} \cite{asmjs} is a specialised subset of JavaScript, which is one of the target
 languages of \textit{Emscripten} \cite{emscripten}, a compiler toolchain able to compile C/C++ applications in order to have them
@@ -101,7 +102,8 @@ run on browsers or on other JavaScript runtimes.
 WebAssembly is available as a target for various languages, such as C/C++ with the aid of Emscripten, Rust,
 AssemblyScript\footnote{A language with a syntax similar to TypeScript.}, Go, Kotlin, Swift, and Zig.
 The compiled binary can be then used from JavaScript on the web, or with Node.js or Deno, or even as a CLI application
-with the aid of the \textit{WebAssembly System Interface} (see Section \ref*{sec:introduction-wasi}).
+with the aid of \textit{WebAssembly runtimes} and the \textit{WebAssembly System Interface}
+for accessing system resources (see Section \ref*{sec:introduction-wasi}).
 
 \subsection{Overview of the language}
 
@@ -110,7 +112,7 @@ in order to be more readable.
 Each binary takes the form of a \textit{module}, which contains \textit{functions}, \textit{global} variables,
 \textit{tables}, and \textit{memories}. Each of these can be exported to be used in the embedder, and a module can also import functionalities.
 While a module is a static representation of a program, an \textit{instance} is the dynamic one.
-A module can be instantiated by the embedder (e.g.\ a JavaScript virtual machine).
+A module can be instantiated by the embedder (e.g., a JavaScript virtual machine).
 
 \begin{code}[language=wasm, caption={Recursive factorial written in WebAssembly S-expressions}, label=lst:wasm-fact]
   (module
@@ -127,7 +129,7 @@ A module can be instantiated by the embedder (e.g.\ a JavaScript virtual machine
 
 WebAssembly is a typed language, but there are only four basic \textit{value types} - integers and IEEE 754 floating
 point numbers, each in 32 and 64 bit variants. There are no distinction between signed and unsigned integers,
-but instructions that depends on signedness are marked with an explicit suffix.
+but instructions that depends on the present of the sign are marked with an explicit suffix.
 
 \textit{Functions} are typed, take a sequence of values as a parameter, and returns another sequence of values.
 They cannot be nested inside each other. The content of the call stack for execution are separate from the data
@@ -135,13 +137,13 @@ portion of the memory, and cannot be accessed directly by WebAssembly.
 The code inside a function consists of a series of \textit{instructions} that modify an implicit operand stack,
 either by declaring local variables or applying operations to the value already on the stack.
 Functions can be called either \textit{directly} by using an index that identifies a function, or \textit{indirectly},
-i.e.\ dynamically through a global \textit{table}. In this second case, only the function's type signature is validated.
+i.e., dynamically through a global \textit{table}. In this second case, only the function's type signature is validated.
 
 WebAssembly has also support for \textit{traps} - in a similar manner to an exception, a trap aborts the current
 computation, and control is given back to the embedder. For example, when embedded in JavaScript, a trap will
 throw a JavaScript exception.
 
-The main storage that WebAssembly uses is a \textit{linear memory} (or simply \textit{memory}), that is represented
+The main memory layout that WebAssembly uses is a \textit{linear memory} (or simply \textit{memory}), that is represented
 by an array of bytes. Each module can define no more than one memory, which can grow by one or more
 \textit{pages}\footnote{A page is 64 KiB large.} if the need arises.
 This memory is separated by the call stack and by the memory dedicated to code.
@@ -157,8 +159,8 @@ it is natural to ponder how memory vulnerabilities affect WebAssembly binaries.
 In the original paper it is mentioned that ``a buggy or exploited WebAssembly program can make a mess of the data in its own memory''
 \cite{bringing-the-web-up-to-speed-2017}, in light of the fact that the call stack is not accessible by the program.
 
-However, even though WebAssembly strives for safety, binaries can be still exploited with both traditional attacks,
-such as buffer overflows, and attacks that aren't applicable in traditional native binaries, e.g.\ overwriting
+However, even though WebAssembly strives for security, binaries can be still exploited with both traditional attacks,
+such as buffer overflows, and attacks that aren't applicable in traditional native binaries, e.g., overwriting
 string literals in memory \cite{binary-security-wasm-2020}.
 
 The paper shows that it is possible to obtain a write primitive given a WebAssembly binary compiled from vulnerable C/C++ code,
@@ -183,35 +185,36 @@ This enables the indirect diversion described in the previous paragraph if the t
 
 The \textit{WebAssembly System Interface} (WASI) \cite{wasi} is a modular system interface for WebAssembly.
 It focuses on security and portability so that WebAssembly binaries can be targeted by different languages
-and then been safely run on different platforms.
+and then be safely run on different platforms.
 Its API provides access to several OS-like features, such as file systems and Berkeley sockets.
 The two languages that have good interoperability at the moment are Rust, where the compiler directly supports targeting both WASM and WASI,
 and C/C++, either through Emscripten or a custom prebuilt \textit{Clang} toolchain\footnote{\url{https://github.com/WebAssembly/wasi-sdk}}.
 
 A binary that uses WASI can be run using a CLI runtime, such as \textit{Wasmtime} \cite{wasmtime} or \textit{Wasmer} \cite{wasmer},
-or using a browser polyfill.
+or using a browser polyfill (an example is visible in \cite{wasi-polyfill}).
 The approach taken for the sandboxing by these runtimes is based on a \textit{capability-based security model} \cite{wasmtime-security-sandboxing},
 so that access to the file system and other resources must be explicitly given. Capabilities can be either \textit{static}, which
-are represented by the list of imports of the WebAssembly module to run, or \textit{dynamic}, i.e.\ specific flags
+are represented by the list of imports of the WebAssembly module to run, or \textit{dynamic}, i.e., specific flags
 specified with custom command-line arguments at execution time.
-Moreover, writes to output streams are filtered when connected to a terminal in order to prevent control sequences
-that may have side effects and confuse or mislead users.
+Moreover, when given permissions to write to a terminal, a program could print characters recognized as control
+sequences that may have side effects and confuse or misled user (a harmless example is clearing the screen).
+Hence, all writes to output streams are filtered in order to prevent this type of behaviour.
 
-The CLI runtimes have some particular features and properties:
+CLI runtimes have some particular features and properties:
 \begin{itemize}
   \item it is possible to \textit{sandbox} entire directories by \textit{preopening} them, and eventually mapping them to custom paths
-        , in order to have the files' descriptors available; it is not possible to escape this sandbox using the parent directory \texttt{..}
+        , in order to have the file descriptors available; it is not possible to escape this sandbox using the parent directory \texttt{..}
         or soft symlinks, but it is possible to escape using hard symlinks;
   \item the \textit{directory} is the finest granularity available to the preopen action - once access is given to a specific directory, all files and subdirectories are
         visible, and it is not possible to restrict permissions (all files are readable and
-        writable) when using the command line runtime wrapper\footnote{It is possible to specify a basic set of permissions when using the WASI runtime library in another language, e.g. in Rust,
+        writable) when using the command line runtime wrapper\footnote{It is possible to specify a basic set of permissions when using the WASI runtime library in another language, such as in Rust,
         see example at \url{https://docs.rs/wasmer-wasi/latest/wasmer_wasi/struct.WasiState.html}.};
-  \item when using C, the WebAssembly binary can create files with specific user permissions on Linux, e.g.\ executable files;
+  \item when using C, the WebAssembly binary can create files with specific user permissions on Linux, e.g., executable files;
   \item when listing files in a directory, the only files that are visible are the ones that were already present at the preopening of the directory,
         but files added after the preopen can be read/written;
   \item any change made to a file by any process is reflected in what the compiled WebAssembly binary is able to read;
   \item environment variables are not accessible by default, but they must be explicitly declared and given access to;
-  \item the WebAssembly memory is effectively sandboxed - the compiled cannot access memory outside its sandbox, otherwise a trap is raised;
+  \item the WebAssembly memory is effectively sandboxed - the compiled program cannot access memory outside its sandbox, otherwise a trap is raised;
   \item not all ``classic'' functionality is available - when compiling C with the custom prebuilt toolchain,
         functions such as \texttt{system}, \texttt{execv}, and \texttt{fexecve} are not available,
         so it is not possible to execute arbitrary commands or files;
@@ -263,7 +266,7 @@ in order to implement specific changes when they cannot be obtained with the fun
 
 Some projects that use LSM include:
 \begin{itemize}
-  \item \textit{SELinux} \cite{selinux}, i.e.\ \textit{Security Enhanced Linux}, that provides a mechanism for supporting advanced and fine-grained access control policies, as well as MAC;
+  \item \textit{SELinux} \cite{selinux}, i.e., \textit{Security Enhanced Linux}, that provides a mechanism for supporting advanced and fine-grained access control policies, as well as MAC;
   \item \textit{Smack} \cite{smack}, a kernel based implementation of MAC with simplicity as one of its primary goals;
   \item \textit{AppArmor} \cite{apparmor}, a MAC style security extension that implements a task centred policy.
 \end{itemize}
@@ -292,7 +295,7 @@ A set of rules is called a \textit{ruleset}, and it can restrict both the thread
 using it and its future children, created either by spawning a new thread, as well
 as using the \textit{fork} system call.
 
-Notably, Landlock does not permits the definition of exceptions.
+Notably, Landlock does not permit the definition of exceptions.
 For example, let us suppose we have a directory \texttt{dir1}, which contains two files
 \texttt{file1} and \texttt{file2}. We can define a ruleset that allows
 reading and writing files for \texttt{dir1}.
@@ -347,13 +350,13 @@ in a privileged context. It can be used to safely extend the capabilities of the
 without requiring to change kernel source code or load kernel modules.
 
 Application developers can run eBPF programs in order to add additional capabilities at runtime,
-and then the operating system guarantees safety and efficiency as if natively compiled
+and then the operating system guarantees security and efficiency as if natively compiled
 by using a Just-In-Time compiler.
 These eBPF programs are event-driven and run when a certain hook point is passed. Some
 predefined hooks include system calls, network events, and so on. If a hook does not exist,
 it is possible to create custom kernel or user probes.
 
-Unlike Landlock, eBPF makes it possible to define specific exception, e.g.\ denying
+Unlike Landlock, eBPF makes it possible to define specific exception, e.g., denying
 certain access rights on specific files while allowing them on the containing directory.
 It also allows to specify whether a program has access to devices such as \texttt{terminal}
 and \texttt{dev}.
