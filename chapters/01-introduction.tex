@@ -49,13 +49,11 @@ However, JavaScript is ill-equipped when it comes to performance-critical modern
 pages - from this needs were born technologies such as \textit{asm.js}, \textit{Native Client}, and eventually \textit{WebAssembly}.
 The main downsides of JavaScript that brought the need for WebAssembly are:
 \begin{itemize}
-  \item JavaScript is a text format, while WebAssembly is a binary format, and this means that parsing WebAssembly
-        is faster than parsing JavaScript;
-  \item JavaScript is dynamically typed and WebAssembly is statically typed, hence code optimization for JS has to occur
-        in the browser, when all JS files have been received, while optimizations for WebAssembly can occur much earlier
-        in the compilation process; for example, JS has only two numeric type (a double-precision IEEE 754 value and a \textit{BigInt}
-        for numbers bigger than $2^53$) but WASM can differentiate between integers and floating point numbers,
-        so that when compiled the most efficient instructions can be chosen when operating on numbers;
+  \item JavaScript is \textit{always} represented as a text format, so it must be parsed by the user's browser for it to be compiled and enhanced;
+  \item JavaScript is dynamically typed, hence optimisations for JS (when possible) have to occur
+        in the browser, when all JS files have been received;
+        for example, JS has only two numeric type (a double-precision IEEE 754 value and a \textit{BigInt}
+        for numbers bigger than $2^53$) and this restricts the usable CPU instructions;
   \item JavaScript has a number of security vulnerabilities that WebAssembly strives to eliminate by design;
         a common security vulnerability\footnote{Software vulnerabilities are the most common, but hardware vulnerabilities have also been found \cite{spectre}.}
         in the JavaScript world is \textit{cross-site scripting} (XSS), which is a violation of the
@@ -119,6 +117,13 @@ The compiled binary can be then used from JavaScript on the web, or with Node.js
 with the aid of \textit{WebAssembly runtimes} and the \textit{WebAssembly System Interface}
 for accessing system resources (see Section \ref*{sec:introduction-wasi}).
 
+WebAssembly resolves many of the problems of JavaScript, the major ones being:
+\begin{itemize}
+  \item being represented with a \textit{binary} format, parsing on the client is faster and simpler;
+  \item having a static type systems, optimisations can be done earlier at compile time, and not on the browser once all the files
+        have already been trasferred;
+\end{itemize}
+
 \subsection{Overview of the language}
 
 Although WebAssembly is a binary code format, it can also be written with \textit{S-expressions}
@@ -157,14 +162,22 @@ WebAssembly has also support for \textit{traps} - in a similar manner to an exce
 computation, and control is given back to the embedder. For example, when embedded in JavaScript, a trap will
 throw a JavaScript exception.
 
-The main memory layout that WebAssembly uses is a \textit{linear memory} (or simply \textit{memory}), that is represented
-by an array of bytes. Each module can define no more than one memory, which can grow by one or more
+The main memory layout that WebAssembly uses is a \textit{linear memory} (or simply \textit{memory}) represented
+by an array of bytes. A \textit{lineary memory} is a simple addressing technique in which memory appears to the
+program as a single contiguous access space \cite{processor-microarchitecture}, which the CPU can access both directly as well as linearly
+without resorting to memory segmentation or pagination schemes, enhancing flexibility and reducing latency.
+Each module can define no more than one memory, which can grow by one or more
 \textit{pages}\footnote{A page is 64 KiB large.} if the need arises.
-This memory is separated by the call stack and by the memory dedicated to code.
-Moreover, when present, all pointers are translated into offsets in the linear memory, and all memory accesses are bound-checked.
+Access to the individual locations is done through addresses, represented as unsigned integers,
+which are dynamically checked against memory size\footnote{On 64 bit platforms the WebAssembly engine
+can make use of virtual memory techniques to eliminate this checks, see \cite{bringing-the-web-up-to-speed-2017}}
+(out of bounds accesses result in a trap).
+Linear memory also brings security benefits - it is disjoint from the code space, the execution stack and the engine's
+data structures \cite{bringing-the-web-up-to-speed-2017}; hence, compiled program cannot corrupt directly their own execution
+environment or perform undefined behaviour.
 
-Another main difference from other stack machines is that WebAssembly doesn't provide arbitrary jumps but
-\textit{structured control flow}, so that the code can be validated in a single pass and prevent common control flow attacks.
+Lastly, WebAssembly doesn't provide arbitrary jumps but \textit{structured control flow},
+so that the code can be validated in a single pass and prevent common control flow attacks.
 
 \subsection{Problems with WebAssembly}
 
