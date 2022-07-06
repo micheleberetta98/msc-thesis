@@ -23,7 +23,7 @@ This means that, for example, running a single function exported from a WebAssem
 into consideration.
 
 \newpage
-\section{Landlock}
+\section{Enforce the WASI sandbox with Landlock}
 
 For the integration with Landlock, a new project was developed, in order to provide
 a custom command line interface that allowed the user to specify with more precision what
@@ -98,8 +98,8 @@ provided binary at runtime - they can still be restricted by the landlock polici
 necessary though in order to give the possibility to access its contents.
 
 Directories can also be \textit{mapped} - in a way similar to the one provided by the \textit{Wasmtime} command line tool,
-it is possible to remap path, so that it's possible to have the binary access any arbitrary path in the system
-without manually copying and/or executing it in a specific directory.
+it is possible to remap paths so that, for example, when mapping \texttt{/var/tmp} to \texttt{.}, every time a compiled WASM binary
+accesses his ``current folder'' it will access \texttt{/var/tmp}.
 
 \begin{table}
   \centering
@@ -256,7 +256,7 @@ ABI\footnote{At the moment it is not possible to specify the \texttt{LANDLOCK\_A
 All flags are listed in Table \ref{table:landlock-flags}, and some the following examples illustrate how to combine them:
 \begin{itemize}
   \item \texttt{file:R} allows only to read from \textit{file};
-  \item \texttt{file:X} the combination of \texttt{.:RDir} allows the execution of \textit{file} and the listing of the current directory;
+  \item the combination of \texttt{file:X} and \texttt{.:RDir} allows the execution of \textit{file} and the listing of the current directory;
   \item \texttt{.:MReg} only allows the creation, rename or linking of regular files in the current directory;
   \item \texttt{.:R,W} and \texttt{./subdir:*} allows only reads and writes on files in the current directory, while no restrictions are
         made for \textit{subdir}.
@@ -271,8 +271,8 @@ not needed by the WASM binary.
 
 \subsection{Advantages and disadvantages}
 
-The main advantage that Landlock brings is simplicity. For the developer, the API is simple enough to use
-to use, and it can be used in a variety of languages - the main two languages are C (used directly with the kernel libraries),
+The main advantage that Landlock brings is simplicity. For the developer, the API is simple enough to use,
+and it can be used in a variety of languages - the main three languages are C (used directly with the kernel libraries),
 Rust as in this project, and Go\footnote{\url{https://github.com/landlock-lsm/go-landlock}}.
 From the user's point of view, the provided permission flags are clear enough that it is not required to have
 anything beside a basic understanding of Linux's file system permissions.
@@ -283,14 +283,14 @@ when running a binary, so the user can run a WebAssembly module in a protected e
 in the \textit{sudoers} group.
 
 The biggest drawback with this approach is simplicity itself. As highlighted in Section \ref{sec:intro-lsm-landlock},
-there is no way to define exception - this restricts the possibilities given to the user, and makes some situations
+there is no way to define exceptions - this restricts the possibilities given to the user, and makes some situations
 impossible to specify. For example, if a \texttt{LANDLOCK\_ACCESS\_FS\_REMOVE\_FILE} right is given to a directory,
 all files in that directory can be renamed and there is no way to prevent renaming for a specific file.
 Or similarly, if a \texttt{LANDLOCK\_ACCESS\_FS\_READ\_DIR} right is given to a directory, all subdirectories
 will be subjected to the same access right, so it is not possible to discriminate between subdirectories.
 In addition to this, the set of capabilities is somewhat limited, and mostly related to the file system.
 
-\section{eBPF with \textit{BPFContain}}
+\section{Enforce the WASI sandbox with eBPF}
 
 \textit{BPFContain} \cite{bpfcontain} is a container security daemon for Linux written in Rust that offers
 interoperability with \textit{eBPF} \cite{ebpf}.
@@ -326,12 +326,12 @@ A policy is hence separated into multiple parts:
 \end{itemize}
 
 If the policy does not taint by default, it is strongly recommended to specify read/execute access to
-the executable and red/exec-mmap access to any required external libraries.
+the executable and read/exec-mmap access to any required external libraries.
 
 More specifically, the rights and restrictions allows for a bigger expressive power, since it is
 possible to differentiate between devices, files, folders, capabilities, network access and
 inter-process communications. For example, a process might be restricted altogether from accessing
-the network, and only allow communication with another specific process or policy.
+the network, and only allow communication with another specific process.
 
 An example of a policy is visible in Listing \ref{lst:yaml-policy-bash}, which defines how to
 run \textit{bash} in a confined environment.
@@ -430,7 +430,7 @@ there is support for exceptions and restrictions, so that more cases can be cove
 
 A point of note is the ability to restrict communication with other processes, be it by allowing
 or disallowing IPC, or specifying what signals can be send and to whom.
-Moreover, the restrictions and permissions applied to files and directories more specific and do not
+Moreover, the restrictions and permissions applied to files and directories are more specific and do not
 necessarily transfer to subdirectories. As seen in the example in the previous sections,
 one can also use \textit{wildcards} when describing paths, such as the \texttt{/var/log/httpd/*log}
 in Listing \ref{lst:yaml-policy-httpd}.
@@ -457,7 +457,7 @@ location, but it is still something that has to be taken into consideration.
 
 Lastly, with this method it is necessary to run a \textit{separate} daemon that does the actual
 confinement, and this daemon must be run as a super user.
-Hence, a user that is not able to use the \texttt{sudo} command is not able to make leverage of eBPF
+Hence, a user that is not able to use the \texttt{sudo} command is not able to leverage eBPF
 expressive power.
 This is in stark contrast with Landlock, which sets out to offer \textit{unprivileged} access control,
-so that super user privileges are not required to restrict oneself.
+so that super user privileges are not required to enforce the sandbox restriction.
