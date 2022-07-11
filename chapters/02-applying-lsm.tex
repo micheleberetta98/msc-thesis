@@ -69,37 +69,28 @@ used to represent the command line interface that allows to specify which permis
 for one or more specific paths.
 
 \begin{code}[language=rust, caption=The \texttt{Args} struct, label=lst:arg-struct]
-  #[derive(Parser, Debug)]
-  #[clap(author, version, about, long_about = None)]
-  pub struct Args {
-    // The module to execute
-    pub wasm_module: String,
+pub struct Args {
+  // The module to execute
+  pub wasm_module: String,
 
-    // The preopened dir(s) to pass to wasmtime
-    pub dirs: Vec<String>,
+  // The preopened dir(s) to pass to wasmtime
+  pub dirs: Vec<String>,
 
-    // The preopened mapped dir(s) to pass to wasmtime
-    pub mapdirs: Vec<(String, String)>,
+  // The preopened mapped dir(s) to pass to wasmtime
+  pub mapdirs: Vec<(String, String)>,
 
-    // A list of the allowed privileges on a particular folder/file
-    pub fs_allows: Vec<(String, BitFlags<AccessFs>)>,
+  // A list of the allowed privileges on a
+  // particular folder/file
+  pub fs_allows: Vec<(String, BitFlags<AccessFs>)>,
 
-    // Disable landlock (test only)
-    pub no_landlock: bool,
-  }
+  // Disable landlock (test only)
+  pub no_landlock: bool,
+}
 \end{code}
 
 Every single field is mapped to one command line argument thanks to the \textit{clap} crates which handles the
 creation and parsing of the CLI arguments structure.
 Their usage and meaning is described in Table \ref{table:landlock-cli-args}.
-
-Note that here preopening a directories does not mean it and its contents will be accessible by the
-provided binary at runtime - they can still be restricted by the landlock policies. Preopening is
-necessary though in order to give the possibility to access its contents.
-
-Directories can also be \textit{mapped} - in a way similar to the one provided by the \textit{Wasmtime} command line tool,
-it is possible to remap paths so that, for example, when mapping \texttt{/var/tmp} to \texttt{.}, every time a compiled WASM binary
-accesses his ``current folder'' it will access \texttt{/var/tmp}.
 
 \begin{table}
   \centering
@@ -120,18 +111,27 @@ accesses his ``current folder'' it will access \texttt{/var/tmp}.
 
 The first argument is positional, and is the path where the WebAssembly module is located.
 
-The arguments \texttt{dir}, \texttt{mapdir} and \texttt{fs-allow} can appear multiple times (or no times at all), and all the values
-are then collected into a single \texttt{Vec}. In this way, it is possible to apply different restrictions on different
-paths - for example, one could set some files as read-only, while another subset of files in a specific directory
-could also be writable.
+The \texttt{dir} and \texttt{mapdir} arguments can appear multiple times and are used to list the directories to preopen
+so that the WebAssembly module can access them and their contents.
+When mapping a directory, in a way similar to the one provided by the \textit{Wasmtime} command line tool, one can make a
+directory appear as ``having a different path'' when accessed by the WebAssembly module.
 
-The \texttt{fs-allow} is made up of two parts, separated by a colon - a path to apply the restrictions to,
+The \texttt{fs-allow} argument is made up of two parts, separated by a colon - a path to apply the restrictions to,
 and a series of enabled permissions on that specific path, separated by a comma.
 Each permission is mapped one-to-one to the flags provided by Landlock in a manner listed in Table \ref{table:landlock-flags}.
 Moreover, there are three useful ``shortcuts'' used to represent common situations - \texttt{$\sim$read}, \texttt{$\sim$write} and \texttt{*}.
 
+A full example of how these arguments work is visible in Figure \ref{fig:args-example}.
+
 Lastly, the \texttt{no-landlock} argument is only for testing purposes - it is off by default, so that
 landlock is enabled and self restriction is applied if not explicitly disabled.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{rust-landlock-args-example.png}
+  \caption{A full example of how the arguments are seen by the program.}
+  \label{fig:args-example}
+\end{figure}
 
 \subsubsection{The \texttt{wasm} module}
 
@@ -139,13 +139,32 @@ This module manages a single WebAssembly binary module and forms a bridge to the
 crates. In this project, \textit{Wasmtime} bindings are used instead of the \textit{Wasmer} ones, but both provide the
 same level of functionality, albeit with a different interface.
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.25\linewidth]{rs-landlock-wasm.png}
+  \caption{A high-view diagram of how the \texttt{wasm} module operates.}
+\end{figure}
+
+A WASM binary is represented by a vector of bytes, and it is also handled the creation
+and construction of a \textit{WASI Context}, a structure defined by the \textit{wasmtime-wasi} crate used to store
+all preopened directories, eventual imports and more that will be useful to run the WebAssembly module.
+
+Moreover, this module defines various helpers to preopen directories, both unmapped and mapped, and
+how to run a WebAssembly binary - it must create both an \textit{engine} and a \textit{linker},
+as well as a \textit{store} which represents the memory of a WebAssembly module described in the previous chapter.
+
+Note that the WebAssembly module has to have a \textit{default exported function} to run - when compiling with a WASI target,
+this is usually represented by the \texttt{\_start} function, which corresponds to the \texttt{main} function in languages
+such as C and Rust.
+
 \begin{code}[language=Rust, caption=The outline of the \texttt{wasm} module]
   pub struct WasmModule {
     bytes: Vec<u8>, ctx_builder: WasiCtxBuilder,
   }
   
   impl WasmModule {
-    // Reads the WASM module and initialises the WasiCtxBuilder
+    // Reads the WASM module and initialises
+    // the WasiCtxBuilder
     pub fn new(path: &str) -> Result<Self> {...}
   
     // Make inherit stdio to the WASM module
@@ -159,7 +178,8 @@ same level of functionality, albeit with a different interface.
     // Preopen and map all given directories
     pub fn preopen_all_map(
       mut self,
-      mapdirs: &Vec<(String, String)>) -> Result<Self> {...}
+      mapdirs: &Vec<(String, String)>)
+      -> Result<Self> {...}
   
     // Preopen (and map) a single directory
     pub fn preopen(
@@ -171,18 +191,6 @@ same level of functionality, albeit with a different interface.
   }  
   \end{code}
 
-Here a WASM binary is represented by a vector of bytes, and it is also handled the creation
-and construction of a \textit{WASI Context}, a structure defined by the \textit{wasmtime-wasi} crate used to store
-all preopened directories, eventual imports and more that will be useful to run the WebAssembly module.
-
-Here are defined various helpers to preopen directories, both unmapped and mapped.
-Most importantly, in this module it's defined how to run a WebAssembly binary - it must defined both an \textit{engine} and a \textit{linker},
-as well as a \textit{store} which represents the memory of a WebAssembly module described in the previous chapter.
-
-Note that the WebAssembly module has to have a \textit{default exported function} to run - when compiling with a WASI target,
-this is usually represented by the \texttt{\_start} function, which corresponds to the \texttt{main} function in languages
-such as C and Rust.
-
 \subsubsection{The \texttt{landlock} and \texttt{path\_access} modules}
 
 The \texttt{landlock} module is a thin wrapper around the API made available by the \textit{rust-landlock} crate.
@@ -190,31 +198,33 @@ It handles mostly ruleset creation, rule insertion, and enforces the policies be
 The main outline of the code is visible in Listing \ref{lst:rust-landlock}.
 
 \begin{code}[language=Rust, caption=The outline of the \texttt{landlock} module, label=lst:rust-landlock]
-  pub struct Landlock {
-    ruleset: RulesetCreated,
-  }
-  
-  impl Landlock {
-    // Creates a new ruleset with flags from Landlock ABI version 1
-    pub fn new() -> Result<Self, RulesetError> {...}
-  
-    // Add a set of rules to the ruleset
-    pub fn add_rules(
-      mut self,
-      rules: impl Iterator<Item = PathAccess>) -> Result<Self>
-    {...}
-  
-    // Add a single rule to the ruleset
-    pub fn add_rule(
-      mut self,
-      path_access: PathAccess) -> Result<Self>
-    {...}
-  
-    // Self restrict the process and checks whether Landlock
-    // is supported or not by the running kernel
-    pub fn enforce(self) -> Result<RestrictionStatus> {...}
-  }
-  \end{code}
+pub struct Landlock {
+  ruleset: RulesetCreated,
+}
+
+impl Landlock {
+  // Creates a new ruleset with flags from
+  // Landlock ABI version 1
+  pub fn new() -> Result<Self, RulesetError> {...}
+
+  // Add a set of rules to the ruleset
+  pub fn add_rules(
+    mut self,
+    rules: impl Iterator<Item = PathAccess>)
+    -> Result<Self>
+  {...}
+
+  // Add a single rule to the ruleset
+  pub fn add_rule(
+    mut self,
+    path_access: PathAccess) -> Result<Self>
+  {...}
+
+  // Self restrict the process and checks whether Landlock
+  // is supported or not by the running kernel
+  pub fn enforce(self) -> Result<RestrictionStatus> {...}
+}
+\end{code}
 
 It makes use of another thin wrapper, the \texttt{PathAccess} struct defined in the \texttt{path\_access} module.
 In this module, the main entity is the \texttt{PathAccess} struct, that tracks which flags as defined in Table \ref{table:landlock-flags}
@@ -262,8 +272,9 @@ All flags are listed in Table \ref{table:landlock-flags}, and some the following
         made for \textit{subdir}.
 \end{itemize}
 
-Note that, as highlighted in Section \ref{sec:landlock-args-module}, the directories containing the files of interest
-must always be preopened, even if their content is then restricted by landlock.
+Note that the directories containing the files of interest must always be preopened,
+even if their content is then restricted by Landlock. This is because, the preopen operation
+is required by the WebAssembly runtimes, while specific permissions are handled by Landlock.
 
 The Landlock self-restriction is applied after the necessary preopening of the directories,
 otherwise the running process would have to always have the permissions for listing directories even if
