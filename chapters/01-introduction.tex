@@ -389,18 +389,48 @@ but will be enforced on all of the thread's descendants.
 in a privileged context. It can be used to safely extend the capabilities of the kernel
 without requiring to change kernel source code or load kernel modules.
 
-Application developers can run eBPF programs in order to add additional capabilities at runtime,
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{ebpf-diagram.png}
+  \caption{A generic overview of eBPF, from \cite{ebpf}}
+\end{figure}
+
+Some of the most common use cases for eBPF include the implementation of networking, security, and
+observability of programs. These are usually implemented in the operating system because of the kernel's
+privileges, but the kernel itself is hard to evolve.
+On the other hand, application developers can run eBPF programs in order to add additional capabilities at runtime,
 and then the operating system guarantees security and efficiency as if natively compiled
 by using a Just-In-Time compiler.
+
 These eBPF programs are event-driven and run when a certain hook point is passed. Some
 predefined hooks include system calls, network events, and so on. If a hook does not exist,
-it is possible to create custom kernel or user probes.
+it is possible to create custom kernel or user probes. An example of how eBPF interacts with the
+Linux kernel is visible in Figure \ref{fig:example-ebpf-hooks}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{ebpf-hooks.png}
+  \caption{An example of two eBPF hooks}
+  \label{fig:example-ebpf-hooks}
+\end{figure}
+
+When running a program with eBPF, there are many steps that are taken:
+\begin{enumerate}
+  \item first of all, eBPF is usually not used directly but via libraries that provide the ability to specify
+        intent-based operations which are then implemented with eBPF; in any case, an eBPF program must be
+        compiled into a specific eBPF bytecode;
+  \item when a certain \textit{hook} is invoked, this hook has to be identified and then the program can be loaded
+        into the kernel with a system call;
+  \item a \textit{verification} step ensures that the eBPF program is safe to run by validating a set of conditions
+        (e.g., the program has the required capabilities, the program always runs to completion, etc.);
+  \item finally, the generic bytecode is then Just-In-Time \textit{compiled} into the machine instructions
+        to run the program as efficiently as possible.
+\end{enumerate}
 
 Unlike Landlock, eBPF makes it possible to define specific exception, e.g., denying
 certain access rights on specific files while allowing them on the containing directory.
 It also allows to specify whether a program has access to devices such as \texttt{terminal}
 and \texttt{dev}.
-
 Thanks to \texttt{BPFContain} \cite{bpfcontain}
 it is also possible to run a container security daemon by leveraging eBPF.  In this case,
 specific policies must be written for desired commands.
