@@ -346,7 +346,7 @@ A policy is hence separated into multiple parts:
 Specifically, when a policy is \textit{tainted}, BPFContain will start enforcing it. This means that a policy
 can be loaded by BPFContain but not be enforced until the controlled program does a specific
 action (e.g., access the network or send a message to a process).
-This however must be esplicitely declared in the policy, since all policies are tainted, hence enforced, by default.
+This however must be explicitly declared in the policy, since all policies are tainted, hence enforced, by default.
 
 An example of a policy is visible in Listing \ref{lst:yaml-policy-bash}, which defines how to
 run \textit{bash} in a confined environment.
@@ -355,7 +355,7 @@ as reading and executing everything in \texttt{/} and reading everything in \tex
 An important point is the \texttt{deny} section - here \textit{bash} is prevented to writing and
 appending anything in all of the file system.
 Lastly, this policy is not active by default, but the process become ``tainted'' and the policy is enforced
-when \textit{bash} tries to write or append anywhere in the filesystem.
+when \textit{bash} tries to write or append anywhere in the file system.
 
 A more complex example is visible in Listing \ref{lst:yaml-policy-httpd}, which shows a policy
 used to run \textit{httpd}, allowing reading the files to serve, reading and appending to log files,
@@ -421,7 +421,7 @@ allow:
   # Allow ipc with MySQL
   - ipc: mysqld
 
-  # Allow sending signals to existing httpd instances
+ # Allow sending signals to existing httpd instances
   - signal: {to: httpd, signals: [check, superFatal]}
 
   # Use networking

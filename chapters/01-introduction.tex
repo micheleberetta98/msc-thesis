@@ -121,7 +121,7 @@ WebAssembly resolves many of the problems of JavaScript, the major ones being:
 \begin{itemize}
   \item being represented with a \textit{binary} format, parsing on the client is faster and simpler;
   \item having a static type systems, optimisations can be done earlier at compile time, and not on the browser once all the files
-        have already been trasferred;
+        have already been transferred;
 \end{itemize}
 
 \subsection{Overview of the language}
@@ -163,7 +163,7 @@ computation, and control is given back to the embedder. For example, when embedd
 throw a JavaScript exception.
 
 The main memory layout that WebAssembly uses is a \textit{linear memory} (or simply \textit{memory}) represented
-by an array of bytes. A \textit{lineary memory} is a simple addressing technique in which memory appears to the
+by an array of bytes. A \textit{linear memory} is a simple addressing technique in which memory appears to the
 program as a single contiguous access space \cite{processor-microarchitecture}, which the CPU can access both directly as well as linearly
 without resorting to memory segmentation or pagination schemes, enhancing flexibility and reducing latency.
 Each module can define no more than one memory, which can grow by one or more
@@ -223,7 +223,7 @@ The approach taken for the sandboxing by these runtimes is based on a \textit{ca
 so that access to the file system and other resources must be explicitly given. Capabilities can be either \textit{static}, which
 are represented by the list of imports of the WebAssembly module to run, or \textit{dynamic}, i.e., specific flags
 specified with custom command-line arguments at execution time.
-Moreover, when given permissions to write to a terminal, a program could print characters recognized as control
+Moreover, when given permissions to write to a terminal, a program could print characters recognised as control
 sequences that may have side effects and confuse or misled user (a harmless example is clearing the screen).
 Hence, all writes to output streams are filtered in order to prevent this type of behaviour.
 
@@ -381,7 +381,7 @@ If that is not the case, this actions is denied directly by the operating system
 
 Lastly, every new thread resulting from a \textit{clone} call inherits all Landlock restrictions from its parents.
 These restrictions are also kept after a \textit{fork}.
-More sepecifically, when a thread restricts itself, these rules are not applied to other sibling threads
+More specifically, when a thread restricts itself, these rules are not applied to other sibling threads
 but will be enforced on all of the thread's descendants.
 
 \subsection{eBPF}
