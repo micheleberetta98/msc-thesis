@@ -138,7 +138,8 @@ landlock is enabled and self restriction is applied if not explicitly disabled.
 This module manages a single WebAssembly binary module and forms a bridge to the \textit{wasmtime} and the \textit{wasmtime-wasi}
 crates. In this project, \textit{Wasmtime} bindings are used instead of the \textit{Wasmer} ones, but both provide the
 same level of functionality, albeit with a different interface. A high level view of the usual sequence the steps would be done
-when loading and running a module is shown in Figure \ref{fig:wasm-module}.
+when loading and running a module is shown in Figure \ref{fig:wasm-module}, while an outline of the module is visible
+in Listing \ref{lst:wasm-module-outline}.
 
 \begin{figure}[h]
   \centering
@@ -159,7 +160,7 @@ Note that the WebAssembly module has to have a \textit{default exported function
 this is usually represented by the \texttt{\_start} function, which corresponds to the \texttt{main} function in languages
 such as C and Rust.
 
-\begin{code}[language=Rust, caption=The outline of the \texttt{wasm} module]
+\begin{code}[language=Rust, caption=The outline of the \texttt{wasm} modul, label=lst:wasm-module-outline]
   pub struct WasmModule {
     bytes: Vec<u8>, ctx_builder: WasiCtxBuilder,
   }
