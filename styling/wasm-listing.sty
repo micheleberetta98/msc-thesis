@@ -1,0 +1,10 @@
+\ProvidesPackage{styling/wasm-listing}
+
+\RequirePackage{listings}
+
+\lstdefinelanguage{wasm}{
+  morekeywords={func,module,export,param,result,if,then,else,eqz,local,get,const,mul,call,sub},
+  emph={i64},
+  emphstyle=\itshape,
+  morestring=[b]",
+}

@@ -1,0 +1,14 @@
+\ProvidesPackage{styling/javascript-listing}
+
+\RequirePackage{listings}
+
+\lstdefinelanguage{javascript}{
+  morekeywords=[1]{function,for,if,else,return,this,var,let},
+  morekeywords=[2]{false,null,true,boolean,number,undefined,NaN},
+  emph={document},
+  emphstyle=\itshape,
+  sensitive,
+  morecomment=[l]{//},
+  morestring=[b]',
+  morestring=[b]",
+}

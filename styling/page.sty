@@ -1,0 +1,17 @@
+\ProvidesPackage{styling/page}
+
+\geometry{margin=3cm}
+\renewcommand{\baselinestretch}{1.2}
+
+\newcommand{\emptypage}{
+  \clearpage
+  \thispagestyle{empty}
+  \pagenumbering{gobble}
+  \mbox{}
+}
+\newcommand{\toc}{
+  \clearpage
+  \pagenumbering{Roman}
+  \tableofcontents
+}
+
