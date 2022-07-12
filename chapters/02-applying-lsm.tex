@@ -137,12 +137,14 @@ landlock is enabled and self restriction is applied if not explicitly disabled.
 
 This module manages a single WebAssembly binary module and forms a bridge to the \textit{wasmtime} and the \textit{wasmtime-wasi}
 crates. In this project, \textit{Wasmtime} bindings are used instead of the \textit{Wasmer} ones, but both provide the
-same level of functionality, albeit with a different interface.
+same level of functionality, albeit with a different interface. A high level view of the usual sequence the steps would be done
+when loading and running a module is shown in Figure \ref{fig:wasm-module}.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.25\linewidth]{rs-landlock-wasm.png}
   \caption{A high-view diagram of how the \texttt{wasm} module operates.}
+  \label{fig:wasm-module}
 \end{figure}
 
 A WASM binary is represented by a vector of bytes, and it is also handled the creation

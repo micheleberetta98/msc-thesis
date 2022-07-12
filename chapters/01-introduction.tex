@@ -387,12 +387,14 @@ but will be enforced on all of the thread's descendants.
 \subsection{eBPF}
 \textit{eBPF} \cite{ebpf} is a virtual machine in the Linux Kernel that can run sandboxed programs
 in a privileged context. It can be used to safely extend the capabilities of the kernel
-without requiring to change kernel source code or load kernel modules.
+without requiring to change kernel source code or load kernel modules. A generic overview of its structure
+is visible in Figure \ref{fig:ebpf-generic-overview}.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.8\linewidth]{ebpf-diagram.png}
   \caption{A generic overview of eBPF, from \cite{ebpf}}
+  \label{fig:ebpf-generic-overview}
 \end{figure}
 
 Some of the most common use cases for eBPF include the implementation of networking, security, and
@@ -410,7 +412,7 @@ Linux kernel is visible in Figure \ref{fig:example-ebpf-hooks}.
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.8\linewidth]{ebpf-hooks.png}
-  \caption{An example of two eBPF hooks}
+  \caption{An example of two eBPF hooks, from \cite{ebpf-description}}
   \label{fig:example-ebpf-hooks}
 \end{figure}
 
