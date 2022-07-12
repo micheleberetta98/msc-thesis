@@ -370,7 +370,7 @@ necessary directories are preopened and eventual environment variables are impor
 An example policy is visible in Listing \ref{lst:yaml-policy-wasm}, where \textit{copy-file.wasm} simply copies
 the content of \texttt{input.txt} to \texttt{output.txt}.
 
-\begin{code}[caption=A policy for running bash, label=lst:yaml-policy-bash]
+\begin{code}[language=yaml, caption=A policy for running bash, label=lst:yaml-policy-bash]
 # Name and command of the policy
 name: bash
 cmd: /bin/bash
@@ -392,7 +392,7 @@ taint:
   - fs: {path: /, access: wa}
 \end{code}
 
-\begin{code}[caption=A policy for HTTPD, label=lst:yaml-policy-httpd]
+\begin{code}[language=yaml, caption=A policy for HTTPD, label=lst:yaml-policy-httpd]
 # Name and command of the policy
 name: httpd
 cmd: httpd
@@ -404,7 +404,7 @@ allow:
 
   # Access to log files
   - file: {pathname: /var/log/httpd, access: rw}
-  - file: {pathname: /var/log/httpd/*log, access: ra}
+  - file: {pathname: /var/log/httpd/*.log, access: ra}
 
   # Read configuration
   - file: {pathname: /etc/httpd, access: r}
@@ -431,7 +431,7 @@ allow:
   - net: [server, send, recv]
 \end{code}
 
-\begin{code}[caption=Running WASM with BPFContain, label=lst:yaml-policy-wasm]
+\begin{code}[language=yaml, caption=Running WASM with BPFContain, label=lst:yaml-policy-wasm]
 # Name and command of the policy
 name: copy-file
 cmd: wasmtime --dir=. copy-file.wasm

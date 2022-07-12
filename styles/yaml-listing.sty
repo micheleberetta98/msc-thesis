@@ -1,0 +1,17 @@
+\ProvidesPackage{styles/yaml-listing}
+
+\RequirePackage{listings}
+
+\lstdefinelanguage{yaml} {
+  keywords={true,false,y,n,name,cmd,allow,deny,taint,defaultTaint},
+  emph={device,fs,path,access,pathname,dev,file,ipc,signal,net,to,signals,}
+  sensitive=false,
+  comment=[l]{\#},
+  moredelim=[l]{\&},
+  morestring=[b]',
+  morestring=[b]",
+  literate =    {---}{{\ProcessThreeDashes}}3
+                {>}{{\textcolor{red}\textgreater}}1
+                {|}{{\textcolor{red}\textbar}}1
+                {\ -\ }{{\ -\ }}3,
+}
