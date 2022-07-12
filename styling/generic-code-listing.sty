@@ -1,5 +1,7 @@
 \ProvidesPackage{styling/generic-code-listing}
 
+\RequirePackage{listings}
+
 \lstnewenvironment{code}[1][]%
 {
    \noindent
@@ -7,22 +9,25 @@
    \vspace{0.2\baselineskip}
    \lstset{
     basicstyle=\ttfamily
+    , captionpos=b,
     , emphstyle=\itshape
     , showstringspaces=false
     , upquote=true
     , frame=single
-    , identifierstyle=%
-    , commentstyle=\color[gray]{0.4}%
-    , stringstyle=\color[rgb]{0, 0.5, 0}%
+    , identifierstyle=
+    % , backgroundcolor=\color[rgb]{0.95, 0.95, 0.92}
+    , commentstyle=\color[gray]{0.4}
+    , stringstyle=\color[rgb]{0, 0.5, 0}
     , keywordstyle=\color[rgb]{0, 0, 0.75}% reserved keywords
     , keywordstyle=[2]\color[rgb]{0.75, 0, 0}% traits
     , keywordstyle=[3]\color[rgb]{0, 0.5, 0}% primitive types
     , keywordstyle=[4]\color[rgb]{0, 0.5, 0}% type and value constructors
     , keywordstyle=[5]\color[rgb]{0, 0, 0.75}% macros
-    , columns=spaceflexible%
-    , keepspaces=true%
-    , showspaces=false%
-    , showtabs=false%
+    , columns=spaceflexible
+    , keepspaces=true
+    , showspaces=false
+    , showtabs=false
+    , numbers=left
     , #1
   }
 }{\endminipage}
