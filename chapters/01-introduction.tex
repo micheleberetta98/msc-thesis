@@ -240,7 +240,7 @@ CLI runtimes have some particular features and properties:
         see example at \url{https://docs.rs/wasmer-wasi/latest/wasmer_wasi/struct.WasiState.html}.};
   \item when using C, the WebAssembly binary can create files with specific user permissions on Linux, e.g., executable files;
   \item when listing files in a directory, the only files that are visible are the ones that were already present at the preopening of the directory,
-        but files added after the preopen can be read/written;
+        but files added after the preopen can be ``seen'' if their name is known (i.e., they can be opened, read or written in accordance with given permissions);
   \item any change made to a file by any process is reflected in what the compiled WebAssembly binary is able to read;
   \item environment variables are not accessible by default, but they must be explicitly declared and given access to;
   \item the WebAssembly memory is effectively sandboxed - the compiled program cannot access memory outside its sandbox, otherwise a trap is raised;
