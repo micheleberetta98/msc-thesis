@@ -300,8 +300,10 @@ The biggest drawback with this approach is simplicity itself. As highlighted in 
 there is no way to define exceptions - this restricts the possibilities given to the user, and makes some situations
 impossible to specify. For example, if a \texttt{LANDLOCK\_ACCESS\_FS\_REMOVE\_FILE} right is given to a directory,
 all files in that directory can be renamed and there is no way to prevent renaming for a specific file.
-Or similarly, if a \texttt{LANDLOCK\_ACCESS\_FS\_READ\_DIR} right is given to a directory, all subdirectories
-will be subjected to the same access right, so it is not possible to discriminate between subdirectories.
+Or similarly, if we have give the \texttt{LANDLOCK\_ACCESS\_FS\_READ\_FILE} and \texttt{LANDLOCK\_ACCESS\_FS\_WRITE\_FILE}
+permissions on a certain directory, then all files that are children of that directory can be read or written, even
+if they are inside subdirectories. If we then try to ``restrict'' this behaviour by giving only read permissions to
+certain subdirectories, they would still have the write permissions from the parent directory.
 In addition to this, the set of capabilities is somewhat limited, and mostly related to the file system.
 
 \section{Enforce the WASI sandbox with eBPF}
@@ -337,9 +339,9 @@ A policy is hence separated into multiple parts:
         \begin{itemize}
           \item a right on specific devices, such as \texttt{terminal} or \texttt{/dev/null};
           \item a grant on a particular folder or file, which is usually a combination of the classic \texttt{rwxa} permissions;
-          \item access to the kernel's capabilities (e.g. DAC override);
+          \item access to the kernel's capabilities (e.g., DAC override);
           \item a list of process names with which communication is allowed;
-          \item a list of primitives that the program can use on the network (e.g. client, send, recv).
+          \item a list of primitives that the program can use on the network (such as client, send, recv).
         \end{itemize}
   \item an optional set of \textit{restrictions} to explicitly revoke, which follows the same structure as the
         granted rights;
@@ -375,7 +377,6 @@ the content of \texttt{input.txt} to \texttt{output.txt}.
 name: bash
 cmd: /bin/bash
 defaultTaint: false
-
 allow:
   # Allow access to terminal and /dev/null
   - device: terminal
@@ -383,11 +384,9 @@ allow:
   # Allow read and execute access on the file system
   - fs: {pathname: /, access: rxm}
   - fs: {pathname: /proc, access: r}
-
 deny:
   # Prevent writes
   - fs: {path: /, access: wa}
-
 taint:
   - fs: {path: /, access: wa}
 \end{code}
