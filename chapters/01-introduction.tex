@@ -53,7 +53,7 @@ The main downsides of JavaScript that brought the need for WebAssembly are:
   \item JavaScript is dynamically typed, hence optimisations for JS (when possible) have to occur
         in the browser, when all JS files have been received;
         for example, JS has only two numeric type (a double-precision IEEE 754 value and a \textit{BigInt}
-        for numbers bigger than $2^53$) and this restricts the usable CPU instructions;
+        for numbers bigger than $2^{53}$) and this restricts the usable CPU instructions;
   \item JavaScript has a number of security vulnerabilities that WebAssembly strives to eliminate by design;
         a common security vulnerability\footnote{Software vulnerabilities are the most common, but hardware vulnerabilities have also been found \cite{spectre}.}
         in the JavaScript world is \textit{cross-site scripting} (XSS), which is a violation of the
