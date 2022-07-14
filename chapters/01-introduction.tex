@@ -170,7 +170,7 @@ Each module can define no more than one memory, which can grow by one or more
 \textit{pages}\footnote{A page is 64 KiB large.} if the need arises.
 Access to the individual locations is done through addresses, represented as unsigned integers,
 which are dynamically checked against memory size\footnote{On 64 bit platforms the WebAssembly engine
-can make use of virtual memory techniques to eliminate this checks, see \cite{bringing-the-web-up-to-speed-2017}}
+can make use of virtual memory techniques to eliminate this checks, see \cite{bringing-the-web-up-to-speed-2017}.}
 (out of bounds accesses result in a trap).
 Linear memory also brings security benefits - it is disjoint from the code space, the execution stack and the engine's
 data structures \cite{bringing-the-web-up-to-speed-2017}; hence, compiled program cannot corrupt directly their own execution
