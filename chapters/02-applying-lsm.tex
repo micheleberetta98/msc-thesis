@@ -13,7 +13,7 @@ Additional desirable features include the possibility to apply exceptions to a c
 as limiting the access to other resources in the operating systems, such as network, devices, and
 inter-process communications.
 
-Finally, usability is also taken into consideration, especially from the point of view of a user.
+Finally, usability is also taken into consideration, especially an user's point of view.
 
 Note that the main purpose of these tests is not to replicate all the functionalities given by
 the WebAssembly runtimes (\textit{Wasmtime} and \textit{Wasmer}), but to see how their basic features,
@@ -30,7 +30,7 @@ a custom command line interface that allowed the user to specify with more preci
 the WebAssembly binary is permitted to do on certain folders and files.
 
 The project is open source and the code is available at \url{https://github.com/micheleberetta98/rust-wasm-landlock}.
-Note that, for the project to compile, the Landlock LSM must be enabled in the Linux kernel.
+In order for the project to compile, the Landlock LSM must be enabled in the Linux kernel.
 
 \subsection{Code architecture and description}\label{sec:landlock-code-architecture}
 
@@ -39,7 +39,7 @@ The code itself is written in \textit{Rust}, and makes use of the
 to communicate with Landlock and the \textit{wasmtime} and \textit{wasmtime-wasi} official
 crates in order to have a runtime environment to execute a WebAssembly binary.
 
-The project is divided into five modules, which are:
+The project is divided into five modules, which are the following:
 \begin{enumerate}
   \item \texttt{args}, used to define and parse the command line arguments that specify the WebAssembly binary,
         the directories to preopen, and the allowed privileges on individual folders and/or files;
@@ -53,11 +53,11 @@ The project is divided into five modules, which are:
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.9\linewidth]{rust-landlock-code-diagram.png}
-  \caption{The code's architecture}
+  \caption{The code's architecture.}
   \label{fig:rust-landlock-code-architecture}
 \end{figure}
 
-The architecture diagram is visible in Figure \ref{fig:rust-landlock-code-architecture}, where
+The architecture diagram is shown in Figure \ref{fig:rust-landlock-code-architecture}, where
 are outlined the most important external crates and all dependencies between the modules, represented
 by directed arrows.
 
@@ -68,7 +68,7 @@ The main definition of this module is the \texttt{Args} struct, visible in Listi
 used to represent the command line interface that allows to specify which permissions to enable
 for one or more specific paths.
 
-\begin{code}[language=rust, caption=The \texttt{Args} struct, label=lst:arg-struct]
+\begin{code}[language=rust, caption=The \texttt{Args} struct., label=lst:arg-struct]
 pub struct Args {
   // The module to execute
   pub wasm_module: String,
@@ -105,7 +105,7 @@ Their usage and meaning is described in Table \ref{table:landlock-cli-args}.
     \texttt{no-landlock} & No & Used to disable the self restriction done by landlock \\
     \hline
   \end{tabular}
-  \caption{All the available command line arguments}
+  \caption{All the available command line arguments.}
   \label{table:landlock-cli-args}
 \end{table}
 
@@ -121,7 +121,7 @@ and a series of enabled permissions on that specific path, separated by a comma.
 Each permission is mapped one-to-one to the flags provided by Landlock in a manner listed in Table \ref{table:landlock-flags}.
 Moreover, there are three useful ``shortcuts'' used to represent common situations - \texttt{$\sim$read}, \texttt{$\sim$write} and \texttt{*}.
 
-A full example of how these arguments work is visible in Figure \ref{fig:args-example}.
+A full example of how these arguments work is shown in Figure \ref{fig:args-example}.
 
 Lastly, the \texttt{no-landlock} argument is only for testing purposes - it is off by default, so that
 landlock is enabled and self restriction is applied if not explicitly disabled.
@@ -137,7 +137,7 @@ landlock is enabled and self restriction is applied if not explicitly disabled.
 
 This module manages a single WebAssembly binary module and forms a bridge to the \textit{wasmtime} and the \textit{wasmtime-wasi}
 crates. In this project, \textit{Wasmtime} bindings are used instead of the \textit{Wasmer} ones, but both provide the
-same level of functionality, albeit with a different interface. A high level view of the usual sequence the steps would be done
+same level of functionality, albeit with a different interface. A high level view of the usual sequence in which the steps would be done
 when loading and running a module is shown in Figure \ref{fig:wasm-module}, while an outline of the module is visible
 in Listing \ref{lst:wasm-module-outline}.
 
@@ -148,19 +148,19 @@ in Listing \ref{lst:wasm-module-outline}.
   \label{fig:wasm-module}
 \end{figure}
 
-A WASM binary is represented by a vector of bytes, and it is also handled the creation
-and construction of a \textit{WASI Context}, a structure defined by the \textit{wasmtime-wasi} crate used to store
-all preopened directories, eventual imports and more that will be useful to run the WebAssembly module.
+The \textit{WasmModule} structure represents a WASM binary as a vector of bytes, and it also handles the creation
+and construction of a \textit{WASI Context}, another structure defined by the \textit{wasmtime-wasi} crate used to store
+all preopened directories, eventual imports, and more data that will be useful to run the WebAssembly module.
 
 Moreover, this module defines various helpers to preopen directories, both unmapped and mapped, and
 how to run a WebAssembly binary - it must create both an \textit{engine} and a \textit{linker},
-as well as a \textit{store} which represents the memory of a WebAssembly module described in the previous chapter.
+as well as a \textit{store}, which represents the memory of a WebAssembly module described in the previous chapter.
 
-Note that the WebAssembly module has to have a \textit{default exported function} to run - when compiling with a WASI target,
+Note that the WebAssembly module must have a \textit{default exported function} to run - when compiling with a WASI target,
 this is usually represented by the \texttt{\_start} function, which corresponds to the \texttt{main} function in languages
 such as C and Rust.
 
-\begin{code}[language=Rust, caption=The outline of the \texttt{wasm} modul, label=lst:wasm-module-outline]
+\begin{code}[language=Rust, caption=The outline of the \texttt{wasm} module., label=lst:wasm-module-outline]
   pub struct WasmModule {
     bytes: Vec<u8>, ctx_builder: WasiCtxBuilder,
   }
@@ -194,13 +194,13 @@ such as C and Rust.
   }  
   \end{code}
 
-\subsubsection{The \texttt{landlock} and \texttt{path\_access} modules}
+\subsubsection{The \texttt{landlock} and the \texttt{path\_access} modules}
 
 The \texttt{landlock} module is a thin wrapper around the API made available by the \textit{rust-landlock} crate.
 It handles mostly ruleset creation, rule insertion, and enforces the policies before the desired WASM module is run.
 The main outline of the code is visible in Listing \ref{lst:rust-landlock}.
 
-\begin{code}[language=Rust, caption=The outline of the \texttt{landlock} module, label=lst:rust-landlock]
+\begin{code}[language=Rust, caption=The outline of the \texttt{landlock} module., label=lst:rust-landlock]
 pub struct Landlock {
   ruleset: RulesetCreated,
 }
@@ -229,8 +229,8 @@ impl Landlock {
 }
 \end{code}
 
-It makes use of another thin wrapper, the \texttt{PathAccess} struct defined in the \texttt{path\_access} module.
-In this module, the main entity is the \texttt{PathAccess} struct, that tracks which flags as defined in Table \ref{table:landlock-flags}
+The module makes use of another thin wrapper, the \texttt{PathAccess} struct defined in the \texttt{path\_access} module.
+Here, the main entity is the \texttt{PathAccess} struct, that tracks which flags, as defined in Table \ref{table:landlock-flags},
 are applied to a single path. The flags list starts empty, and multiple flags can be added at any times.
 Moreover, this module also takes care of conversions between types required by the Landlock ABI in order
 to make the code compile.
@@ -262,7 +262,7 @@ ABI\footnote{At the moment it is not possible to specify the \texttt{LANDLOCK\_A
     \texttt{$\sim$write} & Combination of all but \texttt{X}, \texttt{R} and \texttt{RDir} \\ \hline
     \texttt{*} & Enable all flags \\ \hline
   \end{tabular}
-  \caption{Provided flags and corresponding Landlock permissions}
+  \caption{Provided flags and corresponding Landlock permissions.}
   \label{table:landlock-flags}
 \end{table}
 
@@ -353,7 +353,7 @@ can be loaded by BPFContain but not be enforced until the controlled program doe
 action (e.g., access the network or send a message to a process).
 This however must be explicitly declared in the policy, since all policies are tainted, hence enforced, by default.
 
-An example of a policy is visible in Listing \ref{lst:yaml-policy-bash}, which defines how to
+An example of a policy is defined in Listing \ref{lst:yaml-policy-bash}, which defines how to
 run \textit{bash} in a confined environment.
 In this policy, \textit{bash} is allowed to access the terminal and \texttt{/dev/null}, as well
 as reading and executing everything in \texttt{/} and reading everything in \texttt{/proc}.
@@ -362,7 +362,7 @@ appending anything in all of the file system.
 Lastly, this policy is not active by default, but the process become ``tainted'' and the policy is enforced
 when \textit{bash} tries to write or append anywhere in the file system.
 
-A more complex example is visible in Listing \ref{lst:yaml-policy-httpd}, which shows a policy
+A more complex example is shown in Listing \ref{lst:yaml-policy-httpd}, which shows a policy
 used to run \textit{httpd}, allowing reading the files to serve, reading and appending to log files,
 and allowing inter-process communication only with running \textit{mysqld} processes.
 
@@ -372,7 +372,7 @@ necessary directories are preopened and eventual environment variables are impor
 An example policy is visible in Listing \ref{lst:yaml-policy-wasm}, where \textit{copy-file.wasm} simply copies
 the content of \texttt{input.txt} to \texttt{output.txt}.
 
-\begin{code}[language=yaml, caption=A policy for running bash, label=lst:yaml-policy-bash]
+\begin{code}[language=yaml, caption=A policy for running bash., label=lst:yaml-policy-bash]
 # Name and command of the policy
 name: bash
 cmd: /bin/bash
@@ -391,7 +391,7 @@ taint:
   - fs: {path: /, access: wa}
 \end{code}
 
-\begin{code}[language=yaml, caption=A policy for HTTPD, label=lst:yaml-policy-httpd]
+\begin{code}[language=yaml, caption=A policy for HTTPD., label=lst:yaml-policy-httpd]
 # Name and command of the policy
 name: httpd
 cmd: httpd
@@ -430,7 +430,7 @@ allow:
   - net: [server, send, recv]
 \end{code}
 
-\begin{code}[language=yaml, caption=Running WASM with BPFContain, label=lst:yaml-policy-wasm]
+\begin{code}[language=yaml, caption=Running WASM with BPFContain., label=lst:yaml-policy-wasm]
 # Name and command of the policy
 name: copy-file
 cmd: wasmtime --dir=. copy-file.wasm
