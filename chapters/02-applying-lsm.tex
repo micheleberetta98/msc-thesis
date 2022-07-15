@@ -266,7 +266,7 @@ ABI\footnote{At the moment it is not possible to specify the \texttt{LANDLOCK\_A
   \label{table:landlock-flags}
 \end{table}
 
-All flags are listed in Table \ref{table:landlock-flags}, and some the following examples illustrate how to combine them:
+All flags are listed in Table \ref{table:landlock-flags}, and the following examples illustrate how to combine some of them:
 \begin{itemize}
   \item \texttt{file:R} allows only to read from \textit{file};
   \item the combination of \texttt{file:X} and \texttt{.:RDir} allows the execution of \textit{file} and the listing of the current directory;
@@ -276,7 +276,7 @@ All flags are listed in Table \ref{table:landlock-flags}, and some the following
 \end{itemize}
 
 Note that the directories containing the files of interest must always be preopened,
-even if their content is then restricted by Landlock. This is because, the preopen operation
+even if their content is then restricted by Landlock. This is because the preopen operation
 is required by the WebAssembly runtimes, while specific permissions are handled by Landlock.
 
 The Landlock self-restriction is applied after the necessary preopening of the directories,
@@ -287,9 +287,9 @@ not needed by the WASM binary.
 
 The main advantage that Landlock brings is simplicity. For the developer, the API is simple enough to use,
 and it can be used in a variety of languages - the main three languages are C (used directly with the kernel libraries),
-Rust as in this project, and Go\footnote{\url{https://github.com/landlock-lsm/go-landlock}}.
-From the user's point of view, the provided permission flags are clear enough that it is not required to have
-anything beside a basic understanding of Linux's file system permissions.
+Rust (as in this project), and Go\footnote{\url{https://github.com/landlock-lsm/go-landlock}}.
+From the user's point of view, the provided permission flags are clear enough that it is required to have
+only a basic understanding of Linux's file system permissions.
 Hence, it can be used to provide a clear interface that is not so different from the one already given by
 the existing runtimes.
 Moreover, Landlock allows \textit{unprivileged} access control - it is not necessary to gain particular privileges
@@ -311,7 +311,7 @@ In addition to this, the set of capabilities is somewhat limited, and mostly rel
 \textit{BPFContain} \cite{bpfcontain} is a container security daemon for Linux written in Rust that offers
 interoperability with \textit{eBPF} \cite{ebpf}.
 Since \textit{BPFContain} is an external tool and not a library such as \textit{rust-landlock}, there was no need
-to develop a project from scratch, since it is enough to combine it with the WebAssembly runtime of choice, which
+to develop a project from scratch, since it is possible to combine it with the WebAssembly runtime of choice, which
 in our case is \textit{Wasmtime}.
 
 It should be noted that \textit{BPFContain} is still in active development and not yet feature-complete.
@@ -325,7 +325,7 @@ The usage is pretty straightforward:
         these are mostly log files and a directory used for the policies in \texttt{/var/lib/bpfcontain},
         which permissions are set so that its content is readable, writable and executable by the daemon;
   \item create a policy in \texttt{/var/lib/bpfcontain/policy};
-  \item start the daemon - this must be run with super user privileges;
+  \item start the daemon with super user privileges;
   \item run confined program by referring the policy name, and the policy itself can be written in YAML.
 \end{enumerate}
 
@@ -459,11 +459,11 @@ creating, renaming and linking devices, but eBPF allows to specify which particu
 and which not.
 
 However, eBPF brings also some disadvantages that Landlock does not have.
-The biggest downside is regarding usability - with Landlock it was enough to be able to use
-the terminal and understand the basics of passing parameters, but BPFContain requires the writing
+The biggest downside is regarding usability - while Landlock can be used by anyone able to use
+the terminal and understand the basics of passing parameters, BPFContain requires the writing
 of a policy in a specific language, albeit a simple one like YAML, and this policy must be in a very
 specific location\footnote{To be fair, this is a limitation of \textit{BPFContain} and not of \textit{eBPF} itself.}.
-This brings down obviously the level of simplicity and usability for a user that wants to contain and restrict
+This obviously decreases the level of simplicity and usability for a user that wants to contain and restrict
 some binaries.
 
 Another point regarding the specific usage with \textit{Wasmtime} and WebAssembly is the necessity of
