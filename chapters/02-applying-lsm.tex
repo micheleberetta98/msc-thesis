@@ -22,7 +22,6 @@ security tools from the Linux kernel.
 This means that, for example, running a single function exported from a WebAssembly module won't be taken
 into consideration.
 
-\newpage
 \section{Restricting the WASI sandbox with Landlock}
 
 For the integration with Landlock, a new project was developed, in order to provide
@@ -52,10 +51,30 @@ The project is divided into five modules, which are the following:
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.9\linewidth]{rust-landlock-code-diagram.png}
+  \includegraphics[width=0.8\linewidth]{rust-landlock-code-diagram.png}
   \caption{The code's architecture.}
   \label{fig:rust-landlock-code-architecture}
 \end{figure}
+
+\begin{code}[language=rust, caption=The \texttt{Args} struct., label=lst:arg-struct]
+  pub struct Args {
+    // The module to execute
+    pub wasm_module: String,
+  
+    // The preopened dir(s) to pass to wasmtime
+    pub dirs: Vec<String>,
+  
+    // The preopened mapped dir(s) to pass to wasmtime
+    pub mapdirs: Vec<(String, String)>,
+  
+    // A list of the allowed privileges on a
+    // particular folder/file
+    pub fs_allows: Vec<(String, BitFlags<AccessFs>)>,
+  
+    // Disable landlock (test only)
+    pub no_landlock: bool,
+  }
+  \end{code}
 
 The architecture diagram is shown in Figure \ref{fig:rust-landlock-code-architecture}, where
 are outlined the most important external crates and all dependencies between the modules, represented
@@ -67,26 +86,6 @@ by directed arrows.
 The main definition of this module is the \texttt{Args} struct, visible in Listing \ref{lst:arg-struct},
 used to represent the command line interface that allows to specify which permissions to enable
 for one or more specific paths.
-
-\begin{code}[language=rust, caption=The \texttt{Args} struct., label=lst:arg-struct]
-pub struct Args {
-  // The module to execute
-  pub wasm_module: String,
-
-  // The preopened dir(s) to pass to wasmtime
-  pub dirs: Vec<String>,
-
-  // The preopened mapped dir(s) to pass to wasmtime
-  pub mapdirs: Vec<(String, String)>,
-
-  // A list of the allowed privileges on a
-  // particular folder/file
-  pub fs_allows: Vec<(String, BitFlags<AccessFs>)>,
-
-  // Disable landlock (test only)
-  pub no_landlock: bool,
-}
-\end{code}
 
 Every single field is mapped to one command line argument thanks to the \textit{clap} crates which handles the
 creation and parsing of the CLI arguments structure.
@@ -126,7 +125,7 @@ A full example of how these arguments work is shown in Figure \ref{fig:args-exam
 Lastly, the \texttt{no-landlock} argument is only for testing purposes - it is off by default, so that
 landlock is enabled and self restriction is applied if not explicitly disabled.
 
-\begin{figure}[h]
+\begin{figure}[ht]
   \centering
   \includegraphics[width=\linewidth]{rust-landlock-args-example.png}
   \caption{A full example of how the arguments are seen by the program.}
@@ -141,13 +140,6 @@ same level of functionality, albeit with a different interface. A high level vie
 when loading and running a module is shown in Figure \ref{fig:wasm-module}, while an outline of the module is visible
 in Listing \ref{lst:wasm-module-outline}.
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.25\linewidth]{rs-landlock-wasm.png}
-  \caption{A high-view diagram of how the \texttt{wasm} module operates.}
-  \label{fig:wasm-module}
-\end{figure}
-
 The \textit{WasmModule} structure represents a WASM binary as a vector of bytes, and it also handles the creation
 and construction of a \textit{WASI Context}, another structure defined by the \textit{wasmtime-wasi} crate used to store
 all preopened directories, eventual imports, and more data that will be useful to run the WebAssembly module.
@@ -158,47 +150,60 @@ as well as a \textit{store}, which represents the memory of a WebAssembly module
 
 Note that the WebAssembly module must have a \textit{default exported function} to run - when compiling with a WASI target,
 this is usually represented by the \texttt{\_start} function, which corresponds to the \texttt{main} function in languages
-such as C and Rust.
+such as C and Rust.\\
 
 \begin{code}[language=Rust, caption=The outline of the \texttt{wasm} module., label=lst:wasm-module-outline]
-  pub struct WasmModule {
-    bytes: Vec<u8>, ctx_builder: WasiCtxBuilder,
-  }
-  
-  impl WasmModule {
-    // Reads the WASM module and initialises
-    // the WasiCtxBuilder
-    pub fn new(path: &str) -> Result<Self> {...}
-  
-    // Make inherit stdio to the WASM module
-    pub fn use_stdio(mut self) -> Self {...}
-  
-    // Preopen all given directories
-    pub fn preopen_all(
-      mut self,
-      dirs: &Vec<String>) -> Result<Self> {...}
-  
-    // Preopen and map all given directories
-    pub fn preopen_all_map(
-      mut self,
-      mapdirs: &Vec<(String, String)>)
-      -> Result<Self> {...}
-  
-    // Preopen (and map) a single directory
-    pub fn preopen(
-      mut self,
-      dir: &str, guest_path: &str) -> Result<Self> {...}
-  
-    // Run the module
-    pub fn run(self) -> Result<()> {...}
-  }  
-  \end{code}
+pub struct WasmModule {
+  bytes: Vec<u8>, ctx_builder: WasiCtxBuilder,
+}
+
+impl WasmModule {
+  // Reads the WASM module, initialises WasiCtxBuilder
+  pub fn new(path: &str) -> Result<Self> {...}
+  // Make the WASM module inherit stdio
+  pub fn use_stdio(mut self) -> Self {...}
+  // Preopen all given directories
+  pub fn preopen_all(
+    mut self,
+    dirs: &Vec<String>) -> Result<Self> {...}
+  // Preopen and map all given directories
+  pub fn preopen_all_map(
+    mut self,
+    mapdirs: &Vec<(String, String)>)
+    -> Result<Self> {...}
+  // Preopen (and map) a single directory
+  pub fn preopen(
+    mut self,
+    dir: &str, guest_path: &str) -> Result<Self> {...}
+  // Run the module
+  pub fn run(self) -> Result<()> {...}
+}  
+\end{code}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.25\linewidth]{rs-landlock-wasm.png}
+  \caption{A high-view diagram of how the \texttt{wasm} module operates.}
+  \label{fig:wasm-module}
+\end{figure}
 
 \subsubsection{The \texttt{landlock} and the \texttt{path\_access} modules}
 
 The \texttt{landlock} module is a thin wrapper around the API made available by the \textit{rust-landlock} crate.
 It handles mostly ruleset creation, rule insertion, and enforces the policies before the desired WASM module is run.
 The main outline of the code is visible in Listing \ref{lst:rust-landlock}.
+
+The module makes use of another thin wrapper, the \texttt{PathAccess} struct defined in the \texttt{path\_access} module.
+Here, the main entity is the \texttt{PathAccess} struct, that tracks which flags, as defined in Table \ref{table:landlock-flags},
+are applied to a single path. The flags list starts empty, and multiple flags can be added at any times.
+Moreover, this module also takes care of conversions between types required by the Landlock ABI in order
+to make the code compile.
+
+\subsection{Available permission settings}
+
+The program allows to specify all access right flags from the first version of the Landlock
+ABI\footnote{At the moment it is not possible to specify the \texttt{LANDLOCK\_ACCESS\_FS\_REFERER} in order to reparent a file hierarchy.},
+which are listed in Table \ref{table:landlock-flags}.
 
 \begin{code}[language=Rust, caption=The outline of the \texttt{landlock} module., label=lst:rust-landlock]
 pub struct Landlock {
@@ -225,20 +230,27 @@ impl Landlock {
 
   // Self restrict the process and checks whether Landlock
   // is supported or not by the running kernel
-  pub fn enforce(self) -> Result<RestrictionStatus> {...}
+  pub fn enforce(self) -> Result<RestrictionStatus>
+  {...}
 }
 \end{code}
 
-The module makes use of another thin wrapper, the \texttt{PathAccess} struct defined in the \texttt{path\_access} module.
-Here, the main entity is the \texttt{PathAccess} struct, that tracks which flags, as defined in Table \ref{table:landlock-flags},
-are applied to a single path. The flags list starts empty, and multiple flags can be added at any times.
-Moreover, this module also takes care of conversions between types required by the Landlock ABI in order
-to make the code compile.
+The following examples illustrate how to combine some of them:
+\begin{itemize}
+  \item \texttt{file:R} allows only to read from \textit{file};
+  \item the combination of \texttt{file:X} and \texttt{.:RDir} allows the execution of \textit{file} and the listing of the current directory;
+  \item \texttt{.:MReg} only allows the creation, rename or linking of regular files in the current directory;
+  \item \texttt{.:R,W} and \texttt{./subdir:*} allows only reads and writes on files in the current directory, while no restrictions are
+        made for \textit{subdir}.
+\end{itemize}
 
-\subsection{Available permission settings}
+Note that the directories containing the files of interest must always be preopened,
+even if their content is then restricted by Landlock. This is because the preopen operation
+is required by the WebAssembly runtimes, while specific permissions are handled by Landlock.
 
-The program allows to specify all access right flags from the first version of the Landlock
-ABI\footnote{At the moment it is not possible to specify the \texttt{LANDLOCK\_ACCESS\_FS\_REFERER} in order to reparent a file hierarchy.}.
+The Landlock self-restriction is applied after the necessary preopening of the directories,
+otherwise the running process would have to always have the permissions for listing directories even if
+not needed by the WASM binary.
 
 \begin{table}
   \centering
@@ -265,23 +277,6 @@ ABI\footnote{At the moment it is not possible to specify the \texttt{LANDLOCK\_A
   \caption{Provided flags and corresponding Landlock permissions.}
   \label{table:landlock-flags}
 \end{table}
-
-All flags are listed in Table \ref{table:landlock-flags}, and the following examples illustrate how to combine some of them:
-\begin{itemize}
-  \item \texttt{file:R} allows only to read from \textit{file};
-  \item the combination of \texttt{file:X} and \texttt{.:RDir} allows the execution of \textit{file} and the listing of the current directory;
-  \item \texttt{.:MReg} only allows the creation, rename or linking of regular files in the current directory;
-  \item \texttt{.:R,W} and \texttt{./subdir:*} allows only reads and writes on files in the current directory, while no restrictions are
-        made for \textit{subdir}.
-\end{itemize}
-
-Note that the directories containing the files of interest must always be preopened,
-even if their content is then restricted by Landlock. This is because the preopen operation
-is required by the WebAssembly runtimes, while specific permissions are handled by Landlock.
-
-The Landlock self-restriction is applied after the necessary preopening of the directories,
-otherwise the running process would have to always have the permissions for listing directories even if
-not needed by the WASM binary.
 
 \subsection{Advantages and disadvantages}
 
@@ -377,18 +372,32 @@ the content of \texttt{input.txt} to \texttt{output.txt}.
 name: bash
 cmd: /bin/bash
 defaultTaint: false
+
 allow:
   # Allow access to terminal and /dev/null
   - device: terminal
   - device: null
+  
   # Allow read and execute access on the file system
   - fs: {pathname: /, access: rxm}
   - fs: {pathname: /proc, access: r}
+
 deny:
   # Prevent writes
   - fs: {path: /, access: wa}
-taint:
+
+  taint:
   - fs: {path: /, access: wa}
+\end{code}
+
+\begin{code}[language=yaml, caption=Running WASM with BPFContain., label=lst:yaml-policy-wasm]
+# Name and command of the policy
+name: copy-file
+cmd: wasmtime --dir=. copy-file.wasm
+
+allow:
+  # Allow access to the current folder
+  - fs: {pathname: ., access: rwxm}
 \end{code}
 
 \begin{code}[language=yaml, caption=A policy for HTTPD., label=lst:yaml-policy-httpd]
@@ -428,16 +437,6 @@ allow:
 
   # Use networking
   - net: [server, send, recv]
-\end{code}
-
-\begin{code}[language=yaml, caption=Running WASM with BPFContain., label=lst:yaml-policy-wasm]
-# Name and command of the policy
-name: copy-file
-cmd: wasmtime --dir=. copy-file.wasm
-
-allow:
-  # Allow access to the current folder
-  - fs: {pathname: ., access: rwxm}
 \end{code}
 
 \subsection{Advantages and disadvantages}

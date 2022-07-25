@@ -159,7 +159,7 @@ Functions can be called either \textit{directly} by using an index that identifi
 i.e., dynamically through a global \textit{table} as shown in Figure \ref{fig:indirect-function-table-structure}.
 In this second case, only the function's type signature is validated.
 
-\begin{figure}[h]
+\begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\linewidth]{wasm-function-table.png}
   \caption{The structure of the indirect functions table, from \cite{binary-security-wasm-2020}.}
@@ -226,7 +226,7 @@ The two languages that have good interoperability at the moment are Rust, where 
 and C/C++, either through Emscripten or a custom prebuilt \textit{Clang} toolchain\footnote{\url{https://github.com/WebAssembly/wasi-sdk}}.
 These compilers can produce very different memory layouts, as visible in Figure \ref{fig:different-wasm-memory-layouts}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
   \centering
   \begin{subfigure}[b]{0.4\textwidth}
     \centering
@@ -415,7 +415,7 @@ in a privileged context. It can be used to safely extend the capabilities of the
 without requiring to change kernel source code or load kernel modules. A generic overview of its structure
 is visible in Figure \ref{fig:ebpf-generic-overview}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\linewidth]{ebpf-diagram.png}
   \caption{A generic overview of eBPF, from \cite{ebpf}.}
@@ -434,7 +434,7 @@ predefined hooks include system calls, network events, and so on. If a hook does
 it is possible to create custom kernel or user probes. An example of how eBPF interacts with the
 Linux kernel is visible in Figure \ref{fig:example-ebpf-hooks}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\linewidth]{ebpf-hooks.png}
   \caption{An example of two eBPF hooks, from \cite{ebpf-description}.}
