@@ -156,7 +156,15 @@ portion of the memory, and cannot be accessed directly by WebAssembly.
 The code inside a function consists of a series of \textit{instructions} that modify an implicit operand stack,
 either by declaring local variables or applying operations to the value already on the stack.
 Functions can be called either \textit{directly} by using an index that identifies a function, or \textit{indirectly},
-i.e., dynamically through a global \textit{table}. In this second case, only the function's type signature is validated.
+i.e., dynamically through a global \textit{table} as shown in Figure \ref{fig:indirect-function-table-structure}.
+In this second case, only the function's type signature is validated.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{wasm-function-table.png}
+  \caption{The structure of the indirect functions table, from \cite{binary-security-wasm-2020}.}
+  \label{fig:indirect-function-table-structure}
+\end{figure}
 
 WebAssembly has also support for \textit{traps} - in a similar manner to an exception, a trap aborts the current
 computation, and control is given back to the embedder. For example, when embedded in JavaScript, a trap will
@@ -216,6 +224,23 @@ and then be safely run on different platforms.
 Its API provides access to several OS-like features, such as file systems and Berkeley sockets.
 The two languages that have good interoperability at the moment are Rust, where the compiler directly supports targeting both WASM and WASI,
 and C/C++, either through Emscripten or a custom prebuilt \textit{Clang} toolchain\footnote{\url{https://github.com/WebAssembly/wasi-sdk}}.
+These compilers can produce very different memory layouts, as visible in Figure \ref{fig:different-wasm-memory-layouts}.
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{wasm-memory-emcc-clang9.png}
+    \caption{Emscripten 1.39.7, Clang 9\\(without \texttt{stack-first}).}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{wasm-memory-clang9-rustc.png}
+    \caption{Clang 9 (with \texttt{stack-first}), Rust 1.41 (WASI target).}
+  \end{subfigure}
+  \caption{Examples of WebAssembly memory layouts obtained from different compilers, from \cite{binary-security-wasm-2020}.}
+  \label{fig:different-wasm-memory-layouts}
+\end{figure}
 
 A binary that uses WASI can be run using a CLI runtime, such as \textit{Wasmtime} \cite{wasmtime} or \textit{Wasmer} \cite{wasmer},
 or using a browser polyfill (an example is visible in \cite{wasi-polyfill}).
