@@ -150,7 +150,9 @@ as well as a \textit{store}, which represents the memory of a WebAssembly module
 
 Note that the WebAssembly module must have a \textit{default exported function} to run - when compiling with a WASI target,
 this is usually represented by the \texttt{\_start} function, which corresponds to the \texttt{main} function in languages
-such as C and Rust.\\
+such as C and Rust.
+
+\vspace*{0.5cm}
 
 \begin{code}[language=Rust, caption=The outline of the \texttt{wasm} module., label=lst:wasm-module-outline]
 pub struct WasmModule {

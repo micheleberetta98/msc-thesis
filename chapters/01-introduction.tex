@@ -22,6 +22,8 @@ and it can be both interpreted and \textit{just-in-time compiled}.
 A notable language which is a superset of JavaScript is \textit{TypeScript}, developed by Microsoft, that
 introduces static typing and can be transpiled to JavaScript.
 
+\vspace*{0.5cm}
+
 \begin{code}[language=javascript, caption=A simple example of JavaScript]
 function fact(n) {
   if (n == 0) return 1;
@@ -132,6 +134,8 @@ Each binary takes the form of a \textit{module}, which contains \textit{function
 \textit{tables}, and \textit{memories}. Each of these can be exported to be used in the embedder, and a module can also import functionalities.
 While a module is a static representation of a program, an \textit{instance} is the dynamic one.
 A module can be instantiated by the embedder (e.g., a JavaScript virtual machine).
+
+\vspace*{0.5cm}
 
 \begin{code}[language=wasm, caption={Recursive factorial written in WebAssembly S-expressions}, label=lst:wasm-fact]
   (module
