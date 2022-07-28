@@ -1,8 +1,32 @@
-\section{Test plan}
+\section{Testing plan}
+
+The main goals of this performance testing plan are:
+\begin{itemize}
+  \item to find out whether the usage of LSM implies some sort of performance penalty;
+  \item to identify possible improvable points when embedding WebAssembly in another language.
+\end{itemize}
 
 \subsection{System and hardware}
 
+The system and hardware used for both the development of the project described in Section \ref{sec:restricting-wasi-landlock}
+and the performed test is as follows:
+\begin{itemize}
+  \item Arch Linux as the operating system, more specifically the 2022.05.01 version;
+  \item an Intel Core i5-7200U quad-core with a clock rate of 2.5 GHz;
+  \item 8 GB of RAM;
+  \item a 120 GB solid state disk.
+\end{itemize}
+
+The choice of the operating system is mainly dictated by the fact that Arch Linux has both Landlock and eBPF active
+out of the box, removing the need to compile the Linux kernel with the necessary flags to enable these
+functionalities.
+
 \subsection{Performance indicators}
+
+The main performance indicators will be the mean execution time, measured in milliseconds, together with its
+standard deviation in order to compensate for variability.
+These measures are always obtained from a sample of 100 runs, executed and measured by \texttt{hyperfine},
+a command-line benchmarking tools \cite{hyperfine}.
 
 \section{Comparison between different methods}
 
