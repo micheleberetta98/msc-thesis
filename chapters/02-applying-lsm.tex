@@ -162,21 +162,25 @@ pub struct WasmModule {
 impl WasmModule {
   // Reads the WASM module, initialises WasiCtxBuilder
   pub fn new(path: &str) -> Result<Self> {...}
+
   // Make the WASM module inherit stdio
   pub fn use_stdio(mut self) -> Self {...}
+
   // Preopen all given directories
   pub fn preopen_all(
     mut self,
     dirs: &Vec<String>) -> Result<Self> {...}
+  
   // Preopen and map all given directories
   pub fn preopen_all_map(
     mut self,
-    mapdirs: &Vec<(String, String)>)
-    -> Result<Self> {...}
+    mapdirs: &Vec<(String, String)>) -> Result<Self> {...}
+
   // Preopen (and map) a single directory
   pub fn preopen(
     mut self,
     dir: &str, guest_path: &str) -> Result<Self> {...}
+  
   // Run the module
   pub fn run(self) -> Result<()> {...}
 }  
