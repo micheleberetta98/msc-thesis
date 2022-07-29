@@ -1,0 +1,6 @@
+type,mnative,snative,mlandlock,slandlock,mebpf,sebpf
+Sorting 10000 numbers,0.93,0.07,0.99,0.16,2.16,0.08
+Reading a 100 KB file,0.62,0.60,0.54,0.17,1.98,0.95
+Reading a 1 MB file,0.99,0.68,1.29,0.66,2.54,0.82
+Reading a 10 MB file,5.62,1.11,5.82,1.10,7.07,1.20
+Reading a 100 MB file,58.63,7.80,46.32,3.50,57.09,5.94
