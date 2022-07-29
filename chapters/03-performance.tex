@@ -42,7 +42,7 @@ The performed tests are:
 \end{itemize}
 
 \vspace*{0.5cm}
-\begin{code}[language=Rust, caption=The tested sorting program., label=lst:sorting-test-rust]
+\begin{code}[language=Rust, caption=The tested ``sorting program''., label=lst:sorting-test-rust]
 use rand::Rng;
 
 fn main() {
@@ -57,11 +57,13 @@ fn main() {
 }
 \end{code}
 
-\begin{code}[language=Rust, caption=The tested reading program., label=lst:reading-test-rust]
+\begin{code}[language=Rust, caption=The tested ``reading program''., label=lst:reading-test-rust]
 fn main() {
-  // Change the filename to test different file sizes
-  let _content =
-    std::fs::read_to_string("./input-file.txt");
+  let content = std::fs::read("input-file.txt");
+  match content {
+      Ok(c) => println!("{}", c.len()),
+      Err(_e) => std::process::exit(1),
+  }
 }
 \end{code}
 
@@ -75,7 +77,7 @@ The main performance indicators will be the mean execution time, measured in mil
 standard deviation in order to compensate for variability.
 These measures are always obtained from a sample of 100 runs, executed and measured by \texttt{hyperfine},
 a command-line benchmarking tools \cite{hyperfine}, and finally saved to a
-JSON file\footnote{All results are available in JSON and image format at \url{https://github.com/micheleberetta98/wasm-performance-testing}.}.
+JSON file.
 
 \section{Comparison between different methods}
 
