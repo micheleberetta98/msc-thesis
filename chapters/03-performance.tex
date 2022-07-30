@@ -135,13 +135,18 @@ concentrated under 5 ms.
   \label{fig:distribution-sorting-native}
 \end{figure}
 
-In a similar way, when dealing with files there doesn't seem to be a great overhead
-using LSMs to restrict the running program. As the file get bigger, speed decreases as expected
-for all of the methods tested.
-When file enters the range of hundreds of MBs, the times are significantly higher, and the LSMs seem
-to present less variability compared with a native binary. This is shown by the steep rise in Figure
-\ref{fig:avg-comparison-native-speed}.
-These results are visible in a graphical form in Figure \ref{fig:distribution-reading-native}
+Similarly, when dealing with files there the use of LSMs does not bring a great overhead.
+Execution times of protected binaries are always comparable to running a binary directly
+without any form of restriction. Moreover, as seen in Figure \ref{fig:avg-comparison-native-speed},
+the various functions of the average follow more or less the same shape.
+Times get significantly higher when dealing with files with sizes in the order of hundreds of MBs,
+but even in this case execution times do not differ a lot - restricted binaries however show
+lower variability.
+
+Note that in all these tests eBPF performs always worse on average than Landlock - this could be
+due to the fact that, when running \texttt{bpfcontain}, there is a communication with an active daemon
+(as explained in Section \ref{sec:restricting-wasi-ebpf}), while Landlock communicates directly with
+the Linux kernel.
 
 \begin{figure}[h]
   \centering
@@ -220,11 +225,6 @@ These results are visible in a graphical form in Figure \ref{fig:distribution-re
   \label{fig:distribution-reading-native}
 \end{figure}
 
-Note that in these tests eBPF performs always worse on average than Landlock - this could be
-due to the fact that, when running \texttt{bpfcontain}, there is a communication with an active daemon
-(as explained in Section \ref{sec:restricting-wasi-ebpf}), while Landlock communicates directly with
-the Linux kernel.
-
 \subsection{Landlock and eBPF on a WebAssembly binary}
 
 % \section{Comparison between a restricted and an unrestricted binary}
@@ -238,3 +238,5 @@ the Linux kernel.
 \subsection{Performance impact of Landlock}
 
 \subsection{Performance impact of using a WASI library}
+
+\section{Conclusions and observations}
