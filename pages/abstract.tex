@@ -1,17 +1,17 @@
 \begin{abstract}
 Nowadays, web applications' needs are more sophisticated and demanding than in the past.
 Efficiency and security are hence important points that must be addressed. However JavaScript,
-as the de facto standard language on the web, is not able to meet these requirements.
+the de facto standard of scripting languages on the web, is not able to meet these requirements.
 
-In order to compensate for JavaScript's downsides, \textit{WebAssembly} was introduced,
-It is a new language that is ``designed for efficient execution and compact representation of code
+In order to compensate for JavaScript's downsides, \textit{WebAssembly} (WASM) was introduced.
+WASM is a new language that is ``designed for efficient execution and compact representation of code
 on modern processors including in a web browser'' \cite{wasm-w3c-announcement}, and strives to
 improve both performance and power consumption.
-WebAssembly belongs not only to the web, but can also be run locally with the aid of runtimes, such as
+Despite WASM was conceived to run in browsers, it can also be run directly on the host with the aid of runtimes, such as
 \textit{Wasmtime} and \textit{Wasmer}, that do provide a fair level of security.
+In some use cases, however, the provided security level is not enough and solutions to enhance it
+are necessary.
 
-However, in some cases it can be necessary to enhance this level of security.
-Hence, the aim of this thesis work is to explore how these runtimes can be further restricted
-through the aid of Linux Security Modules when run on a Linux system
-in order to improve security and give more control to the user.
+The aim of this thesis work is to explore how these runtimes can be further restricted
+through the aid of Linux Security Modules so to improve security and give more control to the user.
 \end{abstract}
