@@ -235,8 +235,8 @@ is slower than running directly a native binary. This is also shown in the three
 graphs visible in Figure \ref{fig:distribution-sorting-wasm}, especially when compared with
 the ones in Figure \ref{fig:distribution-sorting-native}.
 
-Performance is hence reasonably comparable, but there is a constant overhead of at least 20 ms in
-all the test runs.
+Hence, a WASM binary performance is reasonably comparable to a native binary,
+although there is a constant overhead of at least 20 ms in all the test runs.
 
 \begin{table}
   \centering
@@ -276,21 +276,21 @@ all the test runs.
   \label{fig:distribution-sorting-wasm}
 \end{figure}
 
-Another interesting point is that the developed project\footnote{Integrating Landlock with the embedding
-of WebAssembly modules in Rust through the library provided by \textit{Wasmtime}.}, presents
-a constant overhead of about 30 ms with respect to using \textit{Wasmtime} directly or thorugh eBPF.
-This is visible also in Figure \ref{fig:avg-comparison-wasm-speed},
+There is another interesting result that presents itself when analysing the integration of Landlock
+and the embedding of WebAssembly modules in Rust (through \textit{Wasmtime}) -
+a constant overhead with respect to using \textit{Wasmtime} directly or through eBPF.
+This can be seen in Table \ref{table:lsm-impact-wasm}, but is more visible in Figure \ref{fig:avg-comparison-wasm-speed},
 showing how the average execution time varies with respect to read file size -
 the \textit{Landlock} curve has roughly the same shape as the other two, but appears translated
-of a constant factor.
+of a constant factor of around 30 ms.
 
 Since in Section \ref{sec:landlock-vs-ebpf-native} it was shown that no restriction method had a considerable overhead
 against a native binary, and because in this case the WASM module is interpreted by a native binary
 restricted with Landlock, it stands to reason that this overhead should be due to the usage
 of the library provided by \textit{Wasmtime} for integrating WASM in Rust.
 
-In all cases, however, execution times are not higher than 200 ms - this is a noticeable
-delay, but small enough to not be of any discomfort to a human user.
+In all cases, however, execution times are not higher than 200 ms - although being a noticeable
+delay, this is small enough to not be of any discomfort to a human user.
 
 \begin{figure}[h!]
   \centering
