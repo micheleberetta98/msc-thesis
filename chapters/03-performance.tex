@@ -228,6 +228,7 @@ the Linux kernel.
 
 
 \subsection{Landlock and eBPF on a WebAssembly binary}
+\label{sec:landlock-vs-ebpf-wasm}
 
 The first thing of note, immediately shown by the data in Table \ref{table:lsm-impact-wasm},
 is that on average every single execution of a WASM binary, either restricted or not,
@@ -371,8 +372,125 @@ delay, this is small enough to not be of any discomfort to a human user.
 
 \section{Internal analysis of the developed project}
 
-\subsection{Performance impact of Landlock}
+In order to test the performance of the integration between Landlock and WebAssembly,
+embedded in Rust through WebAssembly, through the use of the standard library \texttt{std::time::Instant}
+various timestamps were taken and then combined in order to measure the execution time of various program parts.
+A total of 100 runs were used in order to measure the average execution times.
 
-\subsection{Performance impact of using a WASI library}
+Two different WebAssembly programs were tested - a trivial one
+(Listing \ref{lst:project-perf-program-simple}) and a more complex one, with
+file system access and specific restrictions enabled (Listing \ref{lst:project-perf-program-complex}).
+Both these programs were compiled with \texttt{rustc} with a \texttt{wasm32-wasi} target and full
+optimisations enabled.
+
+\vspace*{0.5cm}
+
+\begin{code}[language=Rust, caption=The tested trivial program, label=lst:project-perf-program-simple]
+  fn main() {
+    println!("Hello World");
+  }
+\end{code}
+
+\clearpage
+\begin{code}[language=Rust, caption=The more complex tested program, label=lst:project-perf-program-complex]
+use std::fs::{read_to_string, write};
+
+fn main() {
+  read_to_string("file1.txt")
+    .expect("Could not read file1");
+  write("file1.txt", "New content 1")
+    .expect("Could not write file1");
+  read_to_string("subdir/file2.txt")
+    .expect("Could not read file2");
+  write("subdir/file2.txt", "New content 2")
+    .expect("Could not write file2");
+}  
+\end{code}
+
+\subsection{Execution times}
+
+The different program parts considered in these measures are the following:
+\begin{itemize}
+  \item argument parsing;
+  \item WASM module instantiation;
+  \item the preopening of all directories by Wasmtime;
+  \item applying all the Landlock rules;
+  \item and finally, compiling and running the WASM module.
+\end{itemize}
+
+\begin{table}
+  \centering
+  \csvreader[
+    tabular={|l|r|r|r|r|},
+    table head = \hline
+      \textit{Program part} & $\mu_\mathrm{Instant}$ & $\sigma_\mathrm{Instant}$ & $\mu_\mathrm{Cumulative}$ & $\sigma_\mathrm{Cumulative}$   \\ \hline\hline,
+    late after line = \\ \hline,
+    head to column names,
+  ]{test-data/project-stats-simple.csv}{}
+  {\type & \mean & \stddev & \meanc & \stddevc}
+  \caption{Execution times in $\mu s$ when running the simple program (Listing \ref{lst:project-perf-program-simple}).}
+  \label{table:execution-times-simple}
+\end{table}
+
+\begin{table}
+  \centering
+  \csvreader[
+    tabular={|l|r|r|r|r|},
+    table head = \hline
+      \textit{Program part} & $\mu_\mathrm{Instant}$ & $\sigma_\mathrm{Instant}$ & $\mu_\mathrm{Cumulative}$ & $\sigma_\mathrm{Cumulative}$   \\ \hline\hline,
+    late after line = \\ \hline,
+    head to column names,
+  ]{test-data/project-stats-medium.csv}{}
+  {\type & \mean & \stddev & \meanc & \stddevc}
+  \caption{Execution times in $\mu s$ when running the complex program (Listing \ref{lst:project-perf-program-complex}).}
+  \label{table:execution-times-complex}
+\end{table}
+
+In Table \ref{table:execution-times-simple} and Table \ref{table:execution-times-complex} are visible
+both the average time spent by a program section ($\mu_\mathrm{Instant}$) and the cumulative time
+up until that same section ($\mu_\mathrm{Cumulative}$), all measured in microseconds.
+For example, if the part ``Landlock enforcement'' is such that $\mu_\mathrm{Instant} = 20$ and $\mu_\mathrm{Cumulative} = 100$,
+this means that on average it takes 20 $\mu s$ to apply Landlock to the running process, and on average this part
+is fully completed after 100 $\mu s$ from the beginning of the program.
+
+As is shown in both Table \ref{table:execution-times-simple} and Table \ref{table:execution-times-complex},
+the performance impact of using Landlock to restrict the binary is negligible.
+The biggest bottleneck is given by running the WebAssembly binary - more specifically, instantiating
+the required engine and linker, and then interpreting and running the WASM module (as specified in Section \ref{sec:landlock-wasm-module}).
+
+Moreover, this data confirms the hypothesis brought forward in Section \ref{sec:landlock-vs-ebpf-wasm} - that
+the constant overhead presented by running WASM in combination with Landlock must be due to the usage of
+the WASI embedding library provided by \textit{Wasmtime}, and not a byproduct of restricting the process with Landlock.
+
+Finally, Figure \ref{fig:perf-execution-times-comparison} shows how each program section
+occupies the overall time spent running by the program. The various labels are as follows
+- \texttt{A} is for ``Argument parsing'', \texttt{B} is for ``Module initialisation'',
+\texttt{C} is for ``Preopen'', \texttt{D} is for ``Landlock enforcement'' and
+\texttt{E} is for ``Running WASM binary''.
+
+\begin{figure}[h!]
+  \centering
+  
+  \begin{subfigure}[b]{0.46\textwidth}
+    \includegraphics[width=\textwidth]{project-performance/graph_simple.png}
+    \caption{Simple program}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.46\textwidth}
+    \includegraphics[width=\textwidth]{project-performance/graph_simple_c.png}
+    \caption{Simple program (cumulative)}
+  \end{subfigure}
+
+  \begin{subfigure}[b]{0.46\textwidth}
+    \includegraphics[width=\textwidth]{project-performance/graph_medium.png}
+    \caption{Complex program}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.46\textwidth}
+    \includegraphics[width=\textwidth]{project-performance/graph_medium_c.png}
+    \caption{Complex program (cumulative)}
+  \end{subfigure}
+
+  \caption{A graphic comparison of all the execution times, in $\mu s$.}
+  \label{fig:perf-execution-times-comparison}
+\end{figure}
 
 \section{Conclusions and observations}
