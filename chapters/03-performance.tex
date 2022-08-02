@@ -72,6 +72,7 @@ out of the box, removing the need to compile the Linux kernel with the necessary
 functionalities.
 
 \subsection{Tests' description}
+\label{sec:performance-test-description}
 
 The performed tests are:
 \begin{itemize}
@@ -128,14 +129,13 @@ the standard deviation of the method $x$.
 In this section we will look at what impact different LSMs bring on a program,
 be it a native binary or a WebAssembly binary run through some kind of runtime.
 
-\subsection{Landlock and eBPF on a native binary}
-\label{sec:landlock-vs-ebpf-native}
+In Table \ref{table:lsm-impact-native} are present all execution times for a native binary,
+compiled directly with \texttt{rustc} and run both unrestricted (\textit{Native}) and restricted
+with different LSMs (\textit{Landlock} and \textit{eBPF}).
 
-% As it is visible in Table \ref{table:lsm-impact-native}, when dealing with a purely computational program
-% Landlock is closer to native speed than eBPF, although the difference is on the order
-% of 2 ms and so it is essentially negligible.
-% This is shown also in the three graphs in Figure \ref{fig:distribution-sorting-native} - all runs are
-% concentrated under 5 ms.
+On the other hand, Table \ref{table:lsm-impact-wasm} is about running a WebAssembly binary through
+\textit{Wasmtime} without any restriction, or through the WASM runtime developed in Section \ref{sec:restricting-wasi-landlock}
+and restricted with Landlock (\textit{WL}) or eBPF (\textit{WeBPF}).
 
 \begin{table}
   \centering
@@ -154,6 +154,57 @@ be it a native binary or a WebAssembly binary run through some kind of runtime.
   \label{table:lsm-impact-native}
 \end{table}
 
+\begin{table}
+  \centering
+  \csvreader[
+    tabular={|l|r|r|r|r|r|r|},
+    table head = \hline
+      \textit{Test type}
+      & $\mu_\mathrm{Wasmtime}$   & $\sigma_\mathrm{Wasmtime}$
+      & $\mu_\mathrm{WL}$ & $\sigma_\mathrm{WL}$
+      & $\mu_\mathrm{WeBPF}$     & $\sigma_\mathrm{WeBPF}$ \\ \hline\hline,
+    late after line = \\ \hline,
+    head to column names,
+  ]{test-data/wasm-landlock-ebpf.csv}{}
+  {\type & \mnative & \snative & \mlandlock & \slandlock & \mebpf & \sebpf}
+  \caption{Execution times of a WASM binary under different restrictions (in ms).}
+  \label{table:lsm-impact-wasm}
+\end{table}
+
+\subsection{A computational-heavy program}
+
+Let's take a look at how restricting a purely computational-heavy program, namely the sorting of 
+10000 random numbers showin in Listing \ref{lst:sorting-test-rust}, affects its performance.
+Comparing the first lines of Table \ref{table:lsm-impact-native} and Table \ref{table:lsm-impact-wasm},
+it is immediately apparent that using a LSM to restrict a binary, be it native or WebAssembly, worsen performance.
+
+When dealing with a native binary, \textit{Landlock} has a lower overhead than \textit{eBPF} (an average
+of $1.03$ ms for Landlock against an average of $2.30$ for eBPF), as is visible in Figure \ref{fig:distribution-sorting-native}.
+This could be due to how the two sandoxes are enforced:
+\begin{itemize}
+  \item Landlock is directly available as a C library in the Linux kernel, so the communication between
+        the program and the relative LSM can be as simple as multiple function calls;
+  \item on the other hand, eBPF needs to have an active server\footnote{As highlighted in Section \ref{sec:restricting-wasi-ebpf}.},
+        so the communication has to undergo a message exchange between processes.
+\end{itemize}
+By following this line of reasoning, it is expected that Landlock should be a little faster than eBPF.
+Moreover, eBPF is more complex than Landlock since it allows more control on what
+can and cannot be done by a running program, hence it has to deal with a higher complexity.
+The overhead of eBPF, however, becomes smaller and smaller when measured in percentage as the execution times get higher.
+This means that for small and fast programs the slow-down could become apparent if they get called many times
+in a short period of time, while for slower program called with less frequency this should be negligible.
+
+When dealing with a WebAssembly binary, the computational-heavy program is noticeably slower
+compared to the native binary execution times, either unrestricted or restricted, as show in Figure \ref{fig:distribution-sorting-wasm}.
+The same reasoning applied before is valid here too - eBPF is a little slower than Landlock, with a overhead
+of about $1$ ms.
+However, restricting a WASM binary with the runtime developed in Section \ref{sec:restricting-wasi-landlock}
+introduces a constant overhead of around $30$ ms with respect to \textit{Wasmtime}.
+Since it is visible in Table \ref{table:lsm-impact-native} that Landlock is quite close to
+unrestricted performance on average, and because Landlock was disabled when running
+the tests combining WASM and eBPF, this extra time could be due to how the WASM module gets
+interpreted by the library provided by \textit{Wasmtime}.
+
 \begin{figure}[ht]
   \centering
   \begin{subfigure}[b]{0.32\textwidth}
@@ -171,23 +222,32 @@ be it a native binary or a WebAssembly binary run through some kind of runtime.
     \includegraphics[width=\textwidth]{tests/sorting.native-bpf.png}
     \caption{eBPF}
   \end{subfigure}
-  \caption{Distribution of run times when sorting 10000 numbers (native).}
+  \caption{Distribution of execution times when sorting 10000 numbers (native).}
   \label{fig:distribution-sorting-native}
 \end{figure}
 
-% Similarly, when dealing with files there the use of LSMs does not bring a great overhead.
-% Execution times of protected binaries are always comparable to running a binary directly
-% without any form of restriction, as shown by the graphs in Figure \ref{fig:distribution-reading-native}.
-% Moreover, as seen in Figure \ref{fig:avg-comparison-native-speed},
-% the average execution times of the tested configurations exhibit a similar trend.
-% Times get significantly higher when dealing with files with sizes in the order of hundreds of MBs,
-% but even in this case execution times do not differ a lot - restricted binaries however show
-% lower variability.
+\begin{figure}[ht!]
+  \centering
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/sorting.wasmtime.png}
+    \caption{Wasmtime}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/sorting.wasm-landlock.png}
+    \caption{WASM + Landlock}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/sorting.wasm-bpf.png}
+    \caption{WASM + eBPF}
+  \end{subfigure}
+  \caption{Distribution of execution times when sorting 10000 numbers (WASM).}
+  \label{fig:distribution-sorting-wasm}
+\end{figure}
 
-% Note that in all these tests eBPF performs always worse on average than Landlock - this could be
-% due to the fact that, when running \texttt{bpfcontain}, there is a communication with an active daemon
-% (as explained in Section \ref{sec:restricting-wasi-ebpf}), while Landlock communicates directly with
-% the Linux kernel.
+\subsection{File system access}
 
 \begin{figure}[h]
   \centering
@@ -267,9 +327,6 @@ be it a native binary or a WebAssembly binary run through some kind of runtime.
 \end{figure}
 
 
-\subsection{Landlock and eBPF on a WebAssembly binary}
-\label{sec:landlock-vs-ebpf-wasm}
-
 % The first thing of note, immediately shown by the data in Table \ref{table:lsm-impact-wasm},
 % is that on average every single execution of a WASM binary, either restricted or not,
 % is slower than running directly a native binary. This is also shown in the three distribution
@@ -278,44 +335,6 @@ be it a native binary or a WebAssembly binary run through some kind of runtime.
 
 % Hence, a WASM binary performance is reasonably comparable to a native binary,
 % although there is a constant overhead of at least 20 ms in all the test runs.
-
-\begin{table}
-  \centering
-  \csvreader[
-    tabular={|l|r|r|r|r|r|r|},
-    table head = \hline
-      \textit{Test type}
-      & $\mu_\mathrm{Wasmtime}$   & $\sigma_\mathrm{Wasmtime}$
-      & $\mu_\mathrm{Landlock}$ & $\sigma_\mathrm{Landlock}$
-      & $\mu_\mathrm{eBPF}$     & $\sigma_\mathrm{eBPF}$ \\ \hline\hline,
-    late after line = \\ \hline,
-    head to column names,
-  ]{test-data/wasm-landlock-ebpf.csv}{}
-  {\type & \mnative & \snative & \mlandlock & \slandlock & \mebpf & \sebpf}
-  \caption{Execution times of a WASM binary under different restrictions (in ms).}
-  \label{table:lsm-impact-wasm}
-\end{table}
-
-\begin{figure}[ht!]
-  \centering
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/sorting.wasmtime.png}
-    \caption{Wasmtime}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/sorting.wasm-landlock.png}
-    \caption{Wasmtime + Landlock}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/sorting.wasm-bpf.png}
-    \caption{Wasmtime + eBPF}
-  \end{subfigure}
-  \caption{Distribution of execution times when sorting 10000 numbers (WASM).}
-  \label{fig:distribution-sorting-wasm}
-\end{figure}
 
 % There is another interesting result that presents itself when analysing the integration of Landlock
 % and the embedding of WebAssembly modules in Rust (through \textit{Wasmtime}) -
