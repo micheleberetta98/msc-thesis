@@ -9,24 +9,25 @@ The main goals of this performance testing plan are:
 \noindent
 For a given program written in Rust, the following configurations are tested:
 \begin{itemize}
-  \item a native binary, compiled by \texttt{rustc} and run as executable under the following conditions
+  \item a native binary, compiled by \texttt{rustc} and run as an executable under the following conditions:
         \begin{itemize}
           \item without a sandbox;
-          \item modified in order to be run in a sandbox with Landlock (an example is visible in Listing \ref{lst:test-program-landlock-example});
-          \item restricted with eBPF.
+          \item sandboxed with Landlock (in this case, the program has to be modified - an example is visible in Listing \ref{lst:test-program-landlock-example});
+          \item sandboxed with eBPF.
         \end{itemize}
   \item a WebAssembly binary obtained by the same Rust program and run:
         \begin{itemize}
           \item directly by the \textit{Wasmtime} command line tool;
           \item by the WASM runtime developed in Section \ref{sec:restricting-wasi-landlock} and restricted with Landlock;
           \item by the WASM runtime developed in Section \ref{sec:restricting-wasi-landlock} and restricted with
-                eBPF\footnote{In this case, Landlock is obviously disabled.}.
+                eBPF\footnote{In this case, Landlock is disabled.}.
         \end{itemize}
 \end{itemize}
 
-In Section \ref{sec:landlock-vs-ebpf-native} the first three cases will be analysed in order to find
-eventual differences between Landlock and eBPF when applied to a native binary, while in Section
-\ref{sec:landlock-vs-ebpf-wasm} the same are tested with a WebAssembly binary.
+The first three cases, where the native binary is tested, will be analysed in Section \ref{sec:landlock-vs-ebpf-native}
+in order to find eventual differences between the sandboxes given by Landlock and eBPF.
+The latter three cases will be analysed in Section \ref{sec:landlock-vs-ebpf-wasm} to see
+how the sandboxed WASM runtime compares to \textit{Wasmtime}.
 
 \vspace*{0.5cm}
 \begin{code}[language=Rust, caption=An example of a program restricted with Landlock., label=lst:test-program-landlock-example]
@@ -75,7 +76,7 @@ functionalities.
 The performed tests are:
 \begin{itemize}
   \item a purely computational program, given by the sorting of 10000 random numbers as in Listing \ref{lst:sorting-test-rust},
-        in order to measure the pure computational impact of the various methods;
+        in order to measure only the computational impact of the various methods;
   \item a simple reading of files of various sizes as in Listing \ref{lst:reading-test-rust}, with only the necessary permissions enabled on
         a case-by-case bases, in order to test the sandbox provided and how they fare against native binaries.
 \end{itemize}
@@ -167,7 +168,7 @@ concentrated under 5 ms.
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/sorting.bpf.png}
+    \includegraphics[width=\textwidth]{tests/sorting.native-bpf.png}
     \caption{eBPF}
   \end{subfigure}
   \caption{Distribution of run times when sorting 10000 numbers (native).}
@@ -209,7 +210,7 @@ the Linux kernel.
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100k.bpf.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-100k.native-bpf.png}
     \caption{eBPF (100 KB)}
   \end{subfigure}
 
@@ -225,7 +226,7 @@ the Linux kernel.
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-1M.bpf.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-1M.native-bpf.png}
     \caption{eBPF (1 MB)}
   \end{subfigure}
 
@@ -241,7 +242,7 @@ the Linux kernel.
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-10M.bpf.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-10M.native-bpf.png}
     \caption{eBPF (10 MB)}
   \end{subfigure}
 
@@ -257,7 +258,7 @@ the Linux kernel.
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100M.bpf.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-100M.native-bpf.png}
     \caption{eBPF (100 MB)}
   \end{subfigure}
 
@@ -304,12 +305,12 @@ although there is a constant overhead of at least 20 ms in all the test runs.
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/sorting.landlock.png}
+    \includegraphics[width=\textwidth]{tests/sorting.wasm-landlock.png}
     \caption{Wasmtime + Landlock}
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/sorting.bpf-wasmtime.png}
+    \includegraphics[width=\textwidth]{tests/sorting.wasm-bpf.png}
     \caption{Wasmtime + eBPF}
   \end{subfigure}
   \caption{Distribution of execution times when sorting 10000 numbers (WASM).}
@@ -348,12 +349,12 @@ delay, this is small enough to not be of any discomfort to a human user.
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100k.landlock.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-100k.wasm-landlock.png}
     \caption{Landlock (100 KB)}
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100k.bpf-wasmtime.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-100k.wasm-bpf.png}
     \caption{eBPF (100 KB)}
   \end{subfigure}
 
@@ -364,12 +365,12 @@ delay, this is small enough to not be of any discomfort to a human user.
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-1M.landlock.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-1M.wasm-landlock.png}
     \caption{Landlock (1 MB)}
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-1M.bpf-wasmtime.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-1M.wasm-bpf.png}
     \caption{eBPF (1 MB)}
   \end{subfigure}
 
@@ -380,12 +381,12 @@ delay, this is small enough to not be of any discomfort to a human user.
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-10M.landlock.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-10M.wasm-landlock.png}
     \caption{Landlock (10 MB)}
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-10M.bpf-wasmtime.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-10M.wasm-bpf.png}
     \caption{eBPF (10 MB)}
   \end{subfigure}
 
@@ -396,12 +397,12 @@ delay, this is small enough to not be of any discomfort to a human user.
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100M.landlock.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-100M.wasm-landlock.png}
     \caption{Landlock (100 MB)}
   \end{subfigure}
   \begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100M.bpf-wasmtime.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-100M.wasm-bpf.png}
     \caption{eBPF (100 MB)}
   \end{subfigure}
 
