@@ -1,7 +1,7 @@
 type,mnative,snative,mlandlock,slandlock,mebpf,sebpf
 Sorting 10000 numbers,18.00,1.35,44.20,2.05,45.72,2.14
 Opening a file,17.12,0.24,45.83,1.73,47.40,2.12
-Reading a 100k file,17.47,1.62,45.90,1.71,47.50,2.06
-Reading a 1M file,17.97,1.88,46.44,2.08,47.91,2.17
-Reading a 10M file,23.21,0.76,51.93,2.16,53.41,2.00
-Reading a 100M file,75.68,1.31,104.91,3.25,105.92,1.90
+Reading a 100 KB file,17.47,1.62,45.90,1.71,47.50,2.06
+Reading a 1 MB file,17.97,1.88,46.44,2.08,47.91,2.17
+Reading a 10 MB file,23.21,0.76,51.93,2.16,53.41,2.00
+Reading a 100 MB file,75.68,1.31,104.91,3.25,105.92,1.90
