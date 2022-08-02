@@ -20,7 +20,7 @@
 , morekeywords=[2]{Send}  % additional traits
 %
 , morekeywords=[3]{bool, char, f32, f64, i8, i16, i32, i64, isize, str, u8, u16, u32, u64, unit, usize, i128, u128}  % primitive types
-, morekeywords=[3]{BitFlags, AccessFs, WasiCtxBuilder, PathAccess, RulesetError, RulesetCreated, RestrictionStatus}
+, morekeywords=[3]{BitFlags, AccessFs, WasiCtxBuilder, PathAccess, RulesetError, RulesetCreated, RestrictionStatus, PathBeneath, Ruleset}
 %
 , morekeywords=[4]{Err, false, None, Ok, Some, true}  % prelude value constructors
 % grep 'pub \(type\|struct\|enum\) [A-Za-z][A-Za-z0-9]*' -r . | sed 's/^.*pub \(type\|struct\|enum\) \([A-Za-z][A-Za-z0-9]*\).*/\2/g' | sort -u | tr '\n' ',' | sed 's/^\(.*\),$/{\1}\n/g' | sed 's/,/, /g'    
