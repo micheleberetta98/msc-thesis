@@ -360,7 +360,6 @@ reading and writing files for \texttt{dir1}.
 However, if we then define another ruleset comprising only of read operations
 for \texttt{file1}, the permissions specified for \texttt{dir1} are still
 valid, so when a process restricts itself it is still able to write to \texttt{file1}.
-
 Other limitations of Landlock include the impossibility for a thread to modify its own topology
 (e.g., via \textit{mount}), a limit of 16 layers of stacked rulesets and the impossibility to
 restrict special file systems, such as kernel file systems (e.g., nsfs).
@@ -399,7 +398,7 @@ allows the removal of empty directories \textit{inside} of $d$, and not of $d$ i
   \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_SOCK}, to create, rename or link a socket;
   \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_FIFO}, to create, rename or link a named pipe;
   \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_BLOCK}, to create, rename or link a block device;
-  \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_SYM}, to create, rename or link a symbolic link;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_SYM}, to create, rename or link a symbolic;
   \item \texttt{LANDLOCK\_ACCESS\_FS\_REFER}, to re-parent a file hierarchy\footnote{Available since the second version of the Landlock ABI.}.
 \end{itemize}
 
@@ -407,6 +406,14 @@ This last one is treated differently from the others - in order to prevent privi
 it is necessary that the destination directory hierarchy has the same (or a superset of) restrictions
 as the source hierarchy, since only create a rule with such access right is not enough to protect oneself.
 If that is not the case, this actions is denied directly by the operating system.
+
+The behaviour of symbolic links within Landlock is also interesting - hard links can be created only on data
+which can already be accessed according to the provided rules, while newly created soft links can reference any path on the
+file system, but the rules that are applied are those of the referenced directory.
+For example, if a program has a \texttt{LANDLOCK\_ACCESS\_FS\_READ\_FILE}  as well as a 
+\texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_SYM} on a certain directory in the home of a user, then a hard link
+pointing to \texttt{/etc/passwd} cannot be created, since the program does not have access to it, while a soft
+link can be created but cannot be read.
 
 Lastly, every new thread resulting from a \textit{clone} call inherits all Landlock restrictions from its parents.
 These restrictions are also kept after a \textit{fork}.
