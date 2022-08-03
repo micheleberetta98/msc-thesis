@@ -24,11 +24,6 @@ For a given program written in Rust, the following configurations are tested:
         \end{itemize}
 \end{itemize}
 
-The first three cases, where the native binary is tested, will be analysed in Section \ref{sec:landlock-vs-ebpf-native}
-in order to find eventual differences between the sandboxes given by Landlock and eBPF.
-The latter three cases will be analysed in Section \ref{sec:landlock-vs-ebpf-wasm} to see
-how the sandboxed WASM runtime compares to \textit{Wasmtime}.
-
 \vspace*{0.5cm}
 \begin{code}[language=Rust, caption=An example of a program restricted with Landlock., label=lst:test-program-landlock-example]
 use anyhow::Result;
@@ -175,6 +170,8 @@ and restricted with Landlock (\textit{WL}) or eBPF (\textit{WeBPF}).
 
 Let's take a look at how restricting a purely computational-heavy program, namely the sorting of 
 10000 random numbers showin in Listing \ref{lst:sorting-test-rust}, affects its performance.
+In order to test the eBPF sandbox, Listing \ref{lst:outline-policy-sorting-test} shows the outline for the used policy.
+
 Comparing the first lines of Table \ref{table:lsm-impact-native} and Table \ref{table:lsm-impact-wasm},
 it is immediately apparent that using a LSM to restrict a binary, be it native or WebAssembly, worsen performance.
 
@@ -194,8 +191,18 @@ The overhead of eBPF, however, becomes smaller and smaller when measured in perc
 This means that for small and fast programs the slow-down could become apparent if they get called many times
 in a short period of time, while for slower program called with less frequency this should be negligible.
 
+\vspace*{0.5cm}
+\begin{code}[language=yaml, caption=The outline of the policy used for testing the sorting program., label=lst:outline-policy-sorting-test]
+name: test-sorting
+cmd: # The command to be executed
+allow:
+- fs: {pathname: ., access: rxm}
+\end{code}
+
 When dealing with a WebAssembly binary, the computational-heavy program is noticeably slower
-compared to the native binary execution times, either unrestricted or restricted, as shown in Figure \ref{fig:distribution-sorting-wasm}.
+compared to the native binary execution times, either unrestricted or restricted, as shown in Figure
+\ref{fig:distribution-sorting-wasm}\footnote{Note that Figures \ref{fig:distribution-sorting-wasm} and \ref{fig:distribution-sorting-native}
+have different scales.}.
 The same reasoning applied before is valid here too - eBPF is a little slower than Landlock, with a overhead
 of about $1$ ms.
 However, restricting a WASM binary with the runtime developed in Section \ref{sec:restricting-wasi-landlock}
@@ -203,7 +210,8 @@ introduces a constant overhead of around $30$ ms with respect to \textit{Wasmtim
 Since it is visible in Table \ref{table:lsm-impact-native} that Landlock is quite close to
 unrestricted performance on average, and because Landlock was disabled when running
 the tests combining WASM and eBPF, this extra time could be due to how the WASM module gets
-interpreted by the library provided by \textit{Wasmtime}.
+interpreted by the library provided by \textit{Wasmtime}\footnote{This will be analysed more
+accurately in Section \ref{sec:performance-internal-analysis}.}.
 
 \begin{figure}[ht]
   \centering
@@ -430,6 +438,7 @@ interpreted by the library provided by \textit{Wasmtime}.
 \end{figure}
 
 \section{Internal analysis of the developed project}
+\label{sec:performance-internal-analysis}
 
 In order to test the performance of the integration between Landlock and WebAssembly,
 embedded in Rust through WebAssembly, through the use of the standard library \texttt{std::time::Instant}
