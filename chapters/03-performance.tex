@@ -195,7 +195,7 @@ This means that for small and fast programs the slow-down could become apparent 
 in a short period of time, while for slower program called with less frequency this should be negligible.
 
 When dealing with a WebAssembly binary, the computational-heavy program is noticeably slower
-compared to the native binary execution times, either unrestricted or restricted, as show in Figure \ref{fig:distribution-sorting-wasm}.
+compared to the native binary execution times, either unrestricted or restricted, as shown in Figure \ref{fig:distribution-sorting-wasm}.
 The same reasoning applied before is valid here too - eBPF is a little slower than Landlock, with a overhead
 of about $1$ ms.
 However, restricting a WASM binary with the runtime developed in Section \ref{sec:restricting-wasi-landlock}
