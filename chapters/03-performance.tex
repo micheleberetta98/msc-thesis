@@ -352,7 +352,7 @@ Again, the WASM curves in Figure \ref{fig:avg-comparison-wasm-speed} clearly sho
 of about $30$ ms identified in the previous sections - the \textit{WASM+Landlock} and \textit{WASM+eBPF} curves
 exhibit the same trend as the \textit{Wasmtime} one, but appear translated by a constant factor.
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
   \centering
   \includegraphics[width=0.8\linewidth]{tests/reading-file-native-graph.png}
   \caption{A comparison of native average speeds when reading a file.}
@@ -366,6 +366,7 @@ exhibit the same trend as the \textit{Wasmtime} one, but appear translated by a 
   \label{fig:avg-comparison-wasm-speed}
 \end{figure}
 
+\clearpage
 Finally, Figure \ref{fig:distribution-reading-native} and Figure \ref{fig:distribution-reading-wasm}
 collect all distribution relative to the different readings for native binaries and WASM binaries, respectively.
 Note that, in both figures, the tests on the $100$ MB file have a different scale from the others.
