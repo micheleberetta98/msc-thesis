@@ -255,14 +255,120 @@ accurately in Section \ref{sec:performance-internal-analysis}.}.
   \label{fig:distribution-sorting-wasm}
 \end{figure}
 
-\subsection{File system access}
+\subsection{Opening a file}
 
-\begin{figure}[h]
+This set of tests is meant to measure how the sandboxes perform when the restricted program opens a file.
+In this case, the performance is measured by reading an empty file with the program described in Listing \ref{lst:reading-test-rust}.
+For the policy used with eBPF, its outline is highlighted in Listing \ref{lst:outline-policy-reading-test}
+- in this case, it is necessary to give permissions to access the terminal since the size of the read content is printed. 
+
+\vspace*{0.5cm}
+\begin{code}[language=yaml, caption=The outline of the policy used for testing the reading program., label=lst:outline-policy-reading-test]
+name: test-reading-file
+
+cmd: # The command to be executed
+
+allow:
+  - device: terminal
+  - fs: {pathname: ., access: rxm}
+\end{code}
+
+As is visible in Tables \ref{table:lsm-impact-native} and \ref{table:lsm-impact-wasm},
+the same considerations made for a purely computational program are valid in this case too
+- Landlock, on average, is much closer to native speed than eBPF.
+This is alsow shown in Figure \ref{fig:distribution-opening-native}, where the eBPF curve is shifted towards
+higher execution times.
+
+Similarly, the WASM tests present the same behaviour remarked in the previous section -
+even when unrestricted, WASM is much slower than a native binary, and the developed runtime
+still has the constant overhead of around $30$ ms in both the tests within the Landlock and eBPF sandboxes.
+Again, Figure \ref{fig:distribution-opening-wasm} shows the distribution of execution times.
+
+\begin{figure}[ht]
+  \centering
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/reading-file-0.native.png}
+    \caption{Native}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/reading-file-0.native-landlock.png}
+    \caption{Landlock}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/reading-file-0.native-bpf.png}
+    \caption{eBPF}
+  \end{subfigure}
+  \caption{Distribution of execution times when opening a file (native).}
+  \label{fig:distribution-opening-native}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/reading-file-0.wasmtime.png}
+    \caption{Wasmtime}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/reading-file-0.wasm-landlock.png}
+    \caption{WASM + Landlock}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/reading-file-0.wasm-bpf.png}
+    \caption{WASM + eBPF}
+  \end{subfigure}
+  \caption{Distribution of execution times when opening a file (WASM).}
+  \label{fig:distribution-opening-wasm}
+\end{figure}
+
+\subsection{Accessing the file system}
+
+This last batch of tests is meant to show how sandboxed binaries, both native and WASM, performs when
+dealing with progressively large files.
+The following figures, namely Figure \ref{fig:avg-comparison-native-speed} and Figure \ref{fig:avg-comparison-wasm-speed},
+represents how the average execution time of a native binary and a WASM binary, respectively, changes
+when the read file gets bigger.
+
+The first notable feature is that performance drops exponentially as the file gets larger,
+starting to drop when reading a file in the order of tens of MBs, and with a significant
+spike in execution times when reaching the order of hundreds of MBs.
+This slow-down is clearly visible in the native curves as well as in the WASM curves,
+hence it has to be independent of the method used to run the
+program and only due to external circumstances, such as the operating system or the disk reading speed.
+For small files, however, there is not a notable change in speed.
+
+Another point of note is that in Figure \ref{fig:avg-comparison-native-speed} the gap between eBPF and Landlock,
+identified in the preiovus sections, is clearly visible at all file sizes.
+This can be seen also in Figure \ref{fig:avg-comparison-wasm-speed}, albeit less clearly as the file reaches $100$ MB.
+Note that, while the WASM runtime used for restricting a WASM binary with Landlock is the same used when testing eBPF,
+in this last case Landlock was disabled altogether, so any performance difference is only due to eBPF's internals.
+
+Again, the WASM curves in Figure \ref{fig:avg-comparison-wasm-speed} clearly show the overhead
+of about $30$ ms identified in the previous sections - the \textit{WASM+Landlock} and \textit{WASM+eBPF} curves
+have the same shape as the \textit{Wasmtime} one, but appear translated by a constant factor.
+
+\begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\linewidth]{tests/reading-file-native-graph.png}
   \caption{A comparison of native average speeds when reading a file.}
   \label{fig:avg-comparison-native-speed}
 \end{figure}
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=0.8\linewidth]{tests/reading-file-wasm-graph.png}
+  \caption{A comparison of WASM average speeds when reading a file.}
+  \label{fig:avg-comparison-wasm-speed}
+\end{figure}
+
+Finally, Figure \ref{fig:distribution-reading-native} and Figure \ref{fig:distribution-reading-wasm}
+collect all distribution relative to the different readings for native binaries and WASM binaries, respectively.
+Note that, in both figures, the tests on the $100$ MB file have a different scale from the others.
 
 \begin{figure}[ht!]
   \centering
@@ -332,39 +438,6 @@ accurately in Section \ref{sec:performance-internal-analysis}.}.
 
   \caption{Distribution of a native binary execution times when reading a file.}
   \label{fig:distribution-reading-native}
-\end{figure}
-
-
-% The first thing of note, immediately shown by the data in Table \ref{table:lsm-impact-wasm},
-% is that on average every single execution of a WASM binary, either restricted or not,
-% is slower than running directly a native binary. This is also shown in the three distribution
-% graphs visible in Figure \ref{fig:distribution-sorting-wasm}, especially when compared with
-% the ones in Figure \ref{fig:distribution-sorting-native}.
-
-% Hence, a WASM binary performance is reasonably comparable to a native binary,
-% although there is a constant overhead of at least 20 ms in all the test runs.
-
-% There is another interesting result that presents itself when analysing the integration of Landlock
-% and the embedding of WebAssembly modules in Rust (through \textit{Wasmtime}) -
-% a constant overhead with respect to using \textit{Wasmtime} directly or through eBPF.
-% This can be seen in Table \ref{table:lsm-impact-wasm}, but is more visible in Figure \ref{fig:avg-comparison-wasm-speed},
-% showing how the average execution time varies with respect to read file size -
-% the \textit{Landlock} curve has roughly the same shape as the other two, but appears translated
-% of a constant factor of around 30 ms.
-
-% Since in Section \ref{sec:landlock-vs-ebpf-native} it was shown that no restriction method had a considerable overhead
-% against a native binary, and because in this case the WASM module is interpreted by a native binary
-% restricted with Landlock, it stands to reason that this overhead should be due to the usage
-% of the library provided by \textit{Wasmtime} for integrating WASM in Rust.
-
-% In all cases, however, execution times are not higher than 200 ms - although being a noticeable
-% delay, this is small enough to not be of any discomfort to a human user.
-
-\begin{figure}[ht!]
-  \centering
-  \includegraphics[width=0.8\linewidth]{tests/reading-file-wasm-graph.png}
-  \caption{A comparison of WASM average speeds when reading a file.}
-  \label{fig:avg-comparison-wasm-speed}
 \end{figure}
 
 \begin{figure}[ht!]
@@ -437,6 +510,7 @@ accurately in Section \ref{sec:performance-internal-analysis}.}.
   \label{fig:distribution-reading-wasm}
 \end{figure}
 
+\clearpage
 \section{Internal analysis of the developed project}
 \label{sec:performance-internal-analysis}
 
@@ -459,7 +533,6 @@ optimisations enabled.
   }
 \end{code}
 
-\clearpage
 \begin{code}[language=Rust, caption=The more complex tested program, label=lst:project-perf-program-complex]
 use std::fs::{read_to_string, write};
 
@@ -475,6 +548,7 @@ fn main() {
 }  
 \end{code}
 
+\clearpage
 \subsection{Execution times}
 
 The different program parts considered in these measures are the following:
