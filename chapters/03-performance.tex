@@ -169,7 +169,7 @@ and restricted with Landlock (\textit{WL}) or eBPF (\textit{WeBPF}).
 \subsection{A computational-heavy program}
 
 Let's take a look at how restricting a purely computational-heavy program, namely the sorting of 
-10000 random numbers showin in Listing \ref{lst:sorting-test-rust}, affects its performance.
+10000 random numbers shown in Listing \ref{lst:sorting-test-rust}, affects its performance.
 In order to test the eBPF sandbox, Listing \ref{lst:outline-policy-sorting-test} shows the outline for the used policy.
 
 Comparing the first lines of Table \ref{table:lsm-impact-native} and Table \ref{table:lsm-impact-wasm},
@@ -177,7 +177,7 @@ it is immediately apparent that using a LSM to restrict a binary, be it native o
 
 When dealing with a native binary, \textit{Landlock} has a lower overhead than \textit{eBPF} (an average
 of $1.03$ ms for Landlock against an average of $2.30$ for eBPF), as is visible in Figure \ref{fig:distribution-sorting-native}.
-This could be due to how the two sandoxes are enforced:
+This could be due to how the two sandboxes are enforced:
 \begin{itemize}
   \item Landlock is directly available as a C library in the Linux kernel, so the communication between
         the program and the relative LSM can be as simple as multiple function calls;
@@ -276,7 +276,7 @@ allow:
 As is visible in Tables \ref{table:lsm-impact-native} and \ref{table:lsm-impact-wasm},
 the same considerations made for a purely computational program are valid in this case too
 - Landlock, on average, is much closer to native speed than eBPF.
-This is alsow shown in Figure \ref{fig:distribution-opening-native}, where the eBPF curve is shifted towards
+This is also shown in Figure \ref{fig:distribution-opening-native}, where the eBPF curve is shifted towards
 higher execution times.
 
 Similarly, the WASM tests present the same behaviour remarked in the previous section -
@@ -343,7 +343,7 @@ program and only due to external circumstances, such as the operating system or 
 For small files, however, there is not a notable change in speed.
 
 Another point of note is that in Figure \ref{fig:avg-comparison-native-speed} the gap between eBPF and Landlock,
-identified in the preiovus sections, is clearly visible at all file sizes.
+identified in the previous sections, is clearly visible at all file sizes.
 This can be seen also in Figure \ref{fig:avg-comparison-wasm-speed}, albeit less clearly as the file reaches $100$ MB.
 Note that, while the WASM runtime used for restricting a WASM binary with Landlock is the same used when testing eBPF,
 in this last case Landlock was disabled altogether, so any performance difference is only due to eBPF's internals.
