@@ -7,7 +7,8 @@ The main goals of this performance testing plan are:
 \end{itemize}
 
 \noindent
-For a given program written in Rust, the following configurations are tested:
+For a given program written in Rust, the following configurations are tested in order to compare
+overall speed of both restricted and unrestricted scenarios:
 \begin{itemize}
   \item a native binary, compiled by \texttt{rustc} and run as an executable under the following conditions:
         \begin{itemize}
@@ -513,6 +514,7 @@ Note that, in both figures, the tests on the $100$ MB file have a different scal
 \end{figure}
 
 \clearpage
+
 \section{Internal analysis of the developed project}
 \label{sec:performance-internal-analysis}
 
@@ -607,12 +609,6 @@ occupies the overall time spent running by the program. The various labels are a
 - \texttt{A} is for ``Argument parsing'', \texttt{B} is for ``Module initialisation'',
 \texttt{C} is for ``Preopen'', \texttt{D} is for ``Landlock enforcement'' and
 \texttt{E} is for ``Running WASM binary''.
-
-% Moreover, this data confirms the hypothesis brought forward in Section \ref{sec:landlock-vs-ebpf-wasm} - that
-% the constant overhead presented by running WASM in combination with Landlock must be due to the usage of
-% the WASI embedding library provided by \textit{Wasmtime}, and not a byproduct of restricting the process with Landlock.
-
-% Finally, F
 
 \begin{figure}[ht!]
   \centering
