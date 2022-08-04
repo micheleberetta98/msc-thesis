@@ -58,25 +58,26 @@ The project is divided into five modules, which are the following:
 \end{figure}
 
 \begin{code}[language=rust, caption=The \texttt{Args} struct., label=lst:arg-struct]
-  pub struct Args {
-    // The module to execute
-    pub wasm_module: String,
-  
-    // The preopened dir(s) to pass to wasmtime
-    pub dirs: Vec<String>,
-  
-    // The preopened mapped dir(s) to pass to wasmtime
-    pub mapdirs: Vec<(String, String)>,
-  
-    // A list of the allowed privileges on a
-    // particular folder/file
-    pub fs_allows: Vec<(String, BitFlags<AccessFs>)>,
-  
-    // Disable landlock (test only)
-    pub no_landlock: bool,
-  }
-  \end{code}
+pub struct Args {
+  // The module to execute
+  pub wasm_module: String,
 
+  // The preopened dir(s) to pass to wasmtime
+  pub dirs: Vec<String>,
+
+  // The preopened mapped dir(s) to pass to wasmtime
+  pub mapdirs: Vec<(String, String)>,
+
+  // A list of the allowed privileges on a
+  // particular folder/file
+  pub fs_allows: Vec<(String, BitFlags<AccessFs>)>,
+
+  // Disable landlock (test only)
+  pub no_landlock: bool,
+}
+\end{code}
+
+\clearpage
 The architecture diagram is shown in Figure \ref{fig:rust-landlock-code-architecture}, where
 are outlined the most important external crates and all dependencies between the modules, represented
 by directed arrows.
@@ -195,13 +196,16 @@ impl WasmModule {
   \label{fig:wasm-module}
 \end{figure}
 
-\subsubsection{The \texttt{landlock} and the \texttt{path\_access} modules}
+\subsubsection{The \texttt{landlock} module}
 
 The \texttt{landlock} module is a thin wrapper around the API made available by the \textit{rust-landlock} crate.
 It handles mostly ruleset creation, rule insertion, and enforces the policies before the desired WASM module is run.
 The main outline of the code is visible in Listing \ref{lst:rust-landlock}.
 
-The module makes use of another thin wrapper, the \texttt{PathAccess} struct defined in the \texttt{path\_access} module.
+\subsubsection{The \texttt{path\_access} module}
+
+The \texttt{landlock} module makes use of another thin wrapper, the \texttt{PathAccess} struct defined
+in the \texttt{path\_access} module.
 Here, the main entity is the \texttt{PathAccess} struct, that tracks which flags, as defined in Table \ref{table:landlock-flags},
 are applied to a single path. The flags list starts empty, and multiple flags can be added at any times.
 Moreover, this module also takes care of conversions between types required by the Landlock ABI in order
@@ -213,6 +217,7 @@ The program allows to specify all access right flags from the first version of t
 ABI\footnote{At the moment it is not possible to specify the \texttt{LANDLOCK\_ACCESS\_FS\_REFERER} in order to reparent a file hierarchy.},
 which are listed in Table \ref{table:landlock-flags}.
 
+\vspace*{0.5cm}
 \begin{code}[language=Rust, caption=The outline of the \texttt{landlock} module., label=lst:rust-landlock]
 pub struct Landlock {
   ruleset: RulesetCreated,
@@ -243,6 +248,7 @@ impl Landlock {
 }
 \end{code}
 
+\clearpage\noindent
 The following examples illustrate how to combine some of them:
 \begin{itemize}
   \item \texttt{file:R} allows only to read from \textit{file};
@@ -260,7 +266,7 @@ The Landlock self-restriction is applied after the necessary preopening of the d
 otherwise the running process would have to always have the permissions for listing directories even if
 not needed by the WASM binary.
 
-\begin{table}
+\begin{table}[hbt]
   \centering
   \begin{tabular}{|l|l|}
     \hline
@@ -376,6 +382,7 @@ necessary directories are preopened and eventual environment variables are impor
 An example policy is visible in Listing \ref{lst:yaml-policy-wasm}, where \textit{copy-file.wasm} simply copies
 the content of \texttt{input.txt} to \texttt{output.txt}.
 
+\vspace*{0.5cm}
 \begin{code}[language=yaml, caption=A policy for running bash., label=lst:yaml-policy-bash]
 # Name and command of the policy
 name: bash
