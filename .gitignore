@@ -3,7 +3,7 @@
 *.fls
 *.log
 *.pdf
-*.synctex.gz
+*.synctex*
 *.bcf
 *.run.xml
 *.bbl
