@@ -588,6 +588,7 @@ fn main() -> {
 \end{table}
 
 \subsection{Execution times}
+\label{sec:performance-internal-analysis-execution-times}
 
 The various measures are taken by using the standard Rust library \texttt{std::time},
 in particular the \texttt{Instant} struct, and then averaged on a total of 100 runs of
@@ -662,3 +663,27 @@ In this case, it can also be seen than the time took for running the WASM binary
 the same as the constant overhead that appeared when restricting WASM binaries through the developed runtime.
 
 \section{Conclusions and observations}
+
+One of the key points of this series of tests is that, although perfectly usable,
+WebAssembly is not still at the level of performance provided by using a native binary.
+As seen in Section \ref{sec:performance-comparison-between-different-sandboxes}, WASM binaries
+always perform worse than the native counterpart, even when not restricted by a LSM.
+This result is however to be expected - a WASM binary is made up of WASM instructions and
+it is similar to a sort of \textit{bytecode} that is interpreted by the runtime of one's choosing,
+and usually a interpreted program\footnote{Although the program in question is a binary format and hence faster to interpret.}
+is slower than a compiled one.
+This is true also for other languages that follow this paradigm - for example, Java with the JVM
+or Python (that can be compiled into a bytecode before being interpreted) are usually regarded as
+slower and/or more resource-hungry when compared to compiled languages such as C or Rust.
+
+When embedding WebAssembly in another language, this performance gap becomes even higher due to
+the work that must be done through the provided interpreting libraries
+(see Section \ref{sec:performance-internal-analysis-execution-times}).
+
+A positive point that has been shown multiple times, however, is that restricting a binary
+with a LSM, be it Landlock or eBPF, does not worsen performance a lot.
+As seen in Section \ref{sec:performance-comparison-between-different-sandboxes}, although a small
+performance impact is present, this could be considered negligible for large programs that take
+some time to run. For small programs that have an execution time of the same order of magnitude
+as the delay introduced this could become however problematic if they are called multiple time
+and in high frequency.
