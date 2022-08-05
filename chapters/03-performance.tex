@@ -361,14 +361,64 @@ exhibit the same trend as the \textit{Wasmtime} one, but appear translated by a 
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.8\linewidth]{tests/reading-file-native-graph.png}
+  \begin{subfigure}[b]{\textwidth}
+    \centering
+    \includegraphics[width=0.8\linewidth]{tests/reading-file-native-graph.png}
+  \end{subfigure}
+
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-100K.native.png}
+    \caption{Box plot for reading a 100 KB file.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-1M.native.png}
+    \caption{Box plot for reading a 1 MB file.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-10M.native.png}
+    \caption{Box plot for reading a 10 mB file.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-100M.native.png}
+    \caption{Box plot for reading a 100 MB file.}
+  \end{subfigure}
+
   \caption{A comparison of native average speeds when reading a file.}
   \label{fig:avg-comparison-native-speed}
 \end{figure}
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.8\linewidth]{tests/reading-file-wasm-graph.png}
+  \begin{subfigure}[b]{\textwidth}
+    \centering
+    \includegraphics[width=0.8\linewidth]{tests/reading-file-wasm-graph.png}
+  \end{subfigure}
+
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-100K.wasm.png}
+    \caption{Box plot for reading a 100 KB file.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-1M.wasm.png}
+    \caption{Box plot for reading a 1 MB file.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-10M.wasm.png}
+    \caption{Box plot for reading a 10 mB file.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-100M.wasm.png}
+    \caption{Box plot for reading a 100 MB file.}
+  \end{subfigure}
+
   \caption{A comparison of WASM average speeds when reading a file.}
   \label{fig:avg-comparison-wasm-speed}
 \end{figure}
