@@ -25,6 +25,10 @@ overall speed of both restricted and unrestricted scenarios:
         \end{itemize}
 \end{itemize}
 
+Moreover, the internal performance of the WASM runtime developed in Section \ref{sec:restricting-wasi-landlock}
+will be tested in Section \ref{sec:performance-internal-analysis}. In this case, the program will be subdivided
+into its functional parts and the execution time of each one will be used as a measure.
+
 \vspace*{0.5cm}
 \begin{code}[language=Rust, caption=An example of a program restricted with Landlock., label=lst:test-program-landlock-example]
 use anyhow::Result;
