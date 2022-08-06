@@ -1,5 +1,16 @@
 \ProvidesPackage{styling/page}
 
+\usepackage{fancyhdr}
+
+\fancypagestyle{plain}{
+  \fancyhf{} % clear all header and footers
+  \renewcommand{\headrulewidth}{0pt} % remove the header rule
+  \fancyfoot[CE,CO]{}
+  \fancyfoot[LE,RO]{\thepage}
+}
+
+\pagestyle{plain}
+
 \geometry{margin=3cm}
 \renewcommand{\baselinestretch}{1.5}
 \setcounter{tocdepth}{4}
