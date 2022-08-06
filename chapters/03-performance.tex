@@ -712,7 +712,7 @@ the ``culprit'' for the constant overhead could be the \textit{Wasmtime} library
 In this case, it can also be seen than the time took for running the WASM binary is, in both cases, about
 the same as the constant overhead that appeared when restricting WASM binaries through the developed runtime.
 
-\subsection{Landlock impact}
+\subsection{Landlock impact on performance}
 
 In this section we will focus on the ``Landlock enforcement'' part of the program, in order to describe how
 performance scales with the specified policy complexity. More specifically, performance is measured against
@@ -735,20 +735,49 @@ This is to be expected - when enforcing permissions on a single folder, the code
 and when enforcing a rule on a single folder, all permissions are \textit{xor}-ed together.
 This means that the cost of applying one rule is the same whatever the number of allowed actions is.
 
-\begin{figure}[hbt!]
+\begin{figure}[hbt]
   \centering
-  \begin{subfigure}[b]{0.7\textwidth}
+  \begin{subfigure}[b]{0.8\textwidth}
     \centering
     \includegraphics[width=\textwidth]{tests/landlock-impact.png}
   \end{subfigure}
 
-  \begin{subfigure}[b]{0.7\textwidth}
+  \begin{subfigure}[b]{0.8\textwidth}
     \centering
     \includegraphics[width=\textwidth]{tests/landlock-impact-box.png}
   \end{subfigure}
 
   \caption{Relation between Landlock enforcement and number of permissions.}
   \label{fig:perf-test-landlock-impact-permissions}
+\end{figure}
+
+However, because Landlock's rules are related to paths, then Landlock performance \textit{should} be influenced by the
+number of rules used when specifying multiple paths (folders or files).
+In this series of tests, a different number of rules related to multiple folders\footnote{It does not matter if they are
+related to a folder or a file, since both are considered paths for Landlock.} is taken into considerations
+for each performed test.
+
+As can be seen in Figure \ref{fig:perf-test-landlock-impact-folders}, there is a clear correlation
+between the number of rules used and the time necessary for Landlock to enforce them.
+More specifically, this relation is linear - this is a reasonable result, since if $n$ rules are given,
+then Landlock has to analyse them at least one time in order to enforce all of them.
+Hence, an algorithm with linear complexity is the best possible that could be implemented
+in this case.
+
+\begin{figure}[hbt]
+  \centering
+  \begin{subfigure}[b]{0.8\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/landlock-impact-folders.png}
+  \end{subfigure}
+
+  \begin{subfigure}[b]{0.8\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/landlock-impact-folders-box.png}
+  \end{subfigure}
+
+  \caption{Relation between Landlock enforcement and number of rules.}
+  \label{fig:perf-test-landlock-impact-folders}
 \end{figure}
 
 \section{Conclusions and observations}
