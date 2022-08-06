@@ -126,17 +126,7 @@ WebAssembly resolves many of the problems of JavaScript, the major ones being:
         have already been transferred;
 \end{itemize}
 
-\subsection{Overview of the language}
-
-Although WebAssembly is a binary code format, it can also be written with \textit{S-expressions}
-in order to be more readable.
-Each binary takes the form of a \textit{module}, which contains \textit{functions}, \textit{global} variables,
-\textit{tables}, and \textit{memories}. Each of these can be exported to be used in the embedder, and a module can also import functionalities.
-While a module is a static representation of a program, an \textit{instance} is the dynamic one.
-A module can be instantiated by the embedder (e.g., a JavaScript virtual machine).
-
 \vspace*{0.5cm}
-
 \begin{code}[language=wasm, caption={Recursive factorial written in WebAssembly S-expressions}, label=lst:wasm-fact]
   (module
     (func $fact (param $x i64) (result i64)
@@ -149,6 +139,15 @@ A module can be instantiated by the embedder (e.g., a JavaScript virtual machine
               (i64.sub (local.get $x) (i64.const 1)))))))
     (export "fact" (func $fact)))
 \end{code}
+
+\subsection{Overview of the language}
+
+Although WebAssembly is a binary code format, it can also be written with \textit{S-expressions}
+in order to be more readable, as seen in Listing \ref{lst:wasm-fact}.
+Each binary takes the form of a \textit{module}, which contains \textit{functions}, \textit{global} variables,
+\textit{tables}, and \textit{memories}. Each of these can be exported to be used in the embedder, and a module can also import functionalities.
+While a module is a static representation of a program, an \textit{instance} is the dynamic one.
+A module can be instantiated by the embedder (e.g., a JavaScript virtual machine).
 
 WebAssembly is a typed language, but there are only four basic \textit{value types} - integers and IEEE 754 floating
 point numbers, each in 32 and 64 bit variants. There are no distinction between signed and unsigned integers,
@@ -331,11 +330,12 @@ Some projects that use LSM include:
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.6\linewidth]{lsm-hook-architecture.png}
+  \includegraphics[width=0.7\linewidth]{lsm-hook-architecture.png}
   \caption{LSM Hook Architecture, from \cite{lsm-2002}.}
   \label{fig:lsm-hook-architecture}
 \end{figure}
 
+\clearpage
 \subsection{Landlock}
 \label{sec:intro-lsm-landlock}
 
