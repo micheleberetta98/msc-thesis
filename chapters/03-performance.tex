@@ -361,9 +361,9 @@ exhibit the same trend as the \textit{Wasmtime} one, but appear translated by a 
 
 \begin{figure}[ht!]
   \centering
-  \begin{subfigure}[b]{\textwidth}
+  \begin{subfigure}[b]{0.78\textwidth}
     \centering
-    \includegraphics[width=0.8\linewidth]{tests/reading-file-native-graph.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-native-graph.png}
   \end{subfigure}
 
   \begin{subfigure}[b]{0.45\textwidth}
@@ -379,7 +379,7 @@ exhibit the same trend as the \textit{Wasmtime} one, but appear translated by a 
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{tests/box-plot-10M.native.png}
-    \caption{Box plot for reading a 10 mB file.}
+    \caption{Box plot for reading a 10 MB file.}
   \end{subfigure}
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
@@ -393,9 +393,9 @@ exhibit the same trend as the \textit{Wasmtime} one, but appear translated by a 
 
 \begin{figure}[ht!]
   \centering
-  \begin{subfigure}[b]{\textwidth}
+  \begin{subfigure}[b]{0.78\textwidth}
     \centering
-    \includegraphics[width=0.8\linewidth]{tests/reading-file-wasm-graph.png}
+    \includegraphics[width=\textwidth]{tests/reading-file-wasm-graph.png}
   \end{subfigure}
 
   \begin{subfigure}[b]{0.45\textwidth}
@@ -411,7 +411,7 @@ exhibit the same trend as the \textit{Wasmtime} one, but appear translated by a 
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{tests/box-plot-10M.wasm.png}
-    \caption{Box plot for reading a 10 mB file.}
+    \caption{Box plot for reading a 10 MB file.}
   \end{subfigure}
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
@@ -711,6 +711,45 @@ line, but because Landlock had little overhead when dealing with native binaries
 the ``culprit'' for the constant overhead could be the \textit{Wasmtime} library.
 In this case, it can also be seen than the time took for running the WASM binary is, in both cases, about
 the same as the constant overhead that appeared when restricting WASM binaries through the developed runtime.
+
+\subsection{Landlock impact}
+
+In this section we will focus on the ``Landlock enforcement'' part of the program, in order to describe how
+performance scales with the specified policy complexity. More specifically, performance is measured against
+two ``modes'' of complexity scaling - adding permissions to a single folder, and allowing access to multiple folders
+with the same permissions.
+The program tested will always be the one described in Listing \ref{lst:project-perf-program-complex} - Landlock enforcement
+happens \textit{before} running the WASM program of choice, so how much time the restriction takes should not
+depend on the specific program that has to be sandboxed.
+Similar to the previous sections, the data is averaged over 100 runs.
+
+For the first series of tests, specific permissions will be added one at a time to a single folder,
+starting from \texttt{R,W} (i.e., reading and writing files) and up to enabling all 13 listed permissions
+in Table \ref{table:landlock-flags}.
+Figure \ref{fig:perf-test-landlock-impact-permissions} shows how the average time varies against the number of permissions.
+As is immediately visible, execution time does not depend on the number of permissions on a single folder -
+the average time is always between $17\ ns$ and $19\ ns$, without great variance.
+There are some outliers, but it is safe to conclude that the number of permissions does not affect performance
+when it comes to enforcing Landlock on the running WASM runtime.
+This is to be expected - when enforcing permissions on a single folder, the code treats all permissions as numbers,
+and when enforcing a rule on a single folder, all permissions are \textit{xor}-ed together.
+This means that the cost of applying one rule is the same whatever the number of allowed actions is.
+
+\begin{figure}[hbt!]
+  \centering
+  \begin{subfigure}[b]{0.7\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/landlock-impact.png}
+  \end{subfigure}
+
+  \begin{subfigure}[b]{0.7\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/landlock-impact-box.png}
+  \end{subfigure}
+
+  \caption{Relation between Landlock enforcement and number of permissions.}
+  \label{fig:perf-test-landlock-impact-permissions}
+\end{figure}
 
 \section{Conclusions and observations}
 
