@@ -393,7 +393,7 @@ allow:
   # Allow access to terminal and /dev/null
   - device: terminal
   - device: null
-  
+
   # Allow read and execute access on the file system
   - fs: {pathname: /, access: rxm}
   - fs: {pathname: /proc, access: r}
@@ -412,7 +412,6 @@ name: copy-file
 cmd: wasmtime --dir=. copy-file.wasm
 
 allow:
-  # Allow access to the current folder
   - fs: {pathname: ., access: rwxm}
 \end{code}
 
@@ -448,7 +447,7 @@ allow:
   # Allow ipc with MySQL
   - ipc: mysqld
 
- # Allow sending signals to existing httpd instances
+  # Allow sending signals to existing httpd instances
   - signal: {to: httpd, signals: [check, superFatal]}
 
   # Use networking

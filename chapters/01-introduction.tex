@@ -309,6 +309,7 @@ Even the WASI interface is able to segregate a WebAssembly binary, since it is e
 bound checked at runtime. Hence, the WebAssembly program cannot access data outside its assigned memory, and the
 embedder cannot access memory assigned to the WebAssembly code directly.
 
+\clearpage
 \section{Linux Security Modules}
 
 The \textit{Linux Security Modules} (LSM) \cite{lsm-2002, kernel-lsm}
@@ -335,7 +336,6 @@ Some projects that use LSM include:
   \label{fig:lsm-hook-architecture}
 \end{figure}
 
-\clearpage
 \subsection{Landlock}
 \label{sec:intro-lsm-landlock}
 
