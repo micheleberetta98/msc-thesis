@@ -117,7 +117,7 @@ WebAssembly is available as a target for various languages, such as C/C++ with t
 AssemblyScript\footnote{A language with a syntax similar to TypeScript.}, Go, Kotlin, Swift, and Zig.
 The compiled binary can be then used from JavaScript on the web, or with Node.js or Deno, or even as a CLI application
 with the aid of \textit{WebAssembly runtimes} and the \textit{WebAssembly System Interface}
-for accessing system resources (see Section \ref*{sec:introduction-wasi}).
+for accessing system resources (see Section \ref{sec:introduction-wasi}).
 
 WebAssembly resolves many of the problems of JavaScript, the major ones being:
 \begin{itemize}
@@ -265,7 +265,7 @@ CLI runtimes have some particular features and properties:
   \item the \textit{directory} is the finest granularity available to the preopen action - once access is given to a specific directory, all files and subdirectories are
         visible, and it is not possible to restrict permissions (all files are readable and
         writable) when using the command line runtime wrapper\footnote{It is possible to specify a basic set of permissions when using the WASI runtime library in another language, such as in Rust,
-        see example at \url{https://docs.rs/wasmer-wasi/latest/wasmer_wasi/struct.WasiState.html}.};
+        see example at \cite{wasi-state-example}.};
   \item when using C, the WebAssembly binary can create files with specific user permissions on Linux, e.g., executable files;
   \item when listing files in a directory, the only files that are visible are the ones that were already present at the preopening of the directory,
         but files added after the preopen can be ``seen'' if their name is known (i.e., they can be opened, read or written in accordance with given permissions);

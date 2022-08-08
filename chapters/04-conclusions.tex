@@ -1,0 +1,77 @@
+\section{WebAssembly and LSMs}
+
+\textit{WebAssembly}, abbreviated to WASM, is a relatively new binary instruction format that
+strives to bring security, speed, portability and compactness to the Web,
+as a low-level alternative to JavaScript.
+With the advent of the \textit{WebAssembly System Interface} (WASI),
+this language can be a compilation target for languages such as C and Rust,
+and can also be executed directly on various operating systems
+through the aid of runtimes, such as \textit{Wasmtime} and \textit{Wasmer}.
+
+However, these runtimes' CLI interfaces do not provide a lot of user control
+when dealing with the program's access rights to specific file system locations.
+These interfaces can be extended by using pre-existing access control frameworks,
+namely the \textit{Linux Security Modules}.
+Specifically, two of these frameworks are taken into consideration - \textit{Landlock},
+to provide unprivileged scoped access control, and \textit{eBPF}, a virtual
+machine that can run sandboxed program in a privileged context.
+
+\section{The developed project}
+
+This thesis project deals with the development of a proof-of-concept WASM runtime that
+provides the means to extend the access rights that the user can specify.
+In order to realise this, three phases were necessary.
+
+Firstly, an analysis of the existing runtimes, \textit{Wasmtime} and \textit{Wasmer},
+is required to understand how they behave in different situations and what
+specific means they give to the user in order to restrict a WASM binary.
+As highlighted in Section \ref{sec:introduction-wasi}, when using the default command line
+interface, there are some points that lack a fine granularity, such as the ability
+to describe what a WASM binary can do on a preopened directory's files.
+
+Secondly, the functioning of \textit{Landlock} and \textit{eBPF} needed to be studied and understood
+so that they could be integrated with arbitrary code.
+For this phase, having a mainstream Linux distro was not enough - these two LSMs have to be enabled
+for them to be used by programs. This can be done either by manually compiling the kernel,
+or by using particular distros that have them enabled by default, such as Arch Linux.
+
+Lastly, WASI libraries and the chosen LSMs had to be integrated in a new runtime, described in
+Chapter \ref{chap:restricting-wasi}, able to run WASM binaries while simultaneously sandboxing them according to the user's choice.
+When dealing with Landlock, the integration with a given program is provided by C libraries,
+that can also be wrapped in the language of one's choice - for this project, this was Rust,
+in order to have a safer language that could still produce quite fast binaries.
+On the other hand, eBPF had to be integrated externally, as the sandbox actions is done by
+a server program, acting as a virtual machine.
+Between the two, Landlock definitely emerged as the easier one, both from a user's point of view,
+regarding the available access control options, and from a developer's point of view, since
+the existing libraries are quite straightforward to use. Moreover, its usage does not need the running program
+to have root privileges.
+The eBPF sandbox, although being more complex and requiring root privileges, turned out to be
+the more powerful one, allowing a great deal of fine tuning on multiple areas,
+such as file system, network and inter-process communication.
+
+Regarding performance, WASM is still not close to native speeds, and the usage of WASI libraries
+brought a big overhead against the more traditional runtimes, as shown in the tests in Chapter \ref{chap:performance}.
+However, LSMs themselves are not a hindrance on performance if considered in isolation.
+
+\section{Possible future works}
+
+The first problem that can be taken into consideration is the performance of the WASI libraries.
+Almost all of the time of the tested runs was spent into loading and running the WASM module -
+acting as a bottleneck, these libraries are thus the first and most effective point to improve.
+This could be done either through optimisations in the provided code, or through a more thorough
+configuration of the library's execution capabilities.
+
+Another possible improvement for the existing WASM runtimes could be the integration of \textit{Landlock}
+if the development of a custom full-fledged access control framework turns out to be too great of
+a challenge.
+This could effectively bring a greater deal of control directly available to the user when
+accessing the file system, while still being relatively simple to use.
+However, Landlock is only available on Linux, and moreover it has to be enabled in the kernel.
+This could pose two problems:
+\begin{enumerate}
+  \item the runtime code would be less portable, since a custom version for Linux would have to be created, requiring
+        the creation of more OS-specific code and making development more difficult;
+  \item not all Linux users could use it, since enabling it can be a challenge that only more advanced users
+        could be able to face\footnote{This could be eased if Landlock were to be already enabled in most mainstream distros}.
+\end{enumerate}
