@@ -692,7 +692,7 @@ occupies the overall time spent running by the program. The various labels are a
 \end{figure}
 
 As is immediately apparent by the collected data, the biggest bottleneck on performance is given
-by \textit{running the WebAssembly} binary with the library provided by Wasmtime.
+by \textit{running the WebAssembly binary} with the library provided by Wasmtime.
 The specific actions required are instantiating the required structures, interpreting and linking the WASM module,
 and finally running it, as already highlighted in Section \ref{sec:landlock-wasm-module}.
 This section alone makes up $97.7 \%$ of the time spent running the trivial program, and $98.1 \%$ of the time
