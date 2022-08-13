@@ -31,9 +31,9 @@ the user cannot describe what a WASM binary is permitted to do on a preopened di
 
 Secondly, the two LSMs in question, \textit{Landlock} and \textit{eBPF}, need to be studied and understood
 so that they can be integrated with arbitrary code.
-For this phase, having a mainstream Linux distro is not enough - these two LSMs have to be enabled
+For this phase, having a mainstream Linux distribution is not enough - these two LSMs have to be enabled
 for them to be used by programs. This can be done either by manually compiling the kernel with the desired
-flags enabled, or by using particular distros that have them enabled by default, such as Arch Linux.
+flags enabled, or by using particular distributions that have them enabled by default, such as Arch Linux.
 
 Lastly, WASI libraries and the chosen LSMs have to be integrated in a new runtime, described in
 Chapter \ref{chap:restricting-wasi}, able to run WASM binaries while simultaneously sandboxing them according to the user's choice.
@@ -63,8 +63,7 @@ This could be done either through optimisations in the original code, or through
 configuration of the library's execution capabilities.
 
 Another possible improvement for the existing WASM runtimes could be the integration of \textit{Landlock}
-if the development of a custom full-fledged access control framework turns out to be too great of
-a challenge.
+if the development of a custom full-fledged access control framework turns out to be too hard to implement.
 This could effectively bring a greater deal of control directly available to the user when
 accessing the file system, while still being relatively simple to use.
 However, Landlock is only available on Linux, and moreover it has to be enabled in the kernel.
@@ -73,5 +72,5 @@ This would pose two main problems:
   \item the runtime code would be less portable, since a custom version for Linux would have to be created, requiring
         the creation of more OS-specific code and making development more difficult;
   \item not all Linux users could use it, since enabling it can be a challenge that only more advanced users
-        could be able and/or willing to face\footnote{This could be eased if Landlock were to be already enabled in most mainstream distros.}.
+        could be able and/or willing to face\footnote{This could be eased if Landlock were to be already enabled in most mainstream distributions.}.
 \end{enumerate}

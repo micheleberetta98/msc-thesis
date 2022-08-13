@@ -26,7 +26,7 @@ overall speed of both restricted and unrestricted scenarios:
 \end{itemize}
 
 Moreover, the internal performance of the WASM runtime developed in Section \ref{sec:restricting-wasi-landlock}
-will be tested in Section \ref{sec:performance-internal-analysis}. In this case, a simple range of WASM binaries
+will be tested in Section \ref{sec:performance-internal-analysis}. To test this, a simple range of WASM binaries
 are loaded and, after subdividing the runtime in its functional parts, each one is measured in order
 to estimate the impact on total execution time.
 
@@ -72,7 +72,7 @@ The choice of the operating system is mainly dictated by the fact that Arch Linu
 out of the box, removing the need to compile the Linux kernel with the necessary flags to enable these
 functionalities.
 
-\subsection{Tests' description}
+\subsection{Test scenarios}
 \label{sec:performance-test-description}
 
 The performed tests are:
@@ -89,7 +89,7 @@ varies when dealing with progressively large files. Moreover, an additional empt
 test the overhead on the pure opening of a file.
 
 \vspace*{0.5cm}
-\begin{code}[language=Rust, caption=The tested ``sorting program''., label=lst:sorting-test-rust]
+\begin{code}[language=Rust, caption=The ``sorting program''., label=lst:sorting-test-rust]
 use rand::Rng;
 
 fn main() {
@@ -104,7 +104,7 @@ fn main() {
 }
 \end{code}
 
-\begin{code}[language=Rust, caption=The tested ``reading program''., label=lst:reading-test-rust]
+\begin{code}[language=Rust, caption=The ``reading program''., label=lst:reading-test-rust]
 fn main() {
   let content = std::fs::read("input-file.txt");
   match content {
@@ -131,11 +131,11 @@ the standard deviation of the method $x$.
 In this section we will look at what impact different LSMs bring on a program,
 be it a native binary or a WebAssembly binary run through some kind of runtime.
 
-In Table \ref{table:lsm-impact-native} are present all execution times for a native binary,
+In Table \ref{table:lsm-impact-native} are reported all execution times for a native binary,
 compiled directly with \texttt{rustc} and run both unrestricted (\textit{Native}) and restricted
 with different LSMs (\textit{Landlock} and \textit{eBPF}).
 
-On the other hand, Table \ref{table:lsm-impact-wasm} is about running a WebAssembly binary through
+On the other hand, in Table \ref{table:lsm-impact-wasm} are listed the runs of a WebAssembly binary through
 \textit{Wasmtime} without any restriction, or through the WASM runtime developed in Section \ref{sec:restricting-wasi-landlock}
 and restricted with Landlock (\textit{WL}) or eBPF (\textit{WeBPF}).
 
@@ -214,7 +214,7 @@ The same reasoning applied before is valid here too - eBPF is a little slower th
 of about $1\ ms$.
 However, restricting a WASM binary with the runtime developed in Section \ref{sec:restricting-wasi-landlock}
 introduces a constant overhead of around $30\ ms$ with respect to \textit{Wasmtime}.
-Since it is visible in Table \ref{table:lsm-impact-native} that Landlock is quite close to
+Since it is shown in Table \ref{table:lsm-impact-native} that Landlock is quite close to
 unrestricted performance on average, and because Landlock was disabled when running
 the tests combining WASM and eBPF, this extra time could be due to how the WASM module gets
 interpreted by the library provided by \textit{Wasmtime}\footnote{This will be analysed more
@@ -280,7 +280,7 @@ allow:
   - fs: {pathname: ., access: rxm}
 \end{code}
 
-As is visible in Tables \ref{table:lsm-impact-native} and \ref{table:lsm-impact-wasm},
+As Tables \ref{table:lsm-impact-native} and \ref{table:lsm-impact-wasm} show,
 the same considerations made for a purely computational program are valid in this case too
 - Landlock, on average, is much closer to native speed than eBPF.
 This is also shown in Figure \ref{fig:distribution-opening-native}, where the eBPF curve is shifted towards
@@ -577,7 +577,7 @@ The goal of this series of tests is to measure how the developed runtime,
 described in Section \ref{sec:restricting-wasi-landlock}, behaves internally.
 To do this, various timestamps were taken and combined in specific parts of the
 code in order to have some data on the execution time of important program parts,
-which are
+which are the following:
 \begin{itemize}
   \item command line argument parsing;
   \item WASM module instantiation;
@@ -592,13 +592,13 @@ Hence, only the impact of Landlock can be measured \textit{internally} in the co
 
 \vspace*{0.5cm}
 
-\begin{code}[language=Rust, caption=The tested trivial program, label=lst:project-perf-program-simple]
+\begin{code}[language=Rust, caption=The trivial program., label=lst:project-perf-program-simple]
 fn main() {
   println!("Hello World");
 }
 \end{code}
 
-\begin{code}[language=Rust, caption=The more complex tested program, label=lst:project-perf-program-complex]
+\begin{code}[language=Rust, caption=The more complex program., label=lst:project-perf-program-complex]
 use std::fs::{read_to_string, write};
 
 fn main() -> {
@@ -644,9 +644,9 @@ The various measures are taken by using the standard Rust library \texttt{std::t
 in particular the \texttt{Instant} struct, and then averaged on a total of 100 runs of
 two particular programs:
 \begin{itemize}
-  \item a trivial one visible in Listing \ref{lst:project-perf-program-simple},
+  \item a trivial one described in Listing \ref{lst:project-perf-program-simple},
         dealing only with printing a simple string to the terminal;
-  \item a more complex one visible in Listing \ref{lst:project-perf-program-complex},
+  \item a more complex one shown in Listing \ref{lst:project-perf-program-complex},
         reading and writing some files, so that specific Landlock permissions are required
         (specifically, reading and writing files).
 \end{itemize}
@@ -671,31 +671,31 @@ occupies the overall time spent running by the program. The various labels are a
   
   \begin{subfigure}[b]{0.46\textwidth}
     \includegraphics[width=\textwidth]{project-performance/graph_simple.png}
-    \caption{Simple program}
+    \caption{Simple program.}
   \end{subfigure}
   \begin{subfigure}[b]{0.46\textwidth}
     \includegraphics[width=\textwidth]{project-performance/graph_simple_c.png}
-    \caption{Simple program (cumulative)}
+    \caption{Simple program (cumulative).}
   \end{subfigure}
 
   \begin{subfigure}[b]{0.46\textwidth}
     \includegraphics[width=\textwidth]{project-performance/graph_medium.png}
-    \caption{Complex program}
+    \caption{Complex program.}
   \end{subfigure}
   \begin{subfigure}[b]{0.46\textwidth}
     \includegraphics[width=\textwidth]{project-performance/graph_medium_c.png}
-    \caption{Complex program (cumulative)}
+    \caption{Complex program (cumulative).}
   \end{subfigure}
 
   \caption{A graphic comparison of all the execution times.}
   \label{fig:perf-execution-times-comparison}
 \end{figure}
 
-As is immediately apparent by the collected data, the biggest bottleneck on performance is given
+As is immediately noticeable by the collected data, the biggest bottleneck on performance is given
 by \textit{running the WebAssembly binary} with the library provided by Wasmtime.
 The specific actions required are instantiating the required structures, interpreting and linking the WASM module,
 and finally running it, as already highlighted in Section \ref{sec:landlock-wasm-module}.
-This section alone makes up $97.7 \%$ of the time spent running the trivial program, and $98.1 \%$ of the time
+Running the WebAssembly binary alone makes up $97.7 \%$ of the time spent running the trivial program, and $98.1 \%$ of the time
 spent running the complex program.
 
 The next biggest chunk of time is spent into \textit{module initialisation}, which is comprised of the
