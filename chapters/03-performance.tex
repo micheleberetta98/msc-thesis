@@ -341,8 +341,8 @@ The following figures, namely Figure \ref{fig:avg-comparison-native-speed} and F
 represents how the average execution time of a native binary and a WASM binary, respectively, changes
 when the read file gets bigger.
 
-The first notable feature is that performance drops exponentially as the file gets larger,
-starting to drop when reading a file in the order of tens of MBs, and with a significant
+The first notable feature is that performance drops as the file gets larger,
+starting to get worse when reading a file in the order of tens of MBs, and with a significant
 spike in execution times when reaching the order of hundreds of MBs.
 This slow-down is clearly visible in the native curves as well as in the WASM curves,
 hence it has to be independent of the method used to run the
@@ -799,14 +799,14 @@ When embedding WebAssembly in another language, this performance gap becomes eve
 the work that must be done through the provided interpreting libraries, as has been
 highlighted in Section \ref{sec:performance-internal-analysis-execution-times}.
 
-A positive point that has been shown multiple times, however, is that restricting a binary
+A positive point that has been shown multiple times is that restricting a binary
 with a LSM, be it Landlock or eBPF, does not worsen performance a lot.
 As seen in Section \ref{sec:performance-comparison-between-different-sandboxes}, although a small
 performance impact is present, this could be considered negligible for large programs that take
-some time to run. For small programs that have an execution time of the same order of magnitude
-as the delay introduced this could become however problematic if they are called multiple time
+some time to run. However, for small programs that have an execution time of the same order of magnitude
+as the delay introduced this could become problematic if they are called multiple time
 and in high frequency.
-Moreover, as found in Section \ref{sec:performance-internal-analysis-landlock-impact}, when using Landlock
+Furthermore, as found in Section \ref{sec:performance-internal-analysis-landlock-impact}, when using Landlock
 as a sandbox the overhead introduced is linear with respect to the number of rules (i.e., paths) specified,
 so programs that have to access few locations on the file system have an advantage against programs that need
 access to a lot of files and/or directories.

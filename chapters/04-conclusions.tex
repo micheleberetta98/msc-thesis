@@ -20,22 +20,22 @@ machine that can run sandboxed program in a privileged context.
 
 This thesis work deals with the development of a proof-of-concept WASM runtime that
 provides the means to extend a WASM binary's access rights specifiable by the user.
-The project is divided into three main phases.
+The development of the project was divided into three main phases.
 
 Firstly, an analysis of the existing runtimes, \textit{Wasmtime} and \textit{Wasmer},
-is required to understand how they behave in different situations and what
+was required to understand how they behave in different situations and what
 specific means they give to the user in order to restrict a WASM binary.
 As highlighted in Section \ref{sec:introduction-wasi}, when using the default command line
 interface, there is a lack of a fine granularity on what a program can do - for example,
 the user cannot describe what a WASM binary is permitted to do on a preopened directory's files.
 
-Secondly, the two LSMs in question, \textit{Landlock} and \textit{eBPF}, need to be studied and understood
-so that they can be integrated with arbitrary code.
+Secondly, the two LSMs in question, \textit{Landlock} and \textit{eBPF}, were studied and understood
+so that they could be integrated with arbitrary code.
 For this phase, having a mainstream Linux distribution is not enough - these two LSMs have to be enabled
 for them to be used by programs. This can be done either by manually compiling the kernel with the desired
 flags enabled, or by using particular distributions that have them enabled by default, such as Arch Linux.
 
-Lastly, WASI libraries and the chosen LSMs have to be integrated in a new runtime, described in
+Lastly, WASI libraries and the chosen LSMs had to be integrated in a new runtime, described in
 Chapter \ref{chap:restricting-wasi}, able to run WASM binaries while simultaneously sandboxing them according to the user's choice.
 When dealing with Landlock, the integration with a given program is provided by C libraries,
 which can also be wrapped in the language of one's choice - for this project, this language is Rust,
@@ -51,7 +51,7 @@ the more powerful one, allowing a great deal of fine tuning on multiple areas,
 such as file system, network and inter-process communication.
 
 Regarding performance, WASM is still not close to native speeds, and the usage of WASI libraries
-brought a big overhead against the more traditional runtimes, as shown in the tests in Chapter \ref{chap:performance}.
+brings a big overhead against the more traditional runtimes, as shown in the tests in Chapter \ref{chap:performance}.
 However, LSMs themselves are not a hindrance on performance if considered in isolation.
 
 \section{Possible improvements and future work}
