@@ -584,3 +584,29 @@ Hence, a user that is not able to use the \texttt{sudo} command is not able to l
 expressive power.
 This is in stark contrast with Landlock, which sets out to offer \textit{unprivileged} access control,
 so that super user privileges are not required to enforce the sandbox restriction.
+
+\section{Final product}
+
+The final product of this development process is a \textit{proof-of-concept} WebAssembly runtime
+that is natively integrated with LSMs, in particular with Landlock as eBPF is enforced externally
+through the server managed by BPFContain.
+As highlighted before, the project is open source and available at \url{https://github.com/micheleberetta98/rust-wasm-landlock}.
+
+In order to simply run a WASM binary, it is necessary to provide its name and directories to preopen in case
+there are any through the \texttt{-{}-dir} and \texttt{-{}-mapdir} command line arguments.
+
+Landlock enforcement is done through the \texttt{-{}-fs-allow} argument, which accepts a string in the format
+\texttt{path:restrictions}, where \texttt{path} is any folder of file path that the binary could access
+and \texttt{restrictions} is a comma-separated list of flags as outlined in Table \ref{table:landlock-flags}.
+This flag can be repeated to set different access restrictions on different paths.
+As an example, if \texttt{print.wasm} is a WASM module that prints the content of a certain \texttt{file.txt},
+then a possible command to run it with Landlock could be \texttt{./rust-wasm-landlock print.wasm -{}-dir . -{}-fs-allow ``file.txt:R''},
+where \texttt{rust-wasm-landlock} is the name of the WASM runtime binary.
+
+On the other hand, eBPF enforcement is done externally through eBPF, and as such the WASM runtime is treated
+as any other native process. In this case, it is necessary to specify the desired restrictions in a policy as described in
+Section \ref{sec:restricting-wasi-ebpf} and then running the BPFContain server.
+Note that the relevant directories must be preopened in the \texttt{cmd} section of the policy
+through the \texttt{-{}-dir} and \texttt{-{}-mapdir} as before, but Landlock has to be
+disabled through \texttt{-{}-no-landlock}, otherwise the process would be restricted by
+Landlock and by eBPF at the same time.
