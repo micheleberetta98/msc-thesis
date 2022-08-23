@@ -446,12 +446,16 @@ A policy is hence separated into multiple parts:
   \item and finally an optional set of \textit{taint rules}, which again follow the same structure described above.
 \end{itemize}
 
-Specifically, when a policy is \textit{tainted}, BPFContain will start enforcing it. This means that a policy
-can be loaded by BPFContain but not be enforced until the controlled program does a specific
-action (e.g., access the network or send a message to a process).
-This however must be explicitly declared in the policy, since all policies are tainted, hence enforced, by default.
+Specifically, BPFContains offers through the taint rules a way to selectively choose when
+to start restricting a process.
+This means that a process monitored by BPFContain can start its life without any restriction,
+but as soon as it does a particular action (e.g., access the network or send a message to another process)
+BPFContain will begin enforcing the policy.
+In this case, the policy becomes \textit{tainted} and starts being enforced.
+This however must be explicitly declared in the policy by setting \texttt{defaultTaint} to \texttt{false},
+since all policies are tainted, hence enforced, by default.
 
-An example of a policy is defined in Listing \ref{lst:yaml-policy-bash}, which defines how to
+An example of this kind of ``untainted'' policy is defined in Listing \ref{lst:yaml-policy-bash}, which defines how to
 run \textit{bash} in a confined environment.
 In this policy, \textit{bash} is allowed to access the terminal and \texttt{/dev/null}, as well
 as reading and executing everything in \texttt{/} and reading everything in \texttt{/proc}.
