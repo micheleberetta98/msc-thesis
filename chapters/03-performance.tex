@@ -10,10 +10,10 @@ The main goals of this performance testing plan are:
 For a given program written in Rust, the following configurations are tested in order to compare
 overall speed of both restricted and unrestricted scenarios:
 \begin{itemize}
-  \item a native binary, compiled by \texttt{rustc} and run as an executable under the following conditions:
+  \item a native binary, compiled by \texttt{rustc} and run:
         \begin{itemize}
           \item without a sandbox;
-          \item sandboxed with Landlock (in this case, the program has to be modified - an example is visible in Listing \ref{lst:test-program-landlock-example});
+          \item sandboxed with Landlock;
           \item sandboxed with eBPF.
         \end{itemize}
   \item a WebAssembly binary obtained by the same Rust program and run:
@@ -25,38 +25,41 @@ overall speed of both restricted and unrestricted scenarios:
         \end{itemize}
 \end{itemize}
 
-Moreover, the internal performance of the WASM runtime developed in Section \ref{sec:restricting-wasi-landlock}
-will be tested in Section \ref{sec:performance-internal-analysis}. To test this, a simple range of WASM binaries
-are loaded and, after subdividing the runtime in its functional parts, each one is measured in order
-to estimate the impact on total execution time.
+When testing the native binary with Landlock, the program has to be modified. That is,
+some instructions are added to the code that setup Landlock in a way compatible with the
+specific test. An example of the required instructions is visible in Listing \ref{lst:test-program-landlock-example}.
+On the other hand, for the other methods (i.e., without a sandbox and with eBPF) the program
+does not need any change, but in the case of eBPF it is necessary to use the \texttt{bpfcontain run}
+command with the name of the binary to actually apply the sandbox.
 
-\vspace*{0.7cm}
+\vspace*{0.5cm}
 \begin{code}[language=Rust, caption=An example of a program restricted with Landlock., label=lst:test-program-landlock-example]
 use anyhow::Result;
 use landlock::*;
 
-const ACCESS: BitFlags<AccessFs> =
-  make_bitflags!(AccessFs::{ ReadFile });
-
 fn main() -> Result<()> {
     let path_fd = PathFd::new("input-file.txt")?;
+    let access = make_bitflags!(AccessFs::{ ReadFile });
     
     let path_beneath = PathBeneath::new(path_fd)
-      .allow_access(ACCESS);
+      .allow_access(access);
     let _ = Ruleset::new()
         .handle_access(AccessFs::from_all(ABI::V1))?
         .create()?
         .add_rule(path_beneath)?
         .restrict_self()?;
 
-    // Here goes the main code
-    // ...
+    // Here goes the main code ...
 
     Ok(())
 }
 \end{code}
 
-\clearpage
+Moreover, the internal performance of the WASM runtime developed in Section \ref{sec:restricting-wasi-landlock}
+will be tested in Section \ref{sec:performance-internal-analysis}. To test this, a simple range of WASM binaries
+are loaded and, after subdividing the runtime in its functional parts, each one is measured in order
+to estimate the impact on total execution time.
+
 \subsection{System and hardware}
 
 The system and hardware used for both the development of the project described in Section \ref{sec:restricting-wasi-landlock}
