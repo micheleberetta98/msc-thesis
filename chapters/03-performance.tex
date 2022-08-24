@@ -240,6 +240,10 @@ accurately in Section \ref{sec:performance-internal-analysis}.}.
     \includegraphics[width=\textwidth]{tests/sorting.native-bpf.png}
     \caption{eBPF}
   \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-sorting.native.png}
+  \end{subfigure}
   \caption{Distribution of execution times when sorting 10000 numbers (native).}
   \label{fig:distribution-sorting-native}
 \end{figure}
@@ -260,6 +264,10 @@ accurately in Section \ref{sec:performance-internal-analysis}.}.
     \centering
     \includegraphics[width=\textwidth]{tests/sorting.wasm-bpf.png}
     \caption{WASM + eBPF}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-sorting.wasm.png}
   \end{subfigure}
   \caption{Distribution of execution times when sorting 10000 numbers (WASM).}
   \label{fig:distribution-sorting-wasm}
@@ -311,6 +319,10 @@ Again, Figure \ref{fig:distribution-opening-wasm} shows the distribution of exec
     \includegraphics[width=\textwidth]{tests/reading-file-0.native-bpf.png}
     \caption{eBPF}
   \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-0.native.png}
+  \end{subfigure}
   \caption{Distribution of execution times when opening a file (native).}
   \label{fig:distribution-opening-native}
 \end{figure}
@@ -331,6 +343,10 @@ Again, Figure \ref{fig:distribution-opening-wasm} shows the distribution of exec
     \centering
     \includegraphics[width=\textwidth]{tests/reading-file-0.wasm-bpf.png}
     \caption{WASM + eBPF}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-0.wasm.png}
   \end{subfigure}
   \caption{Distribution of execution times when opening a file (WASM).}
   \label{fig:distribution-opening-wasm}
