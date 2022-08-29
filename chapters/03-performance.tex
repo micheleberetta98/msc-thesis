@@ -209,7 +209,7 @@ allow:
 
 When dealing with a WebAssembly binary, the computational-heavy program is noticeably slower
 compared to the native binary execution times, either unrestricted or restricted, as shown in Figure
-\ref{fig:distribution-sorting-wasm}\footnote{Note that Figures \ref{fig:distribution-sorting-wasm} and \ref{fig:distribution-sorting-native}
+\ref{fig:distribution-sorting-wasm}\footnote{Note that Figures \ref{fig:distribution-sorting-native} and \ref{fig:distribution-sorting-wasm}
 have different scales.}.
 The same reasoning applied before is valid here too - eBPF is a little slower than Landlock, with a overhead
 of about $1\ ms$.
@@ -223,17 +223,22 @@ accurately in Section \ref{sec:performance-internal-analysis}.}.
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.74\linewidth]{tests/box-plot-sorting.native.png}
-  \caption{Execution times when sorting 10000 numbers (native).}
-  \label{fig:distribution-sorting-native}
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-sorting.native.png}
+    \caption{Native}
+    \label{fig:distribution-sorting-native}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\linewidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-sorting.wasm.png}
+    \caption{WebAssembly}
+    \label{fig:distribution-sorting-wasm}
+  \end{subfigure}
+  \caption{Execution times when sorting 10000 numbers.}
 \end{figure}
 
-\begin{figure}[ht!]
-  \centering
-  \includegraphics[width=0.74\linewidth]{tests/box-plot-sorting.wasm.png}
-  \caption{Execution times when sorting 10000 numbers (WASM).}
-  \label{fig:distribution-sorting-wasm}
-\end{figure}
+\clearpage
 
 \subsection{Opening a file}
 
@@ -241,17 +246,6 @@ This set of tests is meant to measure how the sandboxes perform when the restric
 In this case, the performance is measured by reading an empty file with the program described in Listing \ref{lst:reading-test-rust}.
 For the policy used with eBPF, its outline is highlighted in Listing \ref{lst:outline-policy-reading-test}
 - in this case, it is necessary to give permissions to access the terminal since the size of the read content is printed. 
-
-\vspace*{0.5cm}
-\begin{code}[language=yaml, caption=The outline of the policy used for testing the reading program., label=lst:outline-policy-reading-test]
-name: test-reading-file
-
-cmd: # The command to be executed
-
-allow:
-  - device: terminal
-  - fs: {pathname: ., access: rxm}
-\end{code}
 
 As Tables \ref{table:lsm-impact-native} and \ref{table:lsm-impact-wasm} show,
 the same considerations made for a purely computational program are valid in this case too
@@ -264,18 +258,35 @@ even when unrestricted, WASM is much slower than a native binary, and the develo
 still has the constant overhead of around $30\ ms$ in both the tests within the Landlock and eBPF sandboxes.
 Again, Figure \ref{fig:distribution-opening-wasm} shows the box plot of execution times.
 
-\begin{figure}[ht!]
-  \centering
-  \includegraphics[width=0.74\linewidth]{tests/box-plot-0.native.png}
-  \caption{Execution times when opening a file (native).}
-  \label{fig:distribution-opening-native}
-\end{figure}
+\vspace*{1cm}
 
-\begin{figure}[ht!]
+\begin{code}[language=yaml, caption=The outline of the policy used for testing the reading program., label=lst:outline-policy-reading-test]
+name: test-reading-file
+
+cmd: # The command to be executed
+
+allow:
+  - device: terminal
+  - fs: {pathname: ., access: rxm}
+\end{code}
+
+\clearpage
+\begin{figure}[ht]
   \centering
-  \includegraphics[width=0.74\linewidth]{tests/box-plot-0.wasm.png}
-  \caption{Execution times when opening a file (WASM).}
-  \label{fig:distribution-opening-wasm}
+  \begin{subfigure}[b]{0.49\linewidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-0.native.png}
+    \caption{Native}
+    \label{fig:distribution-opening-native}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.49\linewidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-0.wasm.png}
+    \caption{WebAssembly}
+    \label{fig:distribution-opening-wasm}
+  \end{subfigure}
+
+  \caption{Execution times when opening a file.}
 \end{figure}
 
 \subsection{Accessing the file system}
@@ -309,24 +320,21 @@ collect all box plots relative to the different readings for native binaries and
 
 \begin{figure}[ht!]
   \centering
-  \begin{subfigure}[b]{0.78\textwidth}
+
+  \begin{subfigure}[b]{0.49\linewidth}
     \centering
     \includegraphics[width=\textwidth]{tests/reading-file-native-graph.png}
+    \caption{Native}
+    \label{fig:avg-comparison-native-speed}
   \end{subfigure}
-
-  \caption{A comparison of native average speeds when reading a file.}
-  \label{fig:avg-comparison-native-speed}
-\end{figure}
-
-\begin{figure}[ht!]
-  \centering
-  \begin{subfigure}[b]{0.78\textwidth}
+  \begin{subfigure}[b]{0.49\linewidth}
     \centering
     \includegraphics[width=\textwidth]{tests/reading-file-wasm-graph.png}
+    \caption{WebAssembly}
+    \label{fig:avg-comparison-wasm-speed}
   \end{subfigure}
 
-  \caption{A comparison of WASM average speeds when reading a file.}
-  \label{fig:avg-comparison-wasm-speed}
+  \caption{A comparison of average speeds when reading a file.}
 \end{figure}
 
 \begin{figure}[ht!]
