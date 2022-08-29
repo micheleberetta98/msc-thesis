@@ -587,7 +587,7 @@ Note that, in both figures, the tests on the $100$ MB file have a different scal
 
 \clearpage
 
-\section{Internal analyses of the various sandboxes}
+\section{Internal analysis of the various sandboxes}
 \label{sec:performance-internal-analysis}
 
 The goal of this series of tests is to measure how the developed runtime,
@@ -678,7 +678,7 @@ all measured data in milliseconds for, respectively, the trivial and complex pro
 The visible timestamps are both the average time spent by a section, given by $\mu_I$,
 and the cumulative time up until that section's completion, given by $\mu_C$.
 Standard deviations $\sigma_I$ and $\sigma_C$ are also given for any respective program part.
-For example, if the part ``Landlock enforcement'' is such that $\mu_I = 20$ and $\mu_C = 100$,
+For example, if the part ``Landlock enforcement'' is such that $\mu_I = 20\ ms$ and $\mu_C = 100\ ms$,
 this means that on average it takes $20\ ms$ to apply Landlock to the running process, and on average this part
 is fully completed after $100\ ms$ from the beginning of the program.
 
@@ -801,11 +801,19 @@ in this case.
 \label{sec:performance-internal-analysis-ebpf-impact}
 
 Similarly to the previous section, here we will test how eBPF initial policy enforcement scales with the complexity
-of a given policy. In order to be able to make a comparison with Landlock, only
+of a given policy using BPFContain. In order to be able to make a comparison with Landlock, only
 access to the file system will be taken into consideration, and the tests
 will be divided into scaling with the number of permissions on a single folder
 and scaling with the number of folders.
 Again, the program used for the test will be the one described in Listing \ref{lst:project-perf-program-complex}.
+
+Note that BPFContain sandboxing is ``split into two'' - the policies are parsed
+and implemented by a \textit{server} process, while a \textit{client} process restricts itself
+with a chosen policy before running a given program and communicating with the server.
+This initial restriction is what will be
+measured\footnote{In order to do this, the code of BPFContain has to be modified. The version
+used for these tests is available at \url{https://github.com/micheleberetta98/bpfcontain-rs/tree/perf-test}.},
+so that a parallel with Landlock can be made.
 
 \begin{figure}[hbt!]
   \centering
@@ -827,6 +835,7 @@ all the 9 permissions allowed by BPFContain\footnote{These are read, write, exec
 The results are shown in Figure \ref{fig:perf-test-ebpf-impact-permissions} and, as with Landlock, 
 the sandboxing of the running program does not depend by the number of permissions on a single folder.
 
+\vspace*{0.5cm}
 \begin{code}[language=yaml, caption=The outline of the policy used for eBPF tests., label=lst:ebpf-impact-policy-outline]
 name: test-policy
 cmd: ./wasm-runtime program.wasm --no-landlock
@@ -843,10 +852,10 @@ with Landlock. As Figure \ref{fig:perf-test-ebpf-impact-folders} shows, in this 
 of folders specified and the time taken by BPFContain to containerise the running process.
 Here the average time is always around $12.5\ \mu s$, with little variability.
 
-This could be due to the fact that BPFContain sandboxing is ``split into two'' - the policies are parsed
-and implemented by a \textit{server} process, while a \textit{client} process restricts a given executable
-and communicates with the server. In this case, the sandboxing done on the client does not depend on how much
-the particular policy is complex, but it needs only to know which policy to implement, hence the constant
+This could be due to the fact that, as already highlighted, BPFContain sandboxing uses two
+processes - a server and a client that communicates with each other.
+In this case, the sandboxing done on the client does not depend on how much
+the particular policy is complex, since it needs only to know which policy to implement, hence the constant
 complexity that emerges from the tests.
 
 \begin{figure}[hbt!]
@@ -862,9 +871,9 @@ complexity that emerges from the tests.
   \label{fig:perf-test-ebpf-impact-folders}
 \end{figure}
 
-Lastly, note that the times here are all a bit lower than Landlock, but in the previous Section
+Lastly, note that the times here are all a bit lower than Landlock, but in Section \ref{sec:performance-comparison-between-different-sandboxes}
 it was shown that BPFContain was a little slower. As hinted before, this could be due to the communication
-between the server and the client, so even if Landlock has a little initial overhead it could come out
+between the server and the client, so even with more initial overhead Landlock could come out
 faster nonetheless.
 
 \section{Conclusions and observations}
@@ -881,9 +890,10 @@ This is true also for other languages that follow this paradigm - for example, J
 or Python (that can be compiled into a bytecode before being interpreted) are usually regarded as
 slower and/or more resource-hungry when compared to compiled languages such as C or Rust.
 
-When embedding WebAssembly in another language, this performance gap becomes even higher due to
+When embedding WebAssembly in another language this performance gap can become higher,
+although performance itself is still comparable, due to
 the work that must be done through the provided interpreting libraries, as has been
-highlighted in Section \ref{sec:performance-internal-analysis-execution-times}.
+highlighted in Section \ref{sec:performance-internal-analysis-execution-times}. 
 
 A positive point that has been shown multiple times is that restricting a binary
 with a LSM, be it Landlock or eBPF, does not worsen performance a lot.
