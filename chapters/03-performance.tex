@@ -315,8 +315,9 @@ Again, the WASM curves in Figure \ref{fig:avg-comparison-wasm-speed} clearly sho
 of about $30\ ms$ identified in the previous sections - the \textit{WASM+Landlock} and \textit{WASM+eBPF} curves
 exhibit the same trend as the \textit{Wasmtime} one, but appear translated by a constant factor.
 
-Finally, Figure \ref{fig:distribution-reading-native} and Figure \ref{fig:distribution-reading-wasm}
-collect all box plots relative to the different readings for native binaries and WASM binaries, respectively.
+Finally, Figures \ref{fig:distribution-reading-100k}, \ref{fig:distribution-reading-1M}, \ref{fig:distribution-reading-10M},
+and \ref{fig:distribution-reading-100M} collects all box plots relative to the different readings for
+native binaries and WASM binaries.
 
 \begin{figure}[ht!]
   \centering
@@ -343,56 +344,64 @@ collect all box plots relative to the different readings for native binaries and
   \begin{subfigure}[b]{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{tests/box-plot-100K.native.png}
-    \caption{100 KB file}
+    \caption{Native}
   \end{subfigure}
-  \begin{subfigure}[b]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-1M.native.png}
-    \caption{1 MB file}
-  \end{subfigure}
-
-  \begin{subfigure}[b]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-10M.native.png}
-    \caption{10 MB file}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-100M.native.png}
-    \caption{100 MB file}
-  \end{subfigure}
-
-  \caption{Box plots of a native binary execution times when reading a file.}
-  \label{fig:distribution-reading-native}
-\end{figure}
-
-\begin{figure}[ht!]
-  \centering
-
   \begin{subfigure}[b]{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{tests/box-plot-100K.wasm.png}
-    \caption{100 KB file}
+    \caption{WASM}
+  \end{subfigure}
+
+  \caption{Execution times when reading a 100 KB file.}
+  \label{fig:distribution-reading-100k}
+\end{figure}
+
+\begin{figure}[ht!]
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-1M.native.png}
+    \caption{Native}
   \end{subfigure}
   \begin{subfigure}[b]{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{tests/box-plot-1M.wasm.png}
-    \caption{1 MB file}
+    \caption{WASM}
   \end{subfigure}
 
+  \caption{Execution times when reading a 1 MB file.}
+  \label{fig:distribution-reading-1M}
+\end{figure}
+
+\begin{figure}[ht!]
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-10M.native.png}
+    \caption{Native}
+  \end{subfigure}
   \begin{subfigure}[b]{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{tests/box-plot-10M.wasm.png}
-    \caption{10 MB file}
+    \caption{WASM}
+  \end{subfigure}
+
+  \caption{Execution times when reading a 10 MB file.}
+  \label{fig:distribution-reading-10M}
+\end{figure}
+
+\begin{figure}[ht!]
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{tests/box-plot-100M.native.png}
+    \caption{Native}
   \end{subfigure}
   \begin{subfigure}[b]{0.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{tests/box-plot-100M.wasm.png}
-    \caption{100 MB file}
+    \caption{WASM}
   \end{subfigure}
 
-  \caption{Box plots of a WASM binary execution times when reading a file.}
-  \label{fig:distribution-reading-wasm}
+  \caption{Execution times when reading a 100 MB file.}
+  \label{fig:distribution-reading-100M}
 \end{figure}
 
 \clearpage
