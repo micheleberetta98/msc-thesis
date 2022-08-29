@@ -223,51 +223,15 @@ accurately in Section \ref{sec:performance-internal-analysis}.}.
 
 \begin{figure}[ht]
   \centering
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/sorting.native.png}
-    \caption{Native}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/sorting.native-landlock.png}
-    \caption{Landlock}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/sorting.native-bpf.png}
-    \caption{eBPF}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.5\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-sorting.native.png}
-  \end{subfigure}
-  \caption{Distribution of execution times when sorting 10000 numbers (native).}
+  \includegraphics[width=0.74\linewidth]{tests/box-plot-sorting.native.png}
+  \caption{Execution times when sorting 10000 numbers (native).}
   \label{fig:distribution-sorting-native}
 \end{figure}
 
 \begin{figure}[ht!]
   \centering
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/sorting.wasmtime.png}
-    \caption{Wasmtime}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/sorting.wasm-landlock.png}
-    \caption{WASM + Landlock}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/sorting.wasm-bpf.png}
-    \caption{WASM + eBPF}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.5\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-sorting.wasm.png}
-  \end{subfigure}
-  \caption{Distribution of execution times when sorting 10000 numbers (WASM).}
+  \includegraphics[width=0.74\linewidth]{tests/box-plot-sorting.wasm.png}
+  \caption{Execution times when sorting 10000 numbers (WASM).}
   \label{fig:distribution-sorting-wasm}
 \end{figure}
 
@@ -292,61 +256,25 @@ allow:
 As Tables \ref{table:lsm-impact-native} and \ref{table:lsm-impact-wasm} show,
 the same considerations made for a purely computational program are valid in this case too
 - Landlock, on average, is much closer to native speed than eBPF.
-This is also shown in Figure \ref{fig:distribution-opening-native}, where the eBPF curve is shifted towards
+This is also shown in Figure \ref{fig:distribution-opening-native}, where the eBPF average is shifted towards
 higher execution times.
 
 Similarly, the WASM tests present the same behaviour remarked in the previous section -
 even when unrestricted, WASM is much slower than a native binary, and the developed runtime
 still has the constant overhead of around $30\ ms$ in both the tests within the Landlock and eBPF sandboxes.
-Again, Figure \ref{fig:distribution-opening-wasm} shows the distribution of execution times.
+Again, Figure \ref{fig:distribution-opening-wasm} shows the box plot of execution times.
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
   \centering
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-0.native.png}
-    \caption{Native}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-0.native-landlock.png}
-    \caption{Landlock}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-0.native-bpf.png}
-    \caption{eBPF}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.5\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-0.native.png}
-  \end{subfigure}
-  \caption{Distribution of execution times when opening a file (native).}
+  \includegraphics[width=0.74\linewidth]{tests/box-plot-0.native.png}
+  \caption{Execution times when opening a file (native).}
   \label{fig:distribution-opening-native}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
   \centering
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-0.wasmtime.png}
-    \caption{Wasmtime}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-0.wasm-landlock.png}
-    \caption{WASM + Landlock}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-0.wasm-bpf.png}
-    \caption{WASM + eBPF}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.5\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-0.wasm.png}
-  \end{subfigure}
-  \caption{Distribution of execution times when opening a file (WASM).}
+  \includegraphics[width=0.74\linewidth]{tests/box-plot-0.wasm.png}
+  \caption{Execution times when opening a file (WASM).}
   \label{fig:distribution-opening-wasm}
 \end{figure}
 
@@ -376,32 +304,14 @@ Again, the WASM curves in Figure \ref{fig:avg-comparison-wasm-speed} clearly sho
 of about $30\ ms$ identified in the previous sections - the \textit{WASM+Landlock} and \textit{WASM+eBPF} curves
 exhibit the same trend as the \textit{Wasmtime} one, but appear translated by a constant factor.
 
+Finally, Figure \ref{fig:distribution-reading-native} and Figure \ref{fig:distribution-reading-wasm}
+collect all box plots relative to the different readings for native binaries and WASM binaries, respectively.
+
 \begin{figure}[ht!]
   \centering
   \begin{subfigure}[b]{0.78\textwidth}
     \centering
     \includegraphics[width=\textwidth]{tests/reading-file-native-graph.png}
-  \end{subfigure}
-
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-100K.native.png}
-    \caption{Box plot for reading a 100 KB file.}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-1M.native.png}
-    \caption{Box plot for reading a 1 MB file.}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-10M.native.png}
-    \caption{Box plot for reading a 10 MB file.}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-100M.native.png}
-    \caption{Box plot for reading a 100 MB file.}
   \end{subfigure}
 
   \caption{A comparison of native average speeds when reading a file.}
@@ -415,173 +325,65 @@ exhibit the same trend as the \textit{Wasmtime} one, but appear translated by a 
     \includegraphics[width=\textwidth]{tests/reading-file-wasm-graph.png}
   \end{subfigure}
 
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-100K.wasm.png}
-    \caption{Box plot for reading a 100 KB file.}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-1M.wasm.png}
-    \caption{Box plot for reading a 1 MB file.}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-10M.wasm.png}
-    \caption{Box plot for reading a 10 MB file.}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/box-plot-100M.wasm.png}
-    \caption{Box plot for reading a 100 MB file.}
-  \end{subfigure}
-
   \caption{A comparison of WASM average speeds when reading a file.}
   \label{fig:avg-comparison-wasm-speed}
 \end{figure}
 
-\clearpage
-Finally, Figure \ref{fig:distribution-reading-native} and Figure \ref{fig:distribution-reading-wasm}
-collect all distribution relative to the different readings for native binaries and WASM binaries, respectively.
-Note that, in both figures, the tests on the $100$ MB file have a different scale from the others.
-
 \begin{figure}[ht!]
   \centering
-  \begin{subfigure}[b]{0.32\textwidth}
+
+  \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100k.native.png}
-    \caption{Native (100 KB)}
+    \includegraphics[width=\textwidth]{tests/box-plot-100K.native.png}
+    \caption{100 KB file}
   \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
+  \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100k.native-landlock.png}
-    \caption{Landlock (100 KB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100k.native-bpf.png}
-    \caption{eBPF (100 KB)}
+    \includegraphics[width=\textwidth]{tests/box-plot-1M.native.png}
+    \caption{1 MB file}
   \end{subfigure}
 
-  \begin{subfigure}[b]{0.32\textwidth}
+  \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-1M.native.png}
-    \caption{Native (1 MB)}
+    \includegraphics[width=\textwidth]{tests/box-plot-10M.native.png}
+    \caption{10 MB file}
   \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
+  \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-1M.native-landlock.png}
-    \caption{Landlock (1 MB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-1M.native-bpf.png}
-    \caption{eBPF (1 MB)}
+    \includegraphics[width=\textwidth]{tests/box-plot-100M.native.png}
+    \caption{100 MB file}
   \end{subfigure}
 
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-10M.native.png}
-    \caption{Native (10 MB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-10M.native-landlock.png}
-    \caption{Landlock (10 MB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-10M.native-bpf.png}
-    \caption{eBPF (10 MB)}
-  \end{subfigure}
-
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100M.native.png}
-    \caption{Native (100 MB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100M.native-landlock.png}
-    \caption{Landlock (100 MB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100M.native-bpf.png}
-    \caption{eBPF (100 MB)}
-  \end{subfigure}
-
-  \caption{Distribution of a native binary execution times when reading a file.}
+  \caption{Box plots of a native binary execution times when reading a file.}
   \label{fig:distribution-reading-native}
 \end{figure}
 
 \begin{figure}[ht!]
   \centering
-  \begin{subfigure}[b]{0.32\textwidth}
+
+  \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100k.wasmtime.png}
-    \caption{Wasmtime (100 KB)}
+    \includegraphics[width=\textwidth]{tests/box-plot-100K.wasm.png}
+    \caption{100 KB file}
   \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
+  \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100k.wasm-landlock.png}
-    \caption{Landlock (100 KB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100k.wasm-bpf.png}
-    \caption{eBPF (100 KB)}
+    \includegraphics[width=\textwidth]{tests/box-plot-1M.wasm.png}
+    \caption{1 MB file}
   \end{subfigure}
 
-  \begin{subfigure}[b]{0.32\textwidth}
+  \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-1M.wasmtime.png}
-    \caption{Wasmtime (1 MB)}
+    \includegraphics[width=\textwidth]{tests/box-plot-10M.wasm.png}
+    \caption{10 MB file}
   \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
+  \begin{subfigure}[b]{0.49\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-1M.wasm-landlock.png}
-    \caption{Landlock (1 MB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-1M.wasm-bpf.png}
-    \caption{eBPF (1 MB)}
+    \includegraphics[width=\textwidth]{tests/box-plot-100M.wasm.png}
+    \caption{100 MB file}
   \end{subfigure}
 
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-10M.wasmtime.png}
-    \caption{Wasmtime (10 MB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-10M.wasm-landlock.png}
-    \caption{Landlock (10 MB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-10M.wasm-bpf.png}
-    \caption{eBPF (10 MB)}
-  \end{subfigure}
-
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100M.wasmtime.png}
-    \caption{Wasmtime (100 MB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100M.wasm-landlock.png}
-    \caption{Landlock (100 MB)}
-  \end{subfigure}
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{tests/reading-file-100M.wasm-bpf.png}
-    \caption{eBPF (100 MB)}
-  \end{subfigure}
-
-  \caption{Distribution of a WASM binary execution times when reading a file.}
+  \caption{Box plots of a WASM binary execution times when reading a file.}
   \label{fig:distribution-reading-wasm}
 \end{figure}
 
@@ -645,6 +447,7 @@ Note that in this case only Landlock is considered and not eBPF, since eBPF is e
 by a different process, while Landlock system calls are embedded in the code of the runtime.
 Hence, only the impact of Landlock can be measured \textit{internally} in the code.
 
+\vspace*{0.4cm}
 \begin{table}[ht!]
   \centering
   \csvreader[
@@ -691,20 +494,20 @@ occupies the overall time spent running by the program. The various labels are a
 \begin{figure}[ht!]
   \centering
   
-  \begin{subfigure}[b]{0.46\textwidth}
+  \begin{subfigure}[b]{0.49\textwidth}
     \includegraphics[width=\textwidth]{project-performance/graph_simple.png}
     \caption{Simple program.}
   \end{subfigure}
-  \begin{subfigure}[b]{0.46\textwidth}
+  \begin{subfigure}[b]{0.49\textwidth}
     \includegraphics[width=\textwidth]{project-performance/graph_simple_c.png}
     \caption{Simple program (cumulative).}
   \end{subfigure}
 
-  \begin{subfigure}[b]{0.46\textwidth}
+  \begin{subfigure}[b]{0.49\textwidth}
     \includegraphics[width=\textwidth]{project-performance/graph_medium.png}
     \caption{Complex program.}
   \end{subfigure}
-  \begin{subfigure}[b]{0.46\textwidth}
+  \begin{subfigure}[b]{0.49\textwidth}
     \includegraphics[width=\textwidth]{project-performance/graph_medium_c.png}
     \caption{Complex program (cumulative).}
   \end{subfigure}
@@ -730,10 +533,11 @@ and it is even faster than the argument parsing algorithm.
 This findings further support the data shown in Section \ref{sec:performance-comparison-between-different-sandboxes} -
 it was found that the developed WASM runtime was much slower than calling \textit{Wasmtime} from the command
 line, but because Landlock had little overhead when dealing with native binaries this implied that
-the ``culprit'' for the constant overhead could be the \textit{Wasmtime} library.
-In this case, it can also be seen than the time took for running the WASM binary is, in both cases, about
-the same as the constant overhead that appeared when restricting WASM binaries through the developed runtime.
+the ``culprit'' for the overhead could be the \textit{Wasmtime} library.
+Moreover, in this case it can also be seen than the time took for running the WASM binary is, in both cases, about
+the same as the constant overhead.
 
+\clearpage
 \subsection{Landlock performance scaling}
 \label{sec:performance-internal-analysis-landlock-impact}
 
@@ -876,6 +680,7 @@ it was shown that BPFContain was a little slower. As hinted before, this could b
 between the server and the client, so even with more initial overhead Landlock could come out
 faster nonetheless.
 
+\clearpage
 \section{Conclusions and observations}
 
 One of the key points of this series of tests is that, although perfectly usable,
