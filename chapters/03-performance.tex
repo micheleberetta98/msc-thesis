@@ -460,7 +460,7 @@ which are the following:
   \item and finally, compiling and running the WASM module.
 \end{itemize}
 
-Note that in this case only Landlock is considered and not eBPF, since eBPF is enforced externally
+Note that in this case only Landlock is considered, since eBPF is enforced externally
 by a different process, while Landlock system calls are embedded in the code of the runtime.
 Hence, only the impact of Landlock can be measured \textit{internally} in the code.
 
@@ -470,7 +470,7 @@ Hence, only the impact of Landlock can be measured \textit{internally} in the co
   \csvreader[
     tabular={|l|r|r|r|r|},
     table head = \hline
-      \textit{Program part} & $\mu_I$ & $\sigma_I$ & $\mu_C$ & $\sigma_C$   \\ \hline\hline,
+      \textit{Program section} & $\mu_I$ & $\sigma_I$ & $\mu_C$ & $\sigma_C$   \\ \hline\hline,
     late after line = \\ \hline,
     head to column names,
   ]{test-data/project-stats-simple.csv}{}
@@ -484,7 +484,7 @@ Hence, only the impact of Landlock can be measured \textit{internally} in the co
   \csvreader[
     tabular={|l|r|r|r|r|},
     table head = \hline
-      \textit{Program part} & $\mu_I$ & $\sigma_I$ & $\mu_C$ & $\sigma_C$   \\ \hline\hline,
+      \textit{Program section} & $\mu_I$ & $\sigma_I$ & $\mu_C$ & $\sigma_C$   \\ \hline\hline,
     late after line = \\ \hline,
     head to column names,
   ]{test-data/project-stats-medium.csv}{}
@@ -495,7 +495,7 @@ Hence, only the impact of Landlock can be measured \textit{internally} in the co
 
 Tables \ref{table:execution-times-simple} and \ref{table:execution-times-complex} contains
 all measured data in milliseconds for, respectively, the trivial and complex program.
-The visible timestamps are both the average time spent by a section, given by $\mu_I$,
+The recorded timestamps are both the average time spent by a section, given by $\mu_I$,
 and the cumulative time up until that section's completion, given by $\mu_C$.
 Standard deviations $\sigma_I$ and $\sigma_C$ are also given for any respective program part.
 For example, if the part ``Landlock enforcement'' is such that $\mu_I = 20\ ms$ and $\mu_C = 100\ ms$,
@@ -535,7 +535,7 @@ occupies the overall time spent running by the program. The various labels are a
 
 As is immediately noticeable by the collected data, the biggest bottleneck on performance is given
 by \textit{running the WebAssembly binary} with the library provided by Wasmtime.
-The specific actions required are instantiating the required structures, interpreting and linking the WASM module,
+This section comprises of instantiating the required data structures, interpreting and linking the WASM module,
 and finally running it, as already highlighted in Section \ref{sec:landlock-wasm-module}.
 Running the WebAssembly binary alone makes up $97.7 \%$ of the time spent running the trivial program, and $98.1 \%$ of the time
 spent running the complex program.
@@ -608,8 +608,7 @@ This means that the cost of applying one rule is the same whatever the number of
 However, because Landlock rules are related to paths, then Landlock performance \textit{should} be influenced by the
 number of rules used when specifying multiple paths (folders or files).
 In this series of tests, a different number of rules related to multiple folders\footnote{It does not matter if they are
-related to a folder or a file, since both are considered as paths.} is taken into considerations
-for each performed test.
+related to a folder or a file, since both are considered as paths.} is taken into account for each performed test.
 
 As can be seen in Figure \ref{fig:perf-test-landlock-impact-folders}, there is a clear correlation
 between the number of rules used and the time necessary for Landlock to enforce them.
