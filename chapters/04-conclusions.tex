@@ -1,4 +1,4 @@
-\section{WebAssembly and LSMs}
+\section{WebAssembly and LSM}
 
 \textit{WebAssembly}, abbreviated to WASM, is a relatively new binary instruction format that
 strives to bring security, speed, portability, and compactness to the Web
@@ -11,8 +11,8 @@ through the aid of runtimes, such as \textit{Wasmtime} and \textit{Wasmer}.
 However, these runtimes' CLI interfaces do not provide a lot of user control
 when dealing with the program's access rights to specific file system locations.
 These interfaces can be extended by using pre-existing access control frameworks,
-namely the \textit{Linux Security Modules}.
-Specifically, two of these frameworks are taken into consideration - \textit{Landlock},
+specifically the \textit{Linux Security Modules} framework.
+Two frameworks in particular are taken into consideration -- \textit{Landlock},
 to provide unprivileged scoped access control, and \textit{eBPF}, a virtual
 machine that can run sandboxed program in a privileged context.
 
@@ -26,19 +26,19 @@ Firstly, an analysis of the existing runtimes, \textit{Wasmtime} and \textit{Was
 was required to understand how they behave in different situations and what
 specific means they give to the user in order to restrict a WASM binary.
 As highlighted in Section \ref{sec:introduction-wasi}, when using the default command line
-interface, there is a lack of a fine granularity on what a program can do - for example,
+interface, there is a lack of a fine granularity on what a program can do -- for example,
 the user cannot describe what a WASM binary is permitted to do on a preopened directory's files.
 
-Secondly, the two LSMs in question, \textit{Landlock} and \textit{eBPF}, were studied and understood
+Secondly, the two LSM frameworks in question, \textit{Landlock} and \textit{eBPF}, were studied and understood
 so that they could be integrated with arbitrary code.
-For this phase, having a mainstream Linux distribution is not enough - these two LSMs have to be enabled
+For this phase, having a mainstream Linux distribution is not enough -- Landlock and eBPF have to be enabled
 for them to be used by programs. This can be done either by manually compiling the kernel with the desired
 flags enabled, or by using particular distributions that have them enabled by default, such as Arch Linux.
 
-Lastly, WASI libraries and the chosen LSMs had to be integrated in a new runtime, described in
+Lastly, WASI libraries and the chosen LSM frameworks had to be integrated in a new runtime, described in
 Chapter \ref{chap:restricting-wasi}, able to run WASM binaries while simultaneously sandboxing them according to the user's choice.
 When dealing with Landlock, the integration with a given program is provided by C libraries,
-which can also be wrapped in the language of one's choice - for this project, this language is Rust,
+which can also be wrapped in the language of one's choice -- for this project, this language is Rust,
 in order to have a safer language that could still produce quite fast binaries.
 On the other hand, eBPF has to be integrated externally, as the sandbox actions is done by
 a server process, acting as a virtual machine.
@@ -51,13 +51,13 @@ the more powerful one, allowing a great deal of fine tuning on multiple areas,
 such as file system, network and inter-process communication.
 
 Regarding performance, WASM is still not close to native speeds, and the usage of WASI libraries
-brings a big overhead against the more traditional runtimes, as shown in the tests in Chapter \ref{chap:performance}.
+brings a visible overhead against the more traditional runtimes, as shown in the tests in Chapter \ref{chap:performance}.
 However, LSMs themselves are not a hindrance on performance if considered in isolation.
 
 \section{Possible improvements and future work}
 
 The first problem that could be addressed is the performance of the WASI libraries.
-In the testing runs, a very high percentage of the time is spent into loading and running the WASM module -
+In the testing runs, a very high percentage of the time is spent into loading and running the WASM module --
 acting as a bottleneck, these libraries are thus the first and most effective point to improve.
 This could be done either through optimisations in the original code, or through a more thorough
 configuration of the library's execution capabilities.

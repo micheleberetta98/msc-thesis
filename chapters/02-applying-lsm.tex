@@ -13,11 +13,11 @@ Additional desirable features include the possibility to apply exceptions to a c
 as limiting the access to other resources in the operating systems, such as network, devices, and
 inter-process communications.
 
-Finally, usability is also taken into consideration, especially an user's point of view.
+Finally, usability is also taken into consideration, especially from an user's point of view.
 
 Note that the main purpose of these tests is not to replicate all the functionalities given by
 the WebAssembly runtimes (\textit{Wasmtime} and \textit{Wasmer}), but to see how their basic features,
-especially running a WebAssembly compiled binary through WASI, can be integrated and/or extended with
+specifically running a WebAssembly compiled binary through WASI, can be integrated and/or extended with
 security tools from the Linux kernel.
 This means that, for example, running a single function exported from a WebAssembly module won't be taken
 into consideration.
@@ -100,10 +100,10 @@ Their usage and meaning is described in Table \ref{table:landlock-cli-args}.
     \textit{Argument} & \textit{Required} & \textit{Description} \\
     \hline\hline
     \textit{WASM module} & Yes & The path to the WASM binary to run \\ \hline
-    \texttt{dir} & No & All the directories to preopen \\ \hline
-    \texttt{mapdir} & No & Eventual mappings between the directories \\ \hline
-    \texttt{fs-allow} & No & All the permitted actions on a single path \\ \hline
-    \texttt{no-landlock} & No & Used to disable the self restriction done by landlock \\
+    \texttt{-{}-dir} & No & All the directories to preopen \\ \hline
+    \texttt{-{}-mapdir} & No & Eventual mappings between the directories \\ \hline
+    \texttt{-{}-fs-allow} & No & All the permitted actions on a single path \\ \hline
+    \texttt{-{}-no-landlock} & No & Disable the self restriction done by Landlock \\
     \hline
   \end{tabular}
   \caption{All the available command line arguments.}
@@ -144,10 +144,10 @@ fn parse_flag_str(s: &str)
 }
 \end{code}
 
-The \texttt{fs-allow} argument is made up of two parts, separated by a colon - a path to apply the restrictions to,
+The \texttt{fs-allow} argument is made up of two parts, separated by a colon -- a path to apply the restrictions to,
 and a series of enabled permissions on that specific path, separated by a comma.
 Each permission is mapped one-to-one to the flags provided by Landlock in a manner listed in Table \ref{table:landlock-flags}.
-Moreover, there are three useful ``shortcuts'' used to represent common situations - \texttt{read}, \texttt{write} and \texttt{*},
+Moreover, there are three useful ``shortcuts'' used to represent common situations -- \texttt{read}, \texttt{write} and \texttt{*},
 for enabling the common reading operations, write operations and all operations.
 
 \begin{code}[language=Rust, caption=Parsing a single Landlock flag., label=lst:parsing-fs-allow-2]
@@ -188,8 +188,8 @@ to write \texttt{*,-X} instead of spelling out all the enabled flags.
 A full example of how these arguments work is shown in Figure \ref{fig:args-example},
 while the code to parse this specific command line argument is visible in Listings \ref{lst:parsing-fs-allow-1} and \ref{lst:parsing-fs-allow-2}.
 
-Lastly, the \texttt{no-landlock} argument is only for testing purposes - it is off by default, so that
-landlock is enabled and self restriction is applied if not explicitly disabled.
+Lastly, the \texttt{no-landlock} argument is only for testing purposes -- it is off by default, so that
+Landlock is enabled and self restriction is applied if not explicitly disabled.
 
 \vspace*{0.5cm}
 \begin{figure}[ht]
@@ -214,10 +214,10 @@ and construction of a \textit{WASI Context}, another structure defined by the \t
 all preopened directories, eventual imports, and more data that will be useful to run the WebAssembly module.
 
 Moreover, this module defines various helpers to preopen directories, both unmapped and mapped, and
-how to run a WebAssembly binary - it must create both an \textit{engine} and a \textit{linker},
+also defines how to run a WebAssembly binary -- it must create both an \textit{engine} and a \textit{linker},
 as well as a \textit{store}, which represents the memory of a WebAssembly module described in the previous chapter.
 
-Note that the WebAssembly module must have a \textit{default exported function} to run - when compiling with a WASI target,
+Note that the WebAssembly module must have a \textit{default exported function} to be run -- when compiling with a WASI target,
 this is usually represented by the \texttt{\_start} function, which corresponds to the \texttt{main} function in languages
 such as C and Rust.
 
@@ -339,7 +339,7 @@ The following examples illustrate how to combine some of them:
   \item \texttt{.:MReg} only allows the creation, rename or linking of regular files in the current directory;
   \item \texttt{.:R,W} and \texttt{./subdir:*} allows only reads and writes on files in the current directory, while no restrictions are
         made for \textit{subdir};
-  \item \texttt{.:*,-X,-W} allows every action the current directory but the reading and writing of files.
+  \item \texttt{.:*,-X,-W} allows every action the current directory except for the reading and writing of files.
 \end{itemize}
 
 Note that the directories containing the files of interest must always be preopened,
@@ -382,18 +382,18 @@ not needed by the WASM binary.
 \subsection{Advantages and disadvantages}
 
 The main advantage that Landlock brings is simplicity. For the developer, the API is simple enough to use,
-and it can be used in a variety of languages - the main three languages are C (used directly with the kernel libraries),
+and it can be used in a variety of languages -- the main three languages are C (used directly with the kernel libraries),
 Rust (as in this project), and Go\footnote{\url{https://github.com/landlock-lsm/go-landlock}}.
 From the user's point of view, the provided permission flags are clear enough that it is required to have
 only a basic understanding of Linux's file system permissions.
 Hence, it can be used to provide a clear interface that is not so different from the one already given by
 the existing runtimes.
-Moreover, Landlock allows \textit{unprivileged} access control - it is not necessary to gain particular privileges
+Moreover, Landlock allows \textit{unprivileged} access control -- it is not necessary to gain particular privileges
 when running a binary, so the user can run a WebAssembly module in a protected environment even if they are not
 in the \textit{sudoers} group.
 
 The biggest drawback with this approach is simplicity itself. As highlighted in Section \ref{sec:intro-lsm-landlock},
-there is no way to define exceptions - this restricts the possibilities given to the user, and makes some situations
+there is no way to define exceptions -- this restricts the possibilities given to the user, and makes some situations
 impossible to specify. For example, if a \texttt{LANDLOCK\_ACCESS\_FS\_REMOVE\_FILE} right is given to a directory,
 all files in that directory can be renamed and there is no way to prevent renaming for a specific file.
 Or similarly, if we have give the \texttt{LANDLOCK\_ACCESS\_FS\_READ\_FILE} and \texttt{LANDLOCK\_ACCESS\_FS\_WRITE\_FILE}
@@ -409,8 +409,7 @@ In addition to this, the set of capabilities is somewhat limited, and mostly rel
 \textit{BPFContain} \cite{bpfcontain} is a container security daemon for Linux written in Rust that offers
 interoperability with \textit{eBPF} \cite{ebpf}.
 Since \textit{BPFContain} is an external tool and not a library such as \textit{rust-landlock}, there was no need
-to develop a project from scratch, since it is possible to combine it with the WebAssembly runtime of choice, which
-in our case is \textit{Wasmtime}.
+to develop a project from scratch, since it is possible to combine it with the WebAssembly runtime of choice.
 
 It should be noted that \textit{BPFContain} is still in active development and not yet feature-complete.
 Finally, for this tool to work, BPF should be enabled when compiling the Linux kernel.
@@ -419,7 +418,7 @@ Finally, for this tool to work, BPF should be enabled when compiling the Linux k
 
 The usage is pretty straightforward:
 \begin{enumerate}
-  \item run the daemon once in the foreground in order to create the work files and directories -
+  \item run the daemon once in the foreground in order to create the work files and directories --
         these are mostly log files and a directory used for the policies in \texttt{/var/lib/bpfcontain},
         which permissions are set so that its content is readable, writable and executable by the daemon;
   \item create a policy in \texttt{/var/lib/bpfcontain/policy};
@@ -459,7 +458,7 @@ An example of this kind of ``untainted'' policy is defined in Listing \ref{lst:y
 run \textit{bash} in a confined environment.
 In this policy, \textit{bash} is allowed to access the terminal and \texttt{/dev/null}, as well
 as reading and executing everything in \texttt{/} and reading everything in \texttt{/proc}.
-An important point is the \texttt{deny} section - here \textit{bash} is prevented to writing and
+An important point is the \texttt{deny} section -- here \textit{bash} is prevented to writing and
 appending anything in all of the file system.
 Lastly, this policy is not active by default, but the process become ``tainted'' and the policy is enforced
 when \textit{bash} tries to write or append anywhere in the file system.
@@ -565,15 +564,16 @@ creating, renaming and linking devices, but eBPF allows to specify which particu
 and which not.
 
 However, eBPF brings also some disadvantages that Landlock does not have.
-The biggest downside is regarding usability - while Landlock can be used by anyone able to use
+The biggest downside is regarding usability -- while Landlock can be used by anyone able to use
 the terminal and understand the basics of passing parameters, BPFContain requires the writing
 of a policy in a specific language, albeit a simple one like YAML, and this policy must be in a very
 specific location\footnote{To be fair, this is a limitation of \textit{BPFContain} and not of \textit{eBPF} itself.}.
 This obviously decreases the level of simplicity and usability for a user that wants to contain and restrict
 some binaries.
 
-Another point regarding the specific usage with \textit{Wasmtime} and WebAssembly is the necessity of
-having executable privileges - since \textit{Wasmtime} offers a command line binary, then in order to run
+Another point regarding the specific usage with \textit{Wasmtime}\footnote{Or, more generally, any
+WASM runtime that offers an executable binary.} and WebAssembly is the necessity of
+having executable privileges -- since \textit{Wasmtime} offers a command line binary, then in order to run
 a WebAssembly module the confined process must be able to execute commands. This however transfers this
 permission to the WebAssembly module itself. This permission can be restricted only to a specific file system
 location, but it is still something that has to be taken into consideration.
@@ -588,7 +588,7 @@ so that super user privileges are not required to enforce the sandbox restrictio
 \section{Final product}
 
 The final product of this development process is a \textit{proof-of-concept} WebAssembly runtime
-that is natively integrated with LSMs, in particular with Landlock as eBPF is enforced externally
+that is natively integrated with LSM, in particular with Landlock as eBPF is enforced externally
 through the server managed by BPFContain.
 As highlighted before, the project is open source and available at \url{https://github.com/micheleberetta98/rust-wasm-landlock}.
 
@@ -598,7 +598,7 @@ there are any through the \texttt{-{}-dir} and \texttt{-{}-mapdir} command line 
 Landlock enforcement is done through the \texttt{-{}-fs-allow} argument, which accepts a string in the format
 \texttt{path:restrictions}, where \texttt{path} is any folder of file path that the binary could access
 and \texttt{restrictions} is a comma-separated list of flags as outlined in Table \ref{table:landlock-flags}.
-This flag can be repeated to set different access restrictions on different paths.
+This argument can be repeated to set different access restrictions on different paths.
 As an example, if \texttt{print.wasm} is a WASM module that prints the content of a certain \texttt{file.txt},
 then a possible command to run it with Landlock could be \texttt{./rust-wasm-landlock print.wasm -{}-dir . -{}-fs-allow ``file.txt:R''},
 where \texttt{rust-wasm-landlock} is the name of the WASM runtime binary.

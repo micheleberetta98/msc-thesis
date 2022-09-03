@@ -24,7 +24,7 @@ introduces static typing and can be transpiled to JavaScript.
 
 \vspace*{0.5cm}
 
-\begin{code}[language=javascript, caption=A simple example of JavaScript]
+\begin{code}[language=javascript, caption=A simple example of JavaScript.]
 function fact(n) {
   if (n == 0) return 1;
   return n * fact(n - 1);
@@ -48,7 +48,7 @@ document
 \end{code}
 
 However, JavaScript is ill-equipped when it comes to performance-critical modern web
-pages - from this needs were born technologies such as \textit{asm.js}, \textit{Native Client}, and eventually \textit{WebAssembly}.
+pages -- from this needs were born technologies such as \textit{asm.js}, \textit{Native Client}, and eventually \textit{WebAssembly}.
 The main downsides of JavaScript that brought the need for WebAssembly are:
 \begin{itemize}
   \item JavaScript is \textit{always} represented as a text format, so it must be parsed by the user's browser for it to be compiled and enhanced;
@@ -71,7 +71,7 @@ local website. Browsers natively support the rendering of HTML and CSS, and feat
 to just-in-time compile it in order to improve performance.
 
 Browsers can also mitigate the risk provided by the common JavaScript vulnerabilities mentioned in Section \ref{sec:introduction-javascript}
-by using two main methods - \textit{sandboxing}, so that JS isn't allowed to perform general-purpose
+by using two main methods -- \textit{sandboxing}, so that JS isn't allowed to perform general-purpose
 programming tasks like working directly with files\footnote{Although, there are APIs that can grant access to a ``virtual drive''
 only when explicitly allowed by the user \cite{filesystem-mdn}, so access to the user's file system is not possible.},
 and \textit{same-origin policy} constraints, in which scripts from one website have access to data from the same website but not from others.
@@ -123,11 +123,11 @@ WebAssembly resolves many of the problems of JavaScript, the major ones being:
 \begin{itemize}
   \item being represented with a \textit{binary} format, parsing on the client is faster and simpler;
   \item having a static type systems, optimisations can be done earlier at compile time, and not on the browser once all the files
-        have already been transferred;
+        have already been transferred.
 \end{itemize}
 
 \vspace*{0.5cm}
-\begin{code}[language=wasm, caption={Recursive factorial written in WebAssembly S-expressions}, label=lst:wasm-fact]
+\begin{code}[language=wasm, caption={Recursive factorial written in WebAssembly S-expressions.}, label=lst:wasm-fact]
   (module
     (func $fact (param $x i64) (result i64)
       (if (result i64) (i64.eqz (local.get $x))
@@ -149,9 +149,9 @@ Each binary takes the form of a \textit{module}, which contains \textit{function
 While a module is a static representation of a program, an \textit{instance} is the dynamic one.
 A module can be instantiated by the embedder (e.g., a JavaScript virtual machine).
 
-WebAssembly is a typed language, but there are only four basic \textit{value types} - integers and IEEE 754 floating
+WebAssembly is a typed language, but there are only four basic \textit{value types} -- integers and IEEE 754 floating
 point numbers, each in 32 and 64 bit variants. There are no distinction between signed and unsigned integers,
-but instructions that depends on the present of the sign are marked with an explicit suffix.
+but instructions that depends on the presence of the sign are marked with an explicit suffix.
 
 \textit{Functions} are typed, take a sequence of values as a parameter, and returns another sequence of values.
 They cannot be nested inside each other. The content of the call stack for execution are separate from the data
@@ -169,7 +169,7 @@ In this second case, only the function's type signature is validated.
   \label{fig:indirect-function-table-structure}
 \end{figure}
 
-WebAssembly has also support for \textit{traps} - in a similar manner to an exception, a trap aborts the current
+WebAssembly has also support for \textit{traps} -- in a similar manner to an exception, a trap aborts the current
 computation, and control is given back to the embedder. For example, when embedded in JavaScript, a trap will
 throw a JavaScript exception.
 
@@ -181,14 +181,14 @@ Each module can define no more than one memory, which can grow by one or more
 \textit{pages}\footnote{A page is 64 KiB large.} if the need arises.
 Access to the individual locations is done through addresses, represented as unsigned integers,
 which are dynamically checked against memory size\footnote{On 64 bit platforms the WebAssembly engine
-can make use of virtual memory techniques to eliminate this checks, see \cite{bringing-the-web-up-to-speed-2017}.}
+can make use of virtual memory techniques to eliminate these checks, see \cite{bringing-the-web-up-to-speed-2017}.}
 (out of bounds accesses result in a trap).
-Linear memory also brings security benefits - it is disjoint from the code space, the execution stack and the engine's
-data structures \cite{bringing-the-web-up-to-speed-2017}; hence, compiled program cannot corrupt directly their own execution
+Linear memory also brings security benefits -- it is disjoint from the code space, the execution stack and the engine's
+data structures \cite{bringing-the-web-up-to-speed-2017}; hence, compiled program cannot directly corrupt their own execution
 environment or perform undefined behaviour.
 
 Lastly, WebAssembly doesn't provide arbitrary jumps but \textit{structured control flow},
-so that the code can be validated in a single pass and prevent common control flow attacks.
+so that the code can be validated in a single pass and common control flow attacks can be prevented.
 
 \subsection{Problems with WebAssembly}
 
@@ -201,14 +201,14 @@ However, even though WebAssembly strives for security, binaries can be still exp
 such as buffer overflows, and attacks that aren't applicable in traditional native binaries, e.g., overwriting
 string literals in memory \cite{binary-security-wasm-2020}.
 
-The paper shows that it is possible to obtain a write primitive given a WebAssembly binary compiled from vulnerable C/C++ code,
+The paper at \cite{binary-security-wasm-2020} shows that it is possible to obtain a write primitive given a WebAssembly binary compiled from vulnerable C/C++ code,
 by means of stack-based buffer overflows and heap metadata corruption, and it is possible to overwrite stack, heap, and ``constant''
 data, since the linear memory does not have a read-only section. It would be possible then, for example, to overwrite the name
 of a file that was encoded as a string literal in the original program.
 
 Another problem shown in the same paper is the redirection of indirect calls. Since WebAssembly allows indirect calls
 to functions through a function table, an attacker could divert the execution by overwriting an integer in linear memory
-that serves as an index into the table section. WebAssembly limits this ability with two mechanisms - not all functions
+that serves as an index into the table section. WebAssembly limits this ability with two mechanisms -- not all functions
 may appear in the table, but only those that can be indirectly called, and all functions call are type checked.
 So, redirecting indirect calls is possible only within the class of functions with the same type.
 
@@ -218,7 +218,7 @@ in WebAssembly. For example, a log function that in C has the signature \texttt{
 \texttt{void exec(const char* cmd)} both become functions with only one \texttt{i32} param in WebAssembly.
 This enables the indirect diversion described in the previous paragraph if the two functions can be indirectly called.
 
-\subsection{WASI - WebAssembly System Interface}
+\subsection{WASI -- WebAssembly System Interface}
 \label{sec:introduction-wasi}
 
 The \textit{WebAssembly System Interface} (WASI) \cite{wasi} is a modular system interface for WebAssembly.
@@ -249,7 +249,7 @@ A binary that uses WASI can be run using a CLI runtime, such as \textit{Wasmtime
 or using a browser polyfill (an example is visible in \cite{wasi-polyfill}).
 The approach taken for the sandboxing by these runtimes is based on a \textit{capability-based security model} \cite{wasmtime-security-sandboxing},
 so that access to the file system and other resources must be explicitly given. Capabilities can be either \textit{static}, which
-are represented by the list of imports of the WebAssembly module to run, or \textit{dynamic}, i.e., specific flags
+are represented by the list of imports of the WebAssembly module to run, or \textit{dynamic}, i.e., flags
 specified with custom command-line arguments at execution time.
 Moreover, when given permissions to write to a terminal, a program could print characters recognised as control
 sequences that may have side effects and confuse or misled user (a harmless example is clearing the screen).
@@ -261,8 +261,8 @@ CLI runtimes have some particular features and properties:
         in order to have the file descriptors available; it is not possible to escape this sandbox using the parent directory \texttt{..}
         or soft links, but it is possible to escape using hard links;
         this is because hard links point directly to the \textit{data} on disk, and behave as a full fledged copy of the linked file, while soft links
-        only point to an existing \textit{file} - this is why using hard links is possible to ``escape'' sandbox;
-  \item the \textit{directory} is the finest granularity available to the preopen action - once access is given to a specific directory, all files and subdirectories are
+        only point to an existing \textit{file} -- this is why using hard links is possible to ``escape'' sandbox;
+  \item the \textit{directory} is the finest granularity available to the preopen action -- once access is given to a specific directory, all files and subdirectories are
         visible, and it is not possible to restrict permissions (all files are readable and
         writable) when using the command line runtime wrapper\footnote{It is possible to specify a basic set of permissions when using the WASI runtime library in another language, such as in Rust,
         see example at \cite{wasi-state-example}.};
@@ -271,8 +271,8 @@ CLI runtimes have some particular features and properties:
         but files added after the preopen can be ``seen'' if their name is known (i.e., they can be opened, read or written in accordance with given permissions);
   \item any change made to a file by any process is reflected in what the compiled WebAssembly binary is able to read;
   \item environment variables are not accessible by default, but they must be explicitly declared and given access to;
-  \item the WebAssembly memory is effectively sandboxed - the compiled program cannot access memory outside its sandbox, otherwise a trap is raised;
-  \item not all ``classic'' functionality is available - when compiling C with the custom prebuilt toolchain,
+  \item the WebAssembly memory is effectively sandboxed -- the compiled program cannot access memory outside its sandbox, otherwise a trap is raised;
+  \item not all ``classic'' functionality is available -- when compiling C with the custom prebuilt toolchain,
         functions such as \texttt{system}, \texttt{execv}, and \texttt{fexecve} are not available,
         so it is not possible to execute arbitrary commands or files;
   \item fileless execution isn't feasible, since \texttt{memfd\_create} is not available due to the missing
@@ -297,15 +297,15 @@ vulnerabilities by compiling them to WebAssembly before their use.
 
 An example is shown with the \textit{RLBox} project \cite{wasm-firefox-isolation-2020, rlbox-docs},
 a framework that supports efficient sandboxing with modest performance overhead,
-that has been integrated into Firefox in order to sandbox the \texttt{libGraphite} font shaping library.
+that has been integrated into Firefox in order to restrict the \texttt{libGraphite} font shaping library.
 RLBox ensures that whatever library is sandboxed is also memory isolated from the rest of the application,
-and all these boundary crossings are explicit. The isolation is enforced by sandboxing mechanisms, such as
+and all these boundary crossings are explicit. The isolation is enforced by specific mechanisms, such as
 WebAssembly \cite{wasm-sandboxing-firefox}, and to ensure that application code doesn't use unsafe values
 originated in the sandbox, RLBox differentiates between \textit{tainted} and \textit{untainted} values
 through the use of the C++ type system.
 
-Even the WASI interface is able to segregate a WebAssembly binary, since it is effectively \textit{sandboxed}
-- all interactions with the embedding environment must be done through explicit exports and imports, and the memory is
+Even the WASI interface is able to segregate a WebAssembly binary, since it is effectively sandboxed
+-- all interactions with the embedding environment must be done through explicit exports and imports, and the memory is
 bound checked at runtime. Hence, the WebAssembly program cannot access data outside its assigned memory, and the
 embedder cannot access memory assigned to the WebAssembly code directly.
 
@@ -365,7 +365,7 @@ Other limitations of Landlock include the impossibility for a thread to modify i
 restrict special file systems, such as kernel file systems (e.g., nsfs).
 
 In case of multiple consecutive self-restrictions, the result is the intersection
-of all rulesets - if a process first restricts itself allowing all read and writing operations,
+of all rulesets -- if a process first restricts itself allowing all read and writing operations,
 and then restricts itself again with only reading permissions, the result is equivalent
 to a single restriction made with a ruleset that permits only reading operations.
 
@@ -402,12 +402,12 @@ allows the removal of empty directories \textit{inside} of $d$, and not of $d$ i
   \item \texttt{LANDLOCK\_ACCESS\_FS\_REFER}, to re-parent a file hierarchy\footnote{Available since the second version of the Landlock ABI.}.
 \end{itemize}
 
-This last one is treated differently from the others - in order to prevent privilege escalation,
+This last one is treated differently from the others -- in order to prevent privilege escalation,
 it is necessary that the destination directory hierarchy has the same (or a superset of) restrictions
 as the source hierarchy, since only create a rule with such access right is not enough to protect oneself.
 If that is not the case, this actions is denied directly by the operating system.
 
-The behaviour of symbolic links within Landlock is also interesting - hard links can be created only on data
+The behaviour of symbolic links within Landlock is also interesting -- hard links can be created only on data
 which can already be accessed according to the provided rules, while newly created soft links can reference any path on the
 file system, but the rules that are applied are those of the referenced directory.
 For example, if a program has a \texttt{LANDLOCK\_ACCESS\_FS\_READ\_FILE}  as well as a 
