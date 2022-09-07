@@ -128,16 +128,16 @@ WebAssembly resolves many of the problems of JavaScript, the major ones being:
 
 \vspace*{0.5cm}
 \begin{code}[language=wasm, caption={Recursive factorial written in WebAssembly S-expressions.}, label=lst:wasm-fact]
-  (module
-    (func $fact (param $x i64) (result i64)
-      (if (result i64) (i64.eqz (local.get $x))
-        (then (i64.const 1))
-        (else
-          (i64.mul
-            (local.get $x)
-            (call $fact
-              (i64.sub (local.get $x) (i64.const 1)))))))
-    (export "fact" (func $fact)))
+(module
+  (func $fact (param $x i64) (result i64)
+    (if (result i64) (i64.eqz (local.get $x))
+      (then (i64.const 1))
+      (else
+        (i64.mul
+          (local.get $x)
+          (call $fact
+            (i64.sub (local.get $x) (i64.const 1)))))))
+  (export "fact" (func $fact)))
 \end{code}
 
 \subsection{Overview of the language}
