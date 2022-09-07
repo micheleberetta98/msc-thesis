@@ -377,7 +377,7 @@ for Go and \texttt{rust-landlock} \cite{rust-landlock} for Rust.
 
 Landlock employs a series of flags to restrict a sandboxed process to a set of actions on files and
 directories opened after the sandboxing operation (those opened before are not affected).
-As highlighted in \cite{landlock-user-space}, the file system flags for files are:
+As highlighted in \cite{landlock-user-space}, the file system flags for files are these three:
 \begin{itemize}
   \item \texttt{LANDLOCK\_ACCESS\_FS\_EXECUTE}, to execute a file;
   \item \texttt{LANDLOCK\_ACCESS\_FS\_WRITE\_FILE}, to open a file with write access;
