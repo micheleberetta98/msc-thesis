@@ -54,7 +54,7 @@ The main downsides of JavaScript that brought the need for WebAssembly are:
   \item JavaScript is \textit{always} represented as a text format, so it must be parsed by the user's browser for it to be compiled and enhanced;
   \item JavaScript is dynamically typed, hence optimisations for JS (when possible) have to occur
         in the browser, when all JS files have been received;
-        for example, JS has only two numeric type (a double-precision IEEE 754 value and a \textit{BigInt}
+        for example, JS has only two numeric types (a double-precision IEEE 754 value and a \textit{BigInt}
         for numbers bigger than $2^{53}$) and this restricts the usable CPU instructions;
   \item JavaScript has a number of security vulnerabilities that WebAssembly strives to eliminate by design;
         a common security vulnerability\footnote{Software vulnerabilities are the most common, but hardware vulnerabilities have also been found \cite{spectre}.}
@@ -103,7 +103,7 @@ WebAssembly main goals are the following \cite{bringing-the-web-up-to-speed-2017
   \item and finally \textit{compactness}, because code is transmitted over the network and must reduce load times as much as possible.
 \end{itemize}
 
-There were previous attempt at solving the problem of having safe, fast, and portable low-level code on the Web,
+There were previous attempts at solving the problem of having safe, fast, and portable low-level code on the Web,
 such as \textit{ActiveX}, \textit{Native Client}, and \textit{asm.js}.
 
 \textit{ActiveX} \cite{activex} was a Microsoft's technology for code-signing x86 binaries to run on the web, and relied only
@@ -150,11 +150,11 @@ While a module is a static representation of a program, an \textit{instance} is 
 A module can be instantiated by the embedder (e.g., a JavaScript virtual machine).
 
 WebAssembly is a typed language, but there are only four basic \textit{value types} -- integers and IEEE 754 floating
-point numbers, each in 32 and 64 bit variants. There are no distinction between signed and unsigned integers,
-but instructions that depends on the presence of the sign are marked with an explicit suffix.
+point numbers, each in 32 and 64 bit variants. There are no distinctions between signed and unsigned integers,
+but instructions that depend on the presence of the sign are marked with an explicit suffix.
 
 \textit{Functions} are typed, take a sequence of values as a parameter, and then return another sequence of values.
-They cannot be nested inside each other. The content of the call stack for execution are separate from the data
+They cannot be nested inside each other. The contents of the call stack for execution are separate from the data
 portion of the memory, and cannot be accessed directly by WebAssembly.
 The code inside a function consists of a series of \textit{instructions} that modify an implicit operand stack,
 either by declaring local variables or applying operations to the values already on the stack.
@@ -201,7 +201,7 @@ However, even though WebAssembly strives for security, binaries can be still exp
 such as buffer overflows, and attacks that aren't applicable in traditional native binaries, e.g., overwriting
 string literals in memory \cite{binary-security-wasm-2020}.
 
-A paper by Lehman, Kinder, and Pradel \cite{binary-security-wasm-2020} shows
+A paper by Lehmann, Kinder, and Pradel \cite{binary-security-wasm-2020} shows
 that it is possible to obtain a write primitive given a WebAssembly binary compiled from vulnerable C/C++ code,
 by means of stack-based buffer overflows and heap metadata corruption, and it is possible to overwrite stack, heap, and ``constant''
 data, since the linear memory does not have a read-only section. It would be possible then, for example, to overwrite the name
@@ -258,11 +258,11 @@ Hence, all writes to output streams are filtered in order to prevent this type o
 
 CLI runtimes have some particular features and properties:
 \begin{itemize}
-  \item it is possible to \textit{sandbox} entire directories by \textit{preopening} them, and eventually mapping them to custom paths,
+  \item it is possible to \textit{sandbox} entire directories by \textit{preopening} them, and possibly mapping them to custom paths,
         in order to have the file descriptors available; it is not possible to escape this sandbox using the parent directory \texttt{..}
         or soft links, but it is possible to escape using hard links;
         this is because hard links point directly to the \textit{data} on disk, and behave as a full fledged copy of the linked file, while soft links
-        only point to an existing \textit{file} -- this is why using hard links is possible to ``escape'' sandbox;
+        only point to an existing \textit{file} -- this is why using hard links makes it possible to ``escape'' the sandbox;
   \item the \textit{directory} is the finest granularity available to the preopen action -- once access is given to a specific directory, all files and subdirectories are
         visible, and it is not possible to restrict permissions (all files are readable and
         writable) when using the command line runtime wrapper\footnote{It is possible to specify a basic set of permissions when using the WASI runtime library in another language, such as in Rust,
@@ -321,7 +321,7 @@ compile-time via specific flags, such as \texttt{CONFIG\_DEFAULT\_SECURITY}, or 
 
 The LSM is used primarily by \textit{Mandatory Access Control} (MAC) extensions to
 provide a security policy. However, other extensions can be built with the LSM framework
-in order to implement specific changes when they cannot be obtained with the functionality Linux itself.
+in order to implement specific changes when they cannot be obtained with the functionality within Linux itself.
 
 Some projects that use LSM include:
 \begin{itemize}
@@ -399,14 +399,14 @@ allows the removal of empty directories \textit{inside} of $d$, and not of $d$ i
   \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_SOCK}, to create, rename or link a socket;
   \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_FIFO}, to create, rename or link a named pipe;
   \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_BLOCK}, to create, rename or link a block device;
-  \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_SYM}, to create, rename or link a symbolic;
+  \item \texttt{LANDLOCK\_ACCESS\_FS\_MAKE\_SYM}, to create, rename or link a symbolic link;
   \item \texttt{LANDLOCK\_ACCESS\_FS\_REFER}, to re-parent a file hierarchy\footnote{Available since the second version of the Landlock ABI.}.
 \end{itemize}
 
 This last one is treated differently from the others -- in order to prevent privilege escalation,
 it is necessary that the destination directory hierarchy has the same (or a superset of) restrictions
-as the source hierarchy, since only create a rule with such access right is not enough to protect oneself.
-If that is not the case, this actions is denied directly by the operating system.
+as the source hierarchy, since only creating a rule with such access right is not enough to protect oneself.
+If that is not the case, this action is denied directly by the operating system.
 
 The behaviour of symbolic links within Landlock is also interesting -- hard links can be created only on data
 which can already be accessed according to the provided rules, while newly created soft links can reference any path on the
@@ -416,7 +416,7 @@ For example, if a program has a \texttt{LANDLOCK\_ACCESS\_FS\_READ\_FILE}  as we
 pointing to \texttt{/etc/passwd} cannot be created, since the program does not have access to it, while a soft
 link can be created but cannot be read.
 
-Lastly, every new thread resulting from a \textit{clone} call inherits all Landlock restrictions from its parents.
+Lastly, every new thread resulting from a \textit{clone} call inherits all Landlock restrictions from its parent.
 These restrictions are also kept after a \textit{fork}.
 More specifically, when a thread restricts itself, these rules are not applied to other sibling threads
 but will be enforced on all of the thread's descendants.
@@ -443,8 +443,8 @@ by using a Just-In-Time compiler.
 
 These eBPF programs are event-driven and run when a certain hook point is passed. Some
 predefined hooks include system calls, network events, and so on. If a hook does not exist,
-it is possible to create custom kernel or user probes. An example of how eBPF interacts with the
-Linux kernel is visible in Figure \ref{fig:example-ebpf-hooks}.
+it is possible to create custom kernel probes or user probes. An example of how eBPF interacts with the
+Linux Kernel is visible in Figure \ref{fig:example-ebpf-hooks}.
 
 \begin{figure}[ht]
   \centering
@@ -466,10 +466,9 @@ When running a program with eBPF, there are many steps that are taken:
         to run the program as efficiently as possible.
 \end{enumerate}
 
-Unlike Landlock, eBPF makes it possible to define specific exception, e.g., denying
+Unlike Landlock, eBPF makes it possible to define specific exceptions, e.g., denying
 certain access rights on specific files while allowing them on the containing directory.
-It also allows to specify whether a program has access to devices such as \texttt{terminal}
-and \texttt{dev}.
+It also allows to specify whether a program has access to devices such as \texttt{terminal}.
 Thanks to \texttt{BPFContain} \cite{bpfcontain}
 it is also possible to run a container security daemon by leveraging eBPF.  In this case,
-specific policies must be written for desired commands.
+specific policies must be written for the desired commands.
