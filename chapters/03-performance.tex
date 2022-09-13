@@ -132,11 +132,11 @@ the standard deviation of the method $x$.
 In this section we will look at what impact different LSMs bring on a program,
 be it a native binary or a WebAssembly binary run through some kind of runtime.
 
-In Table \ref{table:lsm-impact-native} are reported all execution times for a native binary,
+Table \ref{table:lsm-impact-native} reports all execution times for a native binary,
 compiled directly with \texttt{rustc} and run both unrestricted (\textit{Native}) and restricted
 with different LSMs (\textit{Landlock} and \textit{eBPF}).
 
-On the other hand, in Table \ref{table:lsm-impact-wasm} are listed the runs of a WebAssembly binary through
+Furthermore, Table \ref{table:lsm-impact-wasm} lists the runs of a WebAssembly binary through
 \textit{Wasmtime} without any restriction, or through the WASM runtime developed in Section \ref{sec:restricting-wasi-landlock}
 and restricted with Landlock (\textit{WL}) or eBPF (\textit{WeBPF}).
 
@@ -176,9 +176,9 @@ and restricted with Landlock (\textit{WL}) or eBPF (\textit{WeBPF}).
 
 \subsection{A computational-heavy program}
 
-Let's take a look at how restricting a purely computational-heavy program, namely the sorting of 
+This section analyses how restricting a purely computational-heavy program, namely the sorting of 
 10000 random numbers shown in Listing \ref{lst:sorting-test-rust}, affects its performance.
-In order to test the eBPF sandbox, Listing \ref{lst:outline-policy-sorting-test} shows the outline for the used policy.
+In order to test the eBPF sandbox, the policy outlined in Listing \ref{lst:outline-policy-sorting-test} will be used.
 
 Comparing the first lines of Table \ref{table:lsm-impact-native} and Table \ref{table:lsm-impact-wasm},
 it is immediately apparent that using a LSM to restrict a binary, be it native or WebAssembly, worsen performance.
@@ -193,7 +193,7 @@ This could be due to how the two sandboxes are enforced:
         so the communication has to undergo a message exchange between processes.
 \end{itemize}
 By following this line of reasoning, it is expected that Landlock should be a little faster than eBPF.
-Moreover, eBPF is more complex than Landlock since it allows more control on what
+Furthermore, eBPF is more complex than Landlock since it allows more control on what
 can and cannot be done by a running process, hence it has to deal with a higher complexity.
 The overhead of eBPF, however, becomes smaller and smaller when measured in percentage as the execution times get higher.
 This means that for small and fast programs the slow-down could become apparent if they get called many times
@@ -316,7 +316,7 @@ of about $30\ ms$ identified in the previous sections -- the \textit{WASM+Landlo
 exhibit the same trend as the \textit{Wasmtime} one, but appear translated by a constant factor.
 
 Finally, Figures \ref{fig:distribution-reading-100k}, \ref{fig:distribution-reading-1M}, \ref{fig:distribution-reading-10M},
-and \ref{fig:distribution-reading-100M} collects all box plots relative to the different readings for
+and \ref{fig:distribution-reading-100M} collect all box plots relative to the different readings for
 native binaries and WASM binaries.
 
 \begin{figure}[ht!]
@@ -422,7 +422,7 @@ The programs used as reference are:
         dealing only with printing a simple string to the terminal;
   \item a more complex one shown in Listing \ref{lst:project-perf-program-complex},
         reading and writing some files, so that specific permissions are required
-        (specifically, reading and writing files).
+        (in particular, reading and writing files).
 \end{itemize}
 
 \vspace*{0.5cm}
@@ -493,7 +493,7 @@ Hence, only the impact of Landlock can be measured \textit{internally} in the co
   \label{table:execution-times-complex}
 \end{table}
 
-Tables \ref{table:execution-times-simple} and \ref{table:execution-times-complex} contains
+Tables \ref{table:execution-times-simple} and \ref{table:execution-times-complex} contain
 all measured data in milliseconds for, respectively, the trivial and complex program.
 The recorded timestamps are both the average time spent by a section, given by $\mu_I$,
 and the cumulative time up until that section's completion, given by $\mu_C$.
@@ -502,7 +502,7 @@ For example, if the part ``Landlock enforcement'' is such that $\mu_I = 20\ ms$ 
 this means that on average it takes $20\ ms$ to apply Landlock to the running process, and on average this part
 is fully completed after $100\ ms$ from the beginning of the program.
 
-Moreover, Figure \ref{fig:perf-execution-times-comparison} shows how each program section
+Figure \ref{fig:perf-execution-times-comparison} shows how each program section
 occupies the overall time spent running by the program. The various labels are as follows
 -- \texttt{A} is for ``Argument parsing'', \texttt{B} is for ``Module initialisation'',
 \texttt{C} is for ``Preopen'', \texttt{D} is for ``Landlock enforcement'' and
@@ -559,7 +559,7 @@ the same as the constant overhead.
 \label{sec:performance-internal-analysis-landlock-impact}
 
 In this section we will focus on how Landlock impacts performance and how it scales
-against the complexity of the specified rules. More specifically, performance is measured against
+against the complexity of the specified rules. In particular, performance is measured against
 two ``modes'' of complexity scaling -- adding permissions to a single folder, and allowing access to multiple folders
 with the same permissions.
 In order to do this, the code of the developed WASM runtime will be used, and
@@ -576,7 +576,7 @@ depend on the specific program that has to be sandboxed.
     \includegraphics[width=\textwidth]{tests/landlock-impact-box.png}
   \end{subfigure}
 
-  \caption{Relation between Landlock enforcement and number of permissions.}
+  \caption{Relation between Landlock enforcement and the number of permissions.}
   \label{fig:perf-test-landlock-impact-permissions}
 \end{figure}
 
@@ -601,7 +601,7 @@ This means that the cost of applying one rule is the same whatever the number of
     \includegraphics[width=\textwidth]{tests/landlock-impact-folders-box.png}
   \end{subfigure}
 
-  \caption{Relation between Landlock enforcement and number of rules.}
+  \caption{Relation between Landlock enforcement and the number of rules.}
   \label{fig:perf-test-landlock-impact-folders}
 \end{figure}
 
@@ -644,7 +644,7 @@ so that a parallel with Landlock can be made.
     \includegraphics[width=\textwidth]{tests/ebpf-impact-box.png}
   \end{subfigure}
 
-  \caption{Relation between eBPF enforcement and number of permissions.}
+  \caption{Relation between eBPF enforcement and the number of permissions.}
   \label{fig:perf-test-ebpf-impact-permissions}
 \end{figure}
 
@@ -670,7 +670,7 @@ allow:
 However, when looking at how eBPF scales with the number of paths provided there is a difference
 with Landlock. As Figure \ref{fig:perf-test-ebpf-impact-folders} shows, in this case there is no relation between the number
 of folders specified and the time taken by BPFContain to containerise the running process.
-Here the average time is always around $12.5\ \mu s$, with little variability.
+The average time is always around $12.5\ \mu s$, with little variability.
 
 This could be due to the fact that, as already highlighted, BPFContain sandboxing uses two
 processes -- a server and a client that communicates with each other.
@@ -687,7 +687,7 @@ complexity that emerges from the tests.
     \includegraphics[width=\textwidth]{tests/ebpf-impact-folders-box.png}
   \end{subfigure}
 
-  \caption{Relation between eBPF enforcement and number of folders.}
+  \caption{Relation between eBPF enforcement and the number of folders.}
   \label{fig:perf-test-ebpf-impact-folders}
 \end{figure}
 
