@@ -153,19 +153,19 @@ WebAssembly is a typed language, but there are only four basic \textit{value typ
 point numbers, each in 32 and 64 bit variants. There are no distinction between signed and unsigned integers,
 but instructions that depends on the presence of the sign are marked with an explicit suffix.
 
-\textit{Functions} are typed, take a sequence of values as a parameter, and returns another sequence of values.
+\textit{Functions} are typed, take a sequence of values as a parameter, and then return another sequence of values.
 They cannot be nested inside each other. The content of the call stack for execution are separate from the data
 portion of the memory, and cannot be accessed directly by WebAssembly.
 The code inside a function consists of a series of \textit{instructions} that modify an implicit operand stack,
-either by declaring local variables or applying operations to the value already on the stack.
+either by declaring local variables or applying operations to the values already on the stack.
 Functions can be called either \textit{directly} by using an index that identifies a function, or \textit{indirectly},
 i.e., dynamically through a global \textit{table} as shown in Figure \ref{fig:indirect-function-table-structure}.
-In this second case, only the function's type signature is validated.
+In the second case, only the function's type signature is validated.
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\linewidth]{wasm-function-table.png}
-  \caption{The structure of the indirect functions table, from \cite{binary-security-wasm-2020}.}
+  \caption{The structure of the indirect functions table \cite{binary-security-wasm-2020}.}
   \label{fig:indirect-function-table-structure}
 \end{figure}
 
@@ -177,14 +177,14 @@ The main memory layout that WebAssembly uses is a \textit{linear memory} (or sim
 by an array of bytes. A \textit{linear memory} is a simple addressing technique in which memory appears to the
 program as a single contiguous access space \cite{processor-microarchitecture}, which the CPU can access both directly as well as linearly
 without resorting to memory segmentation or pagination schemes, enhancing flexibility and reducing latency.
-Each module can define no more than one memory, which can grow by one or more
+Each module can define no more than one \textit{memory}, a space which can grow by one or more
 \textit{pages}\footnote{A page is 64 KiB large.} if the need arises.
 Access to the individual locations is done through addresses, represented as unsigned integers,
 which are dynamically checked against memory size\footnote{On 64 bit platforms the WebAssembly engine
 can make use of virtual memory techniques to eliminate these checks, see \cite{bringing-the-web-up-to-speed-2017}.}
 (out of bounds accesses result in a trap).
 Linear memory also brings security benefits -- it is disjoint from the code space, the execution stack and the engine's
-data structures \cite{bringing-the-web-up-to-speed-2017}; hence, compiled program cannot directly corrupt their own execution
+data structures \cite{bringing-the-web-up-to-speed-2017}; hence, compiled programs cannot directly corrupt their own execution
 environment or perform undefined behaviour.
 
 Lastly, WebAssembly doesn't provide arbitrary jumps but \textit{structured control flow},
@@ -193,7 +193,7 @@ so that the code can be validated in a single pass and common control flow attac
 \subsection{Problems with WebAssembly}
 
 Since languages with manual memory management, such as C/C++, can be compiled into WebAssembly,
-it is natural to ponder how memory vulnerabilities affect WebAssembly binaries.
+it is reasonable to ponder how memory vulnerabilities affect WebAssembly binaries.
 In the original paper it is mentioned that ``a buggy or exploited WebAssembly program can make a mess of the data in its own memory''
 \cite{bringing-the-web-up-to-speed-2017}, in light of the fact that the call stack is not accessible by the program.
 
@@ -201,21 +201,22 @@ However, even though WebAssembly strives for security, binaries can be still exp
 such as buffer overflows, and attacks that aren't applicable in traditional native binaries, e.g., overwriting
 string literals in memory \cite{binary-security-wasm-2020}.
 
-The paper at \cite{binary-security-wasm-2020} shows that it is possible to obtain a write primitive given a WebAssembly binary compiled from vulnerable C/C++ code,
+A paper by Lehman, Kinder, and Pradel \cite{binary-security-wasm-2020} shows
+that it is possible to obtain a write primitive given a WebAssembly binary compiled from vulnerable C/C++ code,
 by means of stack-based buffer overflows and heap metadata corruption, and it is possible to overwrite stack, heap, and ``constant''
 data, since the linear memory does not have a read-only section. It would be possible then, for example, to overwrite the name
 of a file that was encoded as a string literal in the original program.
 
-Another problem shown in the same paper is the redirection of indirect calls. Since WebAssembly allows indirect calls
+Another problem analysed in the same paper is the redirection of indirect calls. Since WebAssembly allows indirect calls
 to functions through a function table, an attacker could divert the execution by overwriting an integer in linear memory
-that serves as an index into the table section. WebAssembly limits this ability with two mechanisms -- not all functions
+that serves as an index into the table section. WebAssembly limits this problem with two mechanisms -- not all functions
 may appear in the table, but only those that can be indirectly called, and all functions call are type checked.
 So, redirecting indirect calls is possible only within the class of functions with the same type.
 
 Lastly, it is possible to enable remote code execution when including vulnerable WebAssembly in an application.
 This is because functions that have different types in one language can be mapped onto functions with the same type
 in WebAssembly. For example, a log function that in C has the signature \texttt{void log(int)}, and a function such as
-\texttt{void exec(const char* cmd)} both become functions with only one \texttt{i32} param in WebAssembly.
+\texttt{void exec(const char* cmd)} both become functions with only one \texttt{i32} parameter in WebAssembly.
 This enables the indirect diversion described in the previous paragraph if the two functions can be indirectly called.
 
 \subsection{WASI -- WebAssembly System Interface}
@@ -227,7 +228,7 @@ and then be safely run on different platforms.
 Its API provides access to several OS-like features, such as file systems and Berkeley sockets.
 The two languages that have good interoperability at the moment are Rust, where the compiler directly supports targeting both WASM and WASI,
 and C/C++, either through Emscripten or a custom prebuilt \textit{Clang} toolchain\footnote{\url{https://github.com/WebAssembly/wasi-sdk}}.
-These compilers can produce very different memory layouts, as visible in Figure \ref{fig:different-wasm-memory-layouts}.
+These compilers can produce very different memory layouts, as shown in Figure \ref{fig:different-wasm-memory-layouts}.
 
 \begin{figure}[ht]
   \centering
@@ -241,18 +242,18 @@ These compilers can produce very different memory layouts, as visible in Figure 
     \includegraphics[width=\textwidth]{wasm-memory-clang9-rustc.png}
     \caption{Clang 9 (with \texttt{stack-first}), Rust 1.41 (WASI target).}
   \end{subfigure}
-  \caption{Examples of WebAssembly memory layouts obtained from different compilers, from \cite{binary-security-wasm-2020}.}
+  \caption{Examples of WebAssembly memory layouts obtained from different compilers \cite{binary-security-wasm-2020}.}
   \label{fig:different-wasm-memory-layouts}
 \end{figure}
 
-A binary that uses WASI can be run using a CLI runtime, such as \textit{Wasmtime} \cite{wasmtime} or \textit{Wasmer} \cite{wasmer},
-or using a browser polyfill (an example is visible in \cite{wasi-polyfill}).
+A binary that uses WASI can be run with a CLI runtime, such as \textit{Wasmtime} \cite{wasmtime} or \textit{Wasmer} \cite{wasmer},
+or through a browser polyfill (an example is visible in \cite{wasi-polyfill}).
 The approach taken for the sandboxing by these runtimes is based on a \textit{capability-based security model} \cite{wasmtime-security-sandboxing},
 so that access to the file system and other resources must be explicitly given. Capabilities can be either \textit{static}, which
 are represented by the list of imports of the WebAssembly module to run, or \textit{dynamic}, i.e., flags
 specified with custom command-line arguments at execution time.
 Moreover, when given permissions to write to a terminal, a program could print characters recognised as control
-sequences that may have side effects and confuse or misled user (a harmless example is clearing the screen).
+sequences that may have side effects and confuse or mislead users (a harmless example is clearing the screen).
 Hence, all writes to output streams are filtered in order to prevent this type of behaviour.
 
 CLI runtimes have some particular features and properties:
@@ -266,7 +267,7 @@ CLI runtimes have some particular features and properties:
         visible, and it is not possible to restrict permissions (all files are readable and
         writable) when using the command line runtime wrapper\footnote{It is possible to specify a basic set of permissions when using the WASI runtime library in another language, such as in Rust,
         see example at \cite{wasi-state-example}.};
-  \item when using C, the WebAssembly binary can create files with specific user permissions on Linux, e.g., executable files;
+  \item when using C on Linux, the WebAssembly binary can create files with specific user permissions, e.g., executable files;
   \item when listing files in a directory, the only files that are visible are the ones that were already present at the preopening of the directory,
         but files added after the preopen can be ``seen'' if their name is known (i.e., they can be opened, read or written in accordance with given permissions);
   \item any change made to a file by any process is reflected in what the compiled WebAssembly binary is able to read;
@@ -281,7 +282,7 @@ CLI runtimes have some particular features and properties:
 
 By using the \textit{wasm2c} tool available in the \textit{WebAssembly Binary Toolkit}\footnote{\url{https://github.com/WebAssembly/wabt}},
 C code can be compiled into WebAssembly and then converted back to C.
-This way, a traditional C program can use directly the functions made available from the original C library with an added sandbox
+This way, a traditional C program can handle directly the functions made available from the original C library with an added sandbox
 that allows code isolation. The sandboxed library cannot access locations outside its allocated memory without causing a trap,
 halting the execution, and giving back control to the embedder.
 Similarly, the user C code cannot access the sandboxed memory directly, and, if the code were to attempt to do so,
@@ -293,13 +294,13 @@ ongoing research.
 \subsection{WebAssembly as a fault isolation tool}
 
 Since WebAssembly is \textit{sandboxed}, it is possible to isolate libraries that could be a frequent source of
-vulnerabilities by compiling them to WebAssembly before their use.
+vulnerabilities by compiling them to WebAssembly before being used.
 
 An example is shown with the \textit{RLBox} project \cite{wasm-firefox-isolation-2020, rlbox-docs},
 a framework that supports efficient sandboxing with modest performance overhead,
 that has been integrated into Firefox in order to restrict the \texttt{libGraphite} font shaping library.
 RLBox ensures that whatever library is sandboxed is also memory isolated from the rest of the application,
-and all these boundary crossings are explicit. The isolation is enforced by specific mechanisms, such as
+and all the boundary crossings are explicit. The isolation is enforced by specific mechanisms, such as
 WebAssembly \cite{wasm-sandboxing-firefox}, and to ensure that application code doesn't use unsafe values
 originated in the sandbox, RLBox differentiates between \textit{tainted} and \textit{untainted} values
 through the use of the C++ type system.
@@ -307,7 +308,7 @@ through the use of the C++ type system.
 Even the WASI interface is able to segregate a WebAssembly binary, since it is effectively sandboxed
 -- all interactions with the embedding environment must be done through explicit exports and imports, and the memory is
 bound checked at runtime. Hence, the WebAssembly program cannot access data outside its assigned memory, and the
-embedder cannot access memory assigned to the WebAssembly code directly.
+embedder cannot access memory assigned to the WebAssembly code.
 
 \clearpage
 \section{Linux Security Modules}
@@ -332,7 +333,7 @@ Some projects that use LSM include:
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.7\linewidth]{lsm-hook-architecture.png}
-  \caption{LSM Hook Architecture, from \cite{lsm-2002}.}
+  \caption{LSM Hook Architecture \cite{lsm-2002}.}
   \label{fig:lsm-hook-architecture}
 \end{figure}
 
@@ -340,7 +341,7 @@ Some projects that use LSM include:
 \label{sec:intro-lsm-landlock}
 
 \textit{Landlock} \cite{landlock-kernel, landlock-user-space} is a security feature available since Linux 5.13
-that uses the LSM framework in order to provide scoped access control
+that utilises the LSM framework in order to provide scoped access control
 so that any process, even when unprivileged, can securely restrict itself.
 This can help mitigate the security impact of bugs or unexpected/malicious behaviour
 in user space applications.
@@ -361,7 +362,7 @@ However, if we then define another ruleset comprising only of read operations
 for \texttt{file1}, the permissions specified for \texttt{dir1} are still
 valid, so when a process restricts itself it is still able to write to \texttt{file1}.
 Other limitations of Landlock include the impossibility for a thread to modify its own topology
-(e.g., via \textit{mount}), a limit of 16 layers of stacked rulesets and the impossibility to
+(e.g., via \textit{mount}), a limit of 16 layers of stacked rulesets and the inability to
 restrict special file systems, such as kernel file systems (e.g., nsfs).
 
 In case of multiple consecutive self-restrictions, the result is the intersection
@@ -424,12 +425,12 @@ but will be enforced on all of the thread's descendants.
 \textit{eBPF} \cite{ebpf} is a virtual machine in the Linux Kernel that can run sandboxed programs
 in a privileged context. It can be used to safely extend the capabilities of the kernel
 without requiring to change kernel source code or load kernel modules. A generic overview of its structure
-is visible in Figure \ref{fig:ebpf-generic-overview}.
+is described in Figure \ref{fig:ebpf-generic-overview}.
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\linewidth]{ebpf-diagram.png}
-  \caption{A generic overview of eBPF, from \cite{ebpf}.}
+  \caption{A generic overview of eBPF \cite{ebpf}.}
   \label{fig:ebpf-generic-overview}
 \end{figure}
 
@@ -448,7 +449,7 @@ Linux kernel is visible in Figure \ref{fig:example-ebpf-hooks}.
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\linewidth]{ebpf-hooks.png}
-  \caption{An example of two eBPF hooks, from \cite{ebpf-description}.}
+  \caption{An example of two eBPF hooks \cite{ebpf-description}.}
   \label{fig:example-ebpf-hooks}
 \end{figure}
 
