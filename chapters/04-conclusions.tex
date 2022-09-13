@@ -8,7 +8,7 @@ this language can also be treated as a compilation target for languages such as 
 and can be executed directly on various operating systems
 through the aid of runtimes, such as \textit{Wasmtime} and \textit{Wasmer}.
 
-However, these runtimes' CLI interfaces do not provide a lot of user control
+However, these runtimes' CLI interfaces do not provide extensive user control
 when dealing with the program's access rights to specific file system locations.
 These interfaces can be extended by using pre-existing access control frameworks,
 specifically the \textit{Linux Security Modules} framework.
@@ -32,14 +32,14 @@ the user cannot describe what a WASM binary is permitted to do on a preopened di
 Secondly, the two LSM frameworks in question, \textit{Landlock} and \textit{eBPF}, were studied and understood
 so that they could be integrated with arbitrary code.
 For this phase, having a mainstream Linux distribution is not enough -- Landlock and eBPF have to be enabled
-for them to be used by programs. This can be done either by manually compiling the kernel with the desired
+to be used by programs. This can be done either by manually compiling the kernel with the desired
 flags enabled, or by using particular distributions that have them enabled by default, such as Arch Linux.
 
 Lastly, WASI libraries and the chosen LSM frameworks had to be integrated in a new runtime, described in
 Chapter \ref{chap:restricting-wasi}, able to run WASM binaries while simultaneously sandboxing them according to the user's choice.
 When dealing with Landlock, the integration with a given program is provided by C libraries,
 which can also be wrapped in the language of one's choice -- for this project, this language is Rust,
-in order to have a safer language that could still produce quite fast binaries.
+in order to have a safer language that could still produce reasonably fast binaries.
 On the other hand, eBPF has to be integrated externally, as the sandbox actions is done by
 a server process, acting as a virtual machine.
 Between the two, Landlock is definitely the easier one, both from a user's point of view,
@@ -67,10 +67,8 @@ if the development of a custom full-fledged access control framework turns out t
 This could effectively bring a greater deal of control directly available to the user when
 accessing the file system, while still being relatively simple to use.
 However, Landlock is only available on Linux, and moreover it has to be enabled in the kernel.
-This would pose two main problems:
-\begin{enumerate}
-  \item the runtime code would be less portable, since a custom version for Linux would have to be created, requiring
-        the creation of more OS-specific code and making development more difficult;
-  \item not all Linux users could use it, since enabling it can be a challenge that only more advanced users
-        could be able and/or willing to face\footnote{This could be eased if Landlock were to be already enabled in most mainstream distributions.}.
-\end{enumerate}
+This would pose some problems -- the runtime code would be less portable,
+since a custom version for Linux would have to be created, requiring
+the creation of more OS-specific code and making development more difficult.
+Furthermore, not all Linux users could use it, since enabling it can be a challenge that only more advanced users
+could be able and/or willing to face\footnote{This could be eased if Landlock were to be already enabled in most mainstream distributions.}.
