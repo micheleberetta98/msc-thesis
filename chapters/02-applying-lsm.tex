@@ -1,7 +1,7 @@
 \section{Goals}
 
 The main goal of using \textit{Linux Security Modules} in combination with WebAssembly
-is to provide a finer grain customisation when choosing how to limit the permissions given
+is to provide a fine grain customisation when choosing how to limit the permissions given
 to the executable. More specifically, the desired features are:
 \begin{enumerate}
   \item to give the possibility to differentiate between directories and files when giving permissions;
@@ -323,7 +323,7 @@ The main outline of the code is presented in Listing \ref{lst:rust-landlock}.
 
 The \texttt{landlock} module makes use of another thin wrapper, the \texttt{PathAccess} struct defined
 in the \texttt{path\_access} module.
-Here, the main entity is the \texttt{PathAccess} struct, that tracks which flags, as defined in Table \ref{table:landlock-flags},
+Here, the \texttt{PathAccess} struct tracks which flags, as defined in Table \ref{table:landlock-flags},
 are applied to a single path. The flags list starts empty, and multiple flags can be added at any time.
 Moreover, this module also takes care of conversions between types required by the Landlock ABI to make the code compile.
 
@@ -337,7 +337,7 @@ The following examples illustrate how to combine some of them:
   \item ``\texttt{file:R}'' allows only to read from \textit{file};
   \item the combination of ``\texttt{file:X}'' and ``\texttt{.:RDir}'' allows the execution of \textit{file} and the listing of the current directory;
   \item ``\texttt{.:MReg}'' only allows the creation, rename or linking of regular files in the current directory;
-  \item ``\texttt{.:R,W}'' and ``\texttt{./subdir:*}'' allows only reads and writes on files in the current directory, while no restrictions are
+  \item ``\texttt{.:R,W}'' and ``\texttt{./subdir:*}'' allow only reads and writes on files in the current directory, while no restrictions are
         made for \textit{subdir};
   \item ``\texttt{.:*,-X,-W}'' allows every action on the current directory except for the reading and writing of files.
 \end{itemize}
@@ -607,8 +607,8 @@ where \texttt{rust-wasm-landlock} is the name of the WASM runtime binary.
 
 On the other hand, eBPF enforcement is done externally through BPFContain, and as such the WASM runtime is treated
 as any other native process. In this case, the desired restrictions must be listed in a policy as described in
-Section \ref{sec:restricting-wasi-ebpf} and then the BPFContain server must be run.
-Note that the relevant directories must be preopened in the \texttt{cmd} section of the policy
+Section \ref{sec:restricting-wasi-ebpf} and then the BPFContain server must be running.
+Note that the relevant directories have to be preopened in the \texttt{cmd} section of the policy
 through the \texttt{-{}-dir} and \texttt{-{}-mapdir} arguments, but Landlock has to be
 disabled through \texttt{-{}-no-landlock}, otherwise the process would be restricted by
 Landlock and by eBPF at the same time.

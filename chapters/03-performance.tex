@@ -8,7 +8,7 @@ The main goals of this performance testing plan are:
 
 \noindent
 For a given program written in Rust, the following configurations are tested in order to compare
-overall speed of both restricted and unrestricted scenarios:
+overall execution speed in both restricted and unrestricted scenarios:
 \begin{itemize}
   \item a native binary, compiled by \texttt{rustc} and run:
         \begin{itemize}
@@ -32,6 +32,9 @@ On the other hand, for the other methods (i.e., without a sandbox and with eBPF)
 does not need any change, but in the case of eBPF it is necessary to use the \texttt{bpfcontain run}
 command with the name of the chosen policy to actually apply the sandbox.
 
+Moreover, the internal performance of the WASM runtime developed in Section \ref{sec:restricting-wasi-landlock}
+and the performance of the sandboxing methods will be tested in Section \ref{sec:performance-internal-analysis}.
+
 \vspace*{0.5cm}
 \begin{code}[language=Rust, caption=An example of a program restricted with Landlock., label=lst:test-program-landlock-example]
 use anyhow::Result;
@@ -54,9 +57,6 @@ fn main() -> Result<()> {
     Ok(())
 }
 \end{code}
-
-Moreover, the internal performance of the WASM runtime developed in Section \ref{sec:restricting-wasi-landlock}
-and the performance of the sandboxing methods will be tested in Section \ref{sec:performance-internal-analysis}.
 
 \subsection{System and hardware}
 
@@ -184,7 +184,7 @@ Comparing the first lines of Table \ref{table:lsm-impact-native} and Table \ref{
 it is immediately apparent that using a LSM to restrict a binary, be it native or WebAssembly, worsen performance.
 
 When dealing with a native binary, \textit{Landlock} has a lower overhead than \textit{eBPF} (an average
-of $1.03\ ms$ for Landlock against an average of $2.30\ ms$ for eBPF), as is visible in Figure \ref{fig:distribution-sorting-native}.
+of $1.03\ ms$ for Landlock against an average of $2.30\ ms$ for eBPF), as it is visible in Figure \ref{fig:distribution-sorting-native}.
 This could be due to how the two sandboxes are enforced:
 \begin{itemize}
   \item Landlock is directly available as a C library in the Linux Kernel, so the communication between
@@ -533,7 +533,7 @@ occupies the overall time spent running by the program. The various labels are a
   \label{fig:perf-execution-times-comparison}
 \end{figure}
 
-As is immediately noticeable by the collected data, the biggest bottleneck on performance is given
+As it is immediately noticeable by the collected data, the biggest bottleneck on performance is given
 by \textit{running the WebAssembly binary} with the library provided by \textit{Wasmtime}.
 This section comprises of instantiating the required data structures, interpreting and linking the WASM module,
 and finally running it, as already highlighted in Section \ref{sec:landlock-wasm-module}.
@@ -670,7 +670,7 @@ allow:
 However, when looking at how eBPF scales with the number of paths provided there is a difference
 with Landlock. As Figure \ref{fig:perf-test-ebpf-impact-folders} shows, in this case there is no relation between the number
 of folders specified and the time taken by BPFContain to containerise the running process.
-The average time is always around $12.5\ \mu s$, with little variability.
+The average time is always around $12.35\ \mu s$, with little variability.
 
 This could be due to the fact that, as already highlighted, BPFContain sandboxing uses two
 processes -- a server and a client that communicates with each other.

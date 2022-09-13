@@ -1,13 +1,13 @@
-\section{The Web}
+\section{The web}
 
 \subsection{Basic structure}
 
-The \textit{World Wide Web}, or more commonly \textit{Web}, is a collection of documents and other resources
+The \textit{World Wide Web}, or more commonly \textit{web}, is a collection of documents and other resources
 that can be shared among various devices via the \textit{Internet}.
 
 The resources shared are usually in the form of \textit{web pages}, documents whose structure is defined with HTML
 (\textit{Hypertext Markup Language}) and whose styles are declared with CSS (\textit{Cascade Style Sheet}).
-Other kind of resources include anything ranging from images, videos, audio, software, and source code.
+Other kinds of resources include anything ranging from images, videos, audio, software, and source code.
 
 However, web pages are \textit{static} if they only use HTML and CSS, and cannot do much aside from showing content. A programming
 language is hence needed to make the web \textit{dynamic}. Among all technologies and languages, nowadays
@@ -48,7 +48,7 @@ document
 \end{code}
 
 However, JavaScript is ill-equipped when it comes to performance-critical modern web
-pages -- from this needs were born technologies such as \textit{asm.js}, \textit{Native Client}, and eventually \textit{WebAssembly}.
+pages -- from these needs were born technologies such as \textit{asm.js}, \textit{Native Client}, and eventually \textit{WebAssembly}.
 The main downsides of JavaScript that brought the need for WebAssembly are:
 \begin{itemize}
   \item JavaScript is \textit{always} represented as a text format, so it must be parsed by the user's browser for it to be compiled and enhanced;
@@ -73,13 +73,13 @@ to just-in-time compile it in order to improve performance.
 Browsers can also mitigate the risk provided by the common JavaScript vulnerabilities mentioned in Section \ref{sec:introduction-javascript}
 by using two main methods -- \textit{sandboxing}, so that JS isn't allowed to perform general-purpose
 programming tasks like working directly with files\footnote{Although, there are APIs that can grant access to a ``virtual drive''
-only when explicitly allowed by the user \cite{filesystem-mdn}, so access to the user's file system is not possible.},
+only when explicitly allowed by the user \cite{filesystem-mdn}, so direct access to the user's file system is not possible.},
 and \textit{same-origin policy} constraints, in which scripts from one website have access to data from the same website but not from others.
 
-JavaScript can not only be executed on a browser, but also on so called ``back-end''
+JavaScript can not only be executed in a browser, but also on so called ``back-end''
 runtimes\footnote{Opposed to ``front-end'', which usually pertains to the browser.}.
 These runtimes offer custom libraries that permit JavaScript to access the file system, to make network requests,
-spawn child processes and build complex applications, for example web servers.
+spawn child processes and build complex applications, such as web servers.
 Two notable open-source runtimes are \textit{Node.js}\footnote{\url{https://nodejs.org/}} and \textit{Deno}\footnote{\url{https://deno.land}},
 both built on top of Google's V8 engine.
 The first is older, initially released in 2009, and has a package manager called \textit{npm}
@@ -97,7 +97,7 @@ It was announced in 2015 and implemented by major browsers by 2017, and as of Ma
 by 93\% of all browsers \cite{caniuse, webassembly-mdn}.
 WebAssembly main goals are the following \cite{bringing-the-web-up-to-speed-2017}:
 \begin{itemize}
-  \item \textit{security}, since code on the Web originates from untrusted sources;
+  \item \textit{security}, since code on the web originates from untrusted sources;
   \item \textit{speed}, by using ahead-of-time optimisations in a similar manner as native machine code;
   \item \textit{portability}, since the web spans many devices, architectures, operating systems, and browsers;
   \item and finally \textit{compactness}, because code is transmitted over the network and must reduce load times as much as possible.
@@ -119,7 +119,7 @@ The compiled binary can be then used from JavaScript on the web, or with Node.js
 with the aid of \textit{WebAssembly runtimes} and the \textit{WebAssembly System Interface}
 for accessing system resources (see Section \ref{sec:introduction-wasi}).
 
-WebAssembly resolves many of the problems of JavaScript, the major ones being:
+WebAssembly resolves many of the problems of JavaScript:
 \begin{itemize}
   \item being represented with a \textit{binary} format, parsing on the client is faster and simpler;
   \item having a static type systems, optimisations can be done earlier at compile time, and not on the browser once all the files
@@ -145,7 +145,7 @@ WebAssembly resolves many of the problems of JavaScript, the major ones being:
 Although WebAssembly is a binary code format, it can also be written with \textit{S-expressions}
 in order to be more readable, as seen in Listing \ref{lst:wasm-fact}.
 Each binary takes the form of a \textit{module}, which contains \textit{functions}, \textit{global} variables,
-\textit{tables}, and \textit{memories}. Each of these can be exported to be used in the embedder, and a module can also import functionalities.
+\textit{tables}, and \textit{memories}. Each one of these can be exported to be used in the embedder, and a module can also import functionalities.
 While a module is a static representation of a program, an \textit{instance} is the dynamic one.
 A module can be instantiated by the embedder (e.g., a JavaScript virtual machine).
 
@@ -282,7 +282,7 @@ CLI runtimes have some particular features and properties:
 
 By using the \textit{wasm2c} tool available in the \textit{WebAssembly Binary Toolkit}\footnote{\url{https://github.com/WebAssembly/wabt}},
 C code can be compiled into WebAssembly and then converted back to C.
-This way, a traditional C program can handle directly the functions made available from the original C library with an added sandbox
+This way, a traditional C program can call the functions made available from the original C library with an added sandbox
 that allows code isolation. The sandboxed library cannot access locations outside its allocated memory without causing a trap,
 halting the execution, and giving back control to the embedder.
 Similarly, the user C code cannot access the sandboxed memory directly, and, if the code were to attempt to do so,
@@ -466,8 +466,8 @@ When running a program with eBPF, there are many steps that are taken:
         to run the program as efficiently as possible.
 \end{enumerate}
 
-Unlike Landlock, eBPF makes it possible to define specific exceptions, e.g., denying
-certain access rights on specific files while allowing them on the containing directory.
+Unlike Landlock, eBPF makes it possible to define exceptions, e.g., denying
+certain access rights on certain files while allowing them on the containing directory.
 It also allows to specify whether a program has access to devices such as \texttt{terminal}.
 Thanks to \texttt{BPFContain} \cite{bpfcontain}
 it is also possible to run a container security daemon by leveraging eBPF.  In this case,
